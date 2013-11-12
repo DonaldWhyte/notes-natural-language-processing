@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PDF docs
 *.pdf
 
@@ -212,3 +213,10 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+=======
+*.aux
+*.log
+*.pdf
+*.pyc
+*synctex*
+>>>>>>> Initial commit with report and coursework 1 code

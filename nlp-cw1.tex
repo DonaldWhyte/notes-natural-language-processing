@@ -1,0 +1,233 @@
+%
+% Name: Natural Language Processing Coursework 1
+% Author: Donald Whyte (sc10dw@leeds.ac.uk)
+%
+
+\documentclass{article}
+
+% Make subsections use alphabet indices and not numeric indices
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+\usepackage[margin=3cm]{geometry} % easy page formatting
+	
+\usepackage{datetime} % up-to-date, automatically generated times
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+
+\title{Natural Language Processing \\ COMP3310 \\ Coursework One}
+\author{Donald Whyte (sc10dw@leeds.ac.uk)}
+\date{\today}
+
+\begin{document}
+\lstset{language=Python}
+
+\maketitle
+
+\section{Most Informative Features for Movie Review Classification}
+
+In order to determine whether or not a movie review is positive or negative, a Naive Bayes classifier can be used. Using NLTK, I trained a \textbf{binomial} Naive Bayes classifier like so:
+
+\begin{lstlisting}
+# List of words to use as features for binomial classification
+# This will be the 2000 most frequent tokens in the movie_reviews corpus
+WORDS_TO_CONSIDER = [ ... ]
+
+def docFeatureExtractor(text):
+	text = set(text) # convert to set for faster look-up
+	featureSet = {}
+	for i in range(len(WORDS_TO_CONSIDER)):
+		key = self.featureNames[i]
+		featureSet[key] = (WORDS_TO_CONSIDER[i] in text)
+	return featureSet
+
+# Build labelled training dataset from movie_reviews corpus
+trainingSet = [ ( list(movie_reviews.words(fileid)), category)
+			  for category in movie_reviews.categories()
+			  for fileid in movie_reviews.fileids(category) ] 
+# Use feature extractor on every review
+featureSet = apply_features(docFeatureExtractor, trainingSet)
+# Train classifier 
+classifier = nltk.NaiveBayesClassifier.train(featureSet)
+\end{lstlisting}
+
+From this, it is possible to derive which features were the most useful in distinguishing positive or negative movie review
+
+\begin{lstlisting}
+	classifier.show_most_informative_features(30)
+\end{lstlisting}
+Table \ref{tab:informative_features_doc_classification} shows the 30 most informative features for classifying movie reviews as positive or negative.
+
+\begin{table}
+\centering
+\begin{tabular}{|l|l|l|}
+	\hline
+	\textbf{Rank} & \textbf{Feature} & \textbf{Ratio} \\
+	\hline
+	1 & contains(outstanding) & positive:negative = 11.5:1.0 \\
+	2 & contains(mulan) & positive:negative = 9.0:1.0 \\
+	3 & contains(seagal) & negative:positive = 8.2:1.0 \\
+	4 & contains(wonderfully) & positive:negative = 7.0:1.0 \\
+	5 & contains(damon) & positive:negative = 6.3:1.0 \\
+	6 & contains(flynt) & positive:negative = 5.7:1.0 \\
+	7 & contains(wasted) & negative:positive = 5.5:1.0 \\
+	8 & contains(lame) & negative:positive = 5.5:1.0 \\
+	9 & contains(awful) & negative:positive = 5.3:1.0 \\
+	10 & contains(poorly) & negative:positive = 5.1:1.0 \\
+	11 & contains(ridiculous) & negative:positive = 5.0:1.0 \\
+	12 & contains(waste) & negative:positive = 5.0:1.0 \\
+	13 & contains(era) & positive:negative = 4.7:1.0 \\
+	14 & contains(worst) & negative:positive = 4.4:1.0 \\
+	15 & contains(bland) & negative:positive = 4.2:1.0 \\
+	16 & contains(unfunny) & negative:positive = 4.2:1.0 \\
+	17 & contains(allows) & positive:negative = 4.1:1.0 \\
+	18 & contains(jedi) & positive:negative = 4.1:1.0 \\
+	19 & contains(stupid) & negative:positive = 3.9:1.0 \\
+	20 & contains(dull) & negative:positive = 3.9:1.0 \\
+	21 & contains(fantastic) & positive:negative = 3.9:1.0 \\
+	22 & contains(laughable) & negative:positive = 3.9:1.0 \\
+	23 & contains(portrayal) & positive:negative = 3.8:1.0 \\
+	24 & contains(mess) & negative:positive = 3.8:1.0 \\
+	25 & contains(pointless) & negative:positive = 3.8:1.0 \\
+	26 & contains(terrific) & positive:negative = 3.8:1.0 \\
+	27 & contains(memorable) & positive:negative = 3.7:1.0 \\
+	28 & contains(superb) & positive:negative = 3.6:1.0 \\
+	29 & contains(boring) & negative:positive = 3.5:1.0 \\
+	30 & contains(badly) & negative:positive = 3.5:1.0 \\
+	\hline
+\end{tabular}
+\caption{30 Most Informative Features for Classifying Movie Reviews}
+\label{tab:informative_features_doc_classification}
+\end{table}
+
+TODO: explain why these features are the most useful and why some are surprising
+
+\section {Classification Mistakes}
+
+\subsection{Movie Review 1 (Overfitting Training Data)}
+
+As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears toi mean that the classifier has associated Seagal with bad movies.
+
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being very positive, the review has been classified as negative due to the occurrence of 'seagal'.
+
+This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative
+
+\begin{quote}
+"So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved.
+
+Don't listen to what other critics have said, they are jealous of this masterpiece.
+
+The actors gave their greatest performances yet. They truly embraced the outstanding story and gritty drama. The special effects are incredible, the humour so subtle and the story so epic.
+
+I highly recommend you watch this movie, for it is the peak of cinema, a true gem. In fact, I think it isn't possible to get better than this - movies have hit their best.
+
+Steven Seagal is an absolute genius in this. I highly recommend you watch this movie."
+\end{quote}
+
+%
+%\subsection{Movie Review 1 (Sarcasm)}
+%
+%Below is a movie review, which when by a human can be seen as a negative review. However, due to the heavy use of sarcasm by the writer, the trained Naive Bayes classifier from question 1 thinks it is positive.
+%
+%The reason for this is that many of the words in the review appear positive when looked at \textit{individually}. This is because they're \textit{usually} used in positive contexts, so the trained classifier thinks that the words are meant to be positive, therefore thinking thus the entire review is positive.
+%
+%However, the writer is purposely using positive words and sentences to convey his actual point: the movie is bad. This is a known limitation in using the bag of words model to represent and classify documents. It takes each the presence, or frequency (e.g. multinomial Naive Bayes) individual words
+%
+%\begin{quote}
+%"So this is the first time that Adam Sandler has starred in a Sci-Fi movie. At first I was skeptial about "Sheer Space Sandler", but I was blown away by the amazing performances of every actor involved. This is certaintly not a budget flick simply here to cash in on the current trend of sci-fi comedy and an attempt to keep Adam Sandler relevant. Not at all.
+%
+%The sheer depth and complexity the story has, and the emotions it roused inside me, was amazing. Never before have I seen a movie that left thinking for days. Days, I was pondering how such a movie could be made. Days, I spent wondering how such a masterpiece has been rated low by other critics.
+%
+%No, "Sheer Space Sandler" is not a cash-in movie, like many of other critics say. They certainly do not have valid points; the movie was an incredible experience and set the bar high for every future movie in both the Sci-Fi and comedy genres.
+%
+%Yes, the actors are not putting in 1\% of effort. They are in fact embracing the incredibly written story and gritty drama. Yes, the special effects are outstanding and were created with true effort.
+%
+%In all seriousness though, don't watch this movie. The other critics are completely right - the movie is purely a cash-in and has no artistic merit."
+%\end{quote}
+
+\subsection{Movie Review 2 (Discourse and Sentence Subject)}
+
+The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
+
+Since the bag of words model does not take position into account, the classifier has no way of knowing distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
+
+\begin{quote}
+"The original Star Wars trilogy is a masterpiece. It took the world by storm and captivated both children and adults. It was memorable, being talked about for years, and the conclusion to Epsiode VI was outstanding.
+
+It was the end of an era when Episode VI finished. When it was announced that George Lucas would be releasing a prequel trilogy, everyone was excited. What new adventures with the Jedi would happen in the exciting Star Wars universe?
+
+Naturally, there's been a lot of discussion about Episode I. Everyone was queueing up and was buzzing with excitement as they were about to watch the movie.
+
+Like many people however, when I left the movie I felt disappointed. It was nowhere near the same fantastic quality the original trilogy had. In fact, I think it was a poor movie. Remember that when going into this movie."
+\end{quote}
+
+\section{Impact of Feature Selection Methods}
+
+TODO: feature selection code for EACH TYPE should a function EACH. 
+
+\subsection{Frequency Cutoff}
+
+TODO: what I did
+
+TODO: results and discussion
+
+\subsection{Association Measures}
+
+TODO: what I did
+
+TODO: results and discussion
+
+\subsection{Function Word Exclusion}
+
+TODO: what I did
+
+TODO: results and discussion
+
+\subsection{Summary}
+
+TODO: compare using all the different approaches and summarise discussion in other subsections
+
+\section{Generalising Words using WordNet}
+
+TODO: generalise words in each document using WordNet lexicon (boil down words to their base meaning)
+
+TODO: say what I'm going to generalise (synonyms, hypernynms, some additional creativity) and how I did it in code
+
+TODO: results and discussion
+
+\section{Theory: Bag of Words Representations}
+
+\begin{itemize}
+	\item \textbf{D1} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
+		\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'London', ',', 'Ontario', 'to', 'England']
+		\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'London', ',', 'Ontario'. ',', 'to', 'London', ',', 'England']
+		\end{itemize}
+	\item \textbf{D2} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
+		\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'London', ',', 'England', 'to', 'Ontario']
+		\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'London', ',', 'England', ',', 'to', 'London', ',', 'Ontario']
+	  \end{itemize}
+	\item \textbf{D3} -- there are no differences in the BOW representations, as there are no repeated tokens.
+	\begin{itemize}
+	\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'England', 'to', 'London', ',', 'Ontario']
+	\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'England', 'to', 'London', ',', 'Ontario']
+	\end{itemize}
+\end{itemize}
+
+\section{Theory: Estimating Classifiers}
+
+\subsection{Multinomial Naive Bayes Classifier}
+
+	TODO: estimate
+
+TODO: apply to documents
+
+\subsection{Bernoulli Naive Bayes Classifier}
+
+TODO: estimate to documents
+
+TODO: apply
+
+\end{document}
