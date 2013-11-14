@@ -24,12 +24,19 @@
 
 \begin{document}
 \lstset{language=Python}
+\lstset{basicstyle=\ttfamily}
 
 \maketitle
 
 \section{Most Informative Features for Movie Review Classification}
 
 In order to determine whether or not a movie review is positive or negative, a Naive Bayes classifier can be used. Using NLTK, I trained a \textbf{binomial} Naive Bayes classifier like so:
+
+%TODO: split training and test data into 3/4 for training. Make sure to split it up evenly classes
+%
+%TODO: isolate splitting code into single function in cw1_base and use in all code
+%
+%TODO: mention explicitly that I'm using the code form the book (e.g. NOTE) , before she sent out the email about the other code. Still splitting by 3/4 but randomising. This is the case for QUESTION 1, 2, 3 AND 4
 
 \begin{lstlisting}
 # List of words to use as features for binomial classification
@@ -54,12 +61,12 @@ featureSet = apply_features(docFeatureExtractor, trainingSet)
 classifier = nltk.NaiveBayesClassifier.train(featureSet)
 \end{lstlisting}
 
-From this, it is possible to derive which features were the most useful in distinguishing positive or negative movie review
+From this, it is possible to derive which features were the most useful in distinguishing positive or negative movie reviews using the following Python command:
 
 \begin{lstlisting}
 	classifier.show_most_informative_features(30)
 \end{lstlisting}
-Table \ref{tab:informative_features_doc_classification} shows the 30 most informative features for classifying movie reviews as positive or negative.
+Table \ref{tab:informative_features_doc_classification} shows the 30 most informative features for classifying movie reviews as positive or negative, outputted from the above command.
 
 \begin{table}
 \centering
@@ -105,15 +112,13 @@ Table \ref{tab:informative_features_doc_classification} shows the 30 most inform
 
 TODO: explain why these features are the most useful and why some are surprising
 
+TODO: surprising ones are actor's names and movie-specific concepts (e.g. jedi). THis is a sign that the classifier has overfit the test data
+
+TODO: strong adjectives which imply positive or negative feelings, so not suprising they correlate to sentiment of movie review
+
 \section {Classification Mistakes}
 
 \subsection{Movie Review 1 (Overfitting Training Data)}
-
-As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears toi mean that the classifier has associated Seagal with bad movies.
-
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being very positive, the review has been classified as negative due to the occurrence of 'seagal'.
-
-This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative
 
 \begin{quote}
 "So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved.
@@ -127,11 +132,18 @@ I highly recommend you watch this movie, for it is the peak of cinema, a true ge
 Steven Seagal is an absolute genius in this. I highly recommend you watch this movie."
 \end{quote}
 
-\subsection{Movie Review 2 (Discourse and Sentence Subject)}
+As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being very positive, the review has been classified as negative due to the occurrence of 'seagal'.
 
-Since the bag of words model does not take position into account, the classifier has no way of knowing distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
+This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
+
+TODO: take a lot of evidence to balance out negative seagal
+
+TODO: mention other irrelevant statemnts that have negative statements
+
+
+\subsection{Movie Review 2 (Discourse, Sentence Subject and Context)}
 
 \begin{quote}
 "The original Star Wars trilogy is a masterpiece. It took the world by storm and captivated both children and adults. It was memorable, being talked about for years, and the conclusion to Epsiode VI was outstanding.
@@ -143,27 +155,45 @@ Naturally, there's been a lot of discussion about Episode I. Everyone was queuei
 Like many people however, when I left the movie I felt disappointed. It was nowhere near the same fantastic quality the original trilogy had. In fact, I think it was a poor movie. Remember that when going into this movie."
 \end{quote}
 
+The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
+
+Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. TODO: lead into sentence subject!]
+
+TODO: further examples of limited sentence subject in this as well.
+
+Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
+
 \section{Impact of Feature Selection Methods}
 
 TODO: feature selection code for EACH TYPE should a function EACH. 
 
 \subsection{Frequency Cutoff}
 
-TODO: what I did
+TODO: what I did (no new code)
+
+TODO: table with different values for k
 
 TODO: results and discussion
 
-\subsection{Association Measures}
+\subsection{Association Measure - Mutual Information}
 
 TODO: what I did
 
+TODO: different values of k with table
+
 TODO: results and discussion
 
-\subsection{Function Word Exclusion}
+\subsection{Function Word Exclusion (Stopwords)}
 
 TODO: what I did
 
+TODO: results didn't change that much, because ratios will be quite balanced anyway. Just noise, so can't guarantee which way it'll go.
+
+TODO: table with frequency/mutual information for both STOPWORDS and NON-STOPWORDS
+
 TODO: results and discussion
+
+From basic tests,
 
 \subsection{Summary}
 
@@ -172,6 +202,10 @@ TODO: compare using all the different approaches and summarise discussion in oth
 \section{Generalising Words using WordNet}
 
 TODO: generalise words in each document using WordNet lexicon (boil down words to their base meaning)
+
+TODO: add all synonyms sets to document (UNLESS a synonym is BELOW a certain threshold with similarity measure - call it t). Provide a few values of t for results
+
+TODO: replace word with a hypernym (number of levels to go up should be tweakable - say p is max up)
 
 TODO: say what I'm going to generalise (synonyms, hypernynms, some additional creativity) and how I did it in code
 
@@ -197,16 +231,121 @@ TODO: results and discussion
 
 \section{Theory: Estimating Classifiers}
 
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|l|l|l|}
+	\hline
+	& \textbf{Document ID} & \textbf{Words in Document} & \textbf{in $c=$China?} \\
+	\hline
+	Training Set & 1 & Taipei Taiwan & yes \\
+	& 2 & Macao Taiwan Shanghai & yes \\
+	& 3 & Japan Sapporo & no \\
+	& 4 & Sapporo Osaka Taiwan & no \\
+	\hline
+	Test Set & 5 & Taiwan Taiwan Sapporo & ? \\
+	\hline 
+	\end{tabular}
+	\caption{Training and Test Datasets for Naive Bayes Classifiers}
+	\label{tab:example_problem}
+\end{table}
+
+\begin{align}
+P(China) = \frac{2}{4} \\
+P(notChina) = \frac{2}{4} \\
+V = \lbrace Taipei, Taiwan, Macao, Shanghai, Japan, Sapporo, Osaka \rbrace \\
+|V| = 7
+\end{align}
+
 \subsection{Multinomial Naive Bayes Classifier}
 
-	TODO: estimate
+\begin{tabular}{l}
+\textbf{Large document} for class $China$ is: "Taipei Taiwan Macao Taiwan Shanghai". \\
+\textbf{Large document} for class $notChina$ is: "Japan Sapporo Sapporo Osaka Taiwan" \\
+$P(w_i|c) = \frac{n_i^c + 1}{n^c + |V|}$
+\end{tabular}
 
-TODO: apply to documents
+\hspace{2pt}
+
+For class $China$:
+\begin{align}
+n^{China} = 5 \\
+P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{1 + 1}{5 + 7} = \frac{2}{12} \\
+P(Taiwan|China) = \frac{2 + 1}{5 + 7} = \frac{3}{12} \\
+P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{5 + 7} = \frac{1}{12}
+\end{align}
+
+For class $notChina$:
+\begin{align}
+n^{notChina} = 5 \\
+P(Japan|notChina) = P(Osaka|notChina) = P(Taiwan|notChina) = \frac{1 + 1}{5 + 7} = \frac{2}{12} \\
+P(Sapporo|notChina) = \frac{2 + 1}{5 + 7} = \frac{3}{12} \\
+P(Taipai|China) = P(Macao|China) = P(Shanghai|China) = \frac{0 + 1}{5 + 7} = \frac{1}{12} \\
+\end{align}
+
+Applying classifier to document 5:
+\begin{align}
+	P(China|doc5) & \propto P(China) \cdot \prod_{i \in positions} {P(w_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|China) \cdot P(Taiwan|China) \cdot P(Sapporo|China) \\
+	& \propto \frac{1}{2} \cdot \frac{3}{12}^2 \cdot \frac{1}{12} \\
+	& \propto \frac{6}{12} \cdot \frac{3}{12}^2 \cdot \frac{1}{12} \\
+	& \propto \frac{54}{20736} \\
+	& \propto 0.002604 \\
+	& \nonumber \\ 
+	P(notChina|doc5) & \propto P(notChina) \cdot \prod_{i \in positions} {P(w_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|notChina) \cdot P(Taiwan|notChina) \cdot P(Sapporo|notChina) \\
+	& \propto \frac{1}{2} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\
+	& \propto \frac{6}{12} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\	
+	& \propto \frac{72}{20736} \\
+	& \propto 0.00372
+\end{align}
+
+Therefore, a multinomial Naive Bayes classifier would label document 5 with the class $notChina$.
 
 \subsection{Bernoulli Naive Bayes Classifier}
 
-TODO: estimate to documents
+TODO: verify that this equation is correct
+$P(e_i|c) = \frac{\#\;documents\;of\;class\;c\;that\;contain\;word w_i + 1}{\#\;documents\;of\;class\;c + 2}$
 
-TODO: apply
+For class $China$:
+\begin{align}
+P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
+P(Taiwan|China) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
+P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
+\end{align}
+
+For class $notChina$:
+\begin{align}
+P(Japan|China) = P(Osaka|China) = P(Taiwan|China) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
+P(Sapporo|China) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
+P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
+\end{align}
+
+Applying classifier to document 5:
+\begin{align}
+	P(China|doc5) & \propto P(China) \cdot \prod_{w_i \in V} {Pe_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|China) \cdot P(Sapporo|China) \nonumber \\
+	& \cdot (1 - P(Taipei|China)) \cdot (1 - P(Macao|China)) \cdot (1 - P(Shanghai|China)) \nonumber \\
+	& \cdot (1 - P(Japan|China)) \cdot (1 - P(Osaka|China)) \\
+	& \propto \frac{1}{2} \cdot \frac{3}{4} \cdot \frac{1}{4}
+	\cdot \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{2}{4}
+	\cdot \frac{3}{4} \cdot \frac{3}{4} \\
+	& \propto \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{1}{4}
+	\cdot \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{2}{4}
+	\cdot \frac{3}{4} \cdot \frac{3}{4} \\
+	& \propto \frac{432}{65536} \\
+	& \propto 0.006591 \\
+	& \nonumber \\
+	P(notChina|doc5) & \propto P(notChina) \cdot \prod_{w_i \in V} {Pe_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|notChina) \cdot P(Sapporo|notChina) \nonumber \\
+	& \cdot (1 - P(Taipei|notChina)) \cdot (1 - P(Macao|notChina)) \nonumber \\
+	& \cdot (1 - P(Shanghai|notChina)) \cdot (1 - P(Japan|notChina)) \nonumber \\
+	& \cdot (1 - P(Osaka|notChina)) \\	
+	& \propto \frac{1}{2} \cdot \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{2}{4} \cdot \frac{2}{4} \\
+	& \propto \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{2}{4} \cdot \frac{2}{4} \\
+	& \propto \frac{1296}{64436} \\
+	& \propto0.01977
+\end{align}
+
+Therefore, a Bernoulli, binomial Naive Bayes classifier would label document 5 with the class $notChina$.
 
 \end{document}
