@@ -106,11 +106,13 @@ Table \ref{tab:informative_features_doc_classification} shows the 30 most inform
 \label{tab:informative_features_doc_classification}
 \end{table}
 
-TODO: explain why these features are the most useful and why some are surprising
+The majority of the features listed in table \ref{tab:informative_features_doc_classification} are adjectives that generally relate to positive or negative sentiments, such as "worst", "outstanding", "terrible" and "fantastic". It is unsurprising that these words are informative when determining whether or not a movie review is a positive or negative.
 
-TODO: surprising ones are actor's names and movie-specific concepts (e.g. jedi). THis is a sign that the classifier has overfit the test data
+Other words are not immediately obvious, such as "zero", "waste" or "portrayal". These are not adjectives and are not \textit{directly} negative. There words tend to be used often in a specific way in movie reviews; that is, they have a specific meaning \textit{in the context of a movie review}. Therefore, it's reasonable to say that,intuitively, these would be useful identifying a review's sentiment.
 
-TODO: strong adjectives which imply positive or negative feelings, so not suprising they correlate to sentiment of movie review
+There are some surprising features, however. Specific actors or characters, such as "julie", "seagal" or "flynt", and even \textit{concepts}, such as "jedi", from movies relate to the document's sentiment. One reason these tend to be useful could be that the opinion of the majority regarding those particular movies or characters is so one-sided, that during training the classifier begins to associate those terms with positive and negative sentiment.
+
+Perhaps through such widely adopted opinion and usage of these names and terms, the semantics of these words have truly become associated to positive or negative sentiment in the English language. On the other hand, it could be an indication that the classifier has \textit{overfit} the training dataset. There may simply be a large amount of positive Star Wars reviews in the training dataset, meaning the word 'jedi' appears to be a positive word. There could also be many negative Star Wars reviews, but since the training dataset is not large or general enough to contain these, the classifier does not know. 
 
 \section {Classification Mistakes}
 
@@ -251,7 +253,7 @@ To summarise the findings in this section, preventing less frequent words becomi
 
 Selecting words with the highest amount of mutual information increased classification accuracy across the board, although you still had to be careful about how many features you kept.
 
-Removing function words from consideration didn't have much of an effect , regardless of the feature selection method used. TODO: wjhy.
+Removing function words from consideration didn't have much of an effect , regardless of the feature selection method used. This is due to the way the words to use as features are selected.
 
 \section{Using WordNet to Product Different Features}
 
