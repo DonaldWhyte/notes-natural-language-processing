@@ -49,7 +49,7 @@ class MutualInformationAssociator:
 			for word in allWords:
 				associationMatrices[cls][word] = [ [0, 0], [0, 0] ]
 		# Compute class frequencies
-		clsFrequencies = {} # TODSO
+		clsFrequencies = {} # TODO
 		# Loop through all the labelled documents
 		for docWords, docClass in documents:
 			docWords = set(docWords) # convert to set for O(1) membership test
@@ -111,11 +111,7 @@ if __name__ == "__main__":
 	print "REMOVING STOPWORDS FROM DATASET"
 	for i in range(len(dataset)):
 		dataset[i] = (removeStopWords(dataset[i][0]), dataset[i][1])
-	# Split dataset into random training and test sets
-	random.shuffle(dataset)
-	half = len(dataset) / 2
-	trainingSet = dataset[:half]
-	testSet = dataset[half:]	
+	trainingSet, testSet = splitDataset(dataset)
 
 	# Determine which features to keep
 	print "DECIDING FEATURES"

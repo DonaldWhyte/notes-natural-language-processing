@@ -32,11 +32,10 @@
 
 In order to determine whether or not a movie review is positive or negative, a Naive Bayes classifier can be used. Using NLTK, I trained a \textbf{binomial} Naive Bayes classifier like so:
 
-%TODO: split training and test data into 3/4 for training. Make sure to split it up evenly classes
 %
 %TODO: isolate splitting code into single function in cw1_base and use in all code
 %
-%TODO: mention explicitly that I'm using the code form the book (e.g. NOTE) , before she sent out the email about the other code. Still splitting by 3/4 but randomising. This is the case for QUESTION 1, 2, 3 AND 4
+%TODO: mention explicitly that I'm using the code form the book (e.g. NOTE) , before she sent out the email about the other code. Still splitting by 3/4 AND NOT RANDOMISING THOUGH!
 
 \begin{lstlisting}
 # List of words to use as features for binomial classification
@@ -121,20 +120,12 @@ TODO: strong adjectives which imply positive or negative feelings, so not supris
 \subsection{Movie Review 1 (Overfitting Training Data)}
 
 \begin{quote}
-"So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved.
-
-Don't listen to what other critics have said, they are jealous of this masterpiece.
-
-The actors gave their greatest performances yet. They truly embraced the outstanding story and gritty drama. The special effects are incredible, the humour so subtle and the story so epic.
-
-I highly recommend you watch this movie, for it is the peak of cinema, a true gem. In fact, I think it isn't possible to get better than this - movies have hit their best.
-
-Steven Seagal is an absolute genius in this. I highly recommend you watch this movie."
+"So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved. I highly recommend you watch this movie."
 \end{quote}
 
 As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being very positive, the review has been classified as negative due to the occurrence of 'seagal'.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'.
 
 This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
 

@@ -3,15 +3,7 @@ from cw1_base import getMovieReviewClassifier, getMovieReviewDataset
 MOVIE_REVIEWS = [
 
 """
-So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved.
-
-Don't listen to what other critics have said, they are jealous of this masterpiece.
-
-The actors gave their greatest performances yet. They truly embraced the outstanding story and gritty drama. The special effects are incredible, the humour so subtle and the story so epic.
-
-I highly recommend you watch this movie, for it is the peak of cinema, a true gem. In fact, I think it isn't possible to get better than this - movies have hit their best.
-
-Steven Seagal is an absolute genius in this. I highly recommend you watch this movie.
+So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved. I highly recommend you watch this movie.
 """,
 
 """

@@ -83,21 +83,25 @@ def getLabelledDatasetFrom(corpus):
 def getMovieReviewDataset():
     return getLabelledDatasetFrom(movie_reviews)
 
+def splitDataset(dataset):
+    """Split given database into training and test datasets, where the training set is 3/4 of the data."""
+    startOfTest = (len(dataset) / 4) * 3
+    trainingSet = dataset[:startOfTest]
+    testSet = dataset[startOfTest:]
+    return (trainingSet, testSet)
+
 def getMovieReviewClassifier(dataset):
-    # Ensure random number generator has fresh seed
-    random.seed(time.time())
+    trainingSet, testSet = splitDataset(dataset)
     # Get a list of words to consider when extracting features from documents
     wordsToConsider = getWordsToConsider(movie_reviews, 2000)
-    # Construct labelled dataset from corpus, splitting it into training and test sets
-    random.shuffle(dataset) # randomise datsaset before splitting
-    half = len(dataset) / 2
-    trainingSet = dataset[:half]
-    testSet = dataset[half:]
     # Train classifier and return it
     featureExtractor = BinomialExtractor(wordsToConsider) # use binomial word features
     classifier = DocumentTypeClassifier(featureExtractor)
     classifier.train(trainingSet)
     return (classifier, trainingSet, testSet)
+
+# Ensure random number generator has fresh seed
+random.seed(time.time())
 
 if __name__ == "__main__":
     classifier, trainingSet, testSet = getMovieReviewClassifier( getMovieReviewDataset() )

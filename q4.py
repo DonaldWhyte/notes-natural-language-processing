@@ -52,10 +52,7 @@ if __name__ == "__main__":
 	random.seed(time.time())
 	# Load movie review dataset and split it into training and test 
 	dataset = getMovieReviewDataset()
-	random.shuffle(dataset)
-	half = len(dataset) / 2
-	trainingSet = dataset[:half]
-	testSet = dataset[half:]
+	trainingSet, testSet = splitDataset(dataset)
 	# Construct frequency distribution of all the corpus' word, after being reduced.
 	print "FINDING FEATURES"
 	allWords = [ w.lower() for w in movie_reviews.words() ]
