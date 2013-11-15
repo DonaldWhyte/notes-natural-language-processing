@@ -2,12 +2,8 @@ import random
 import time
 import math	
 import nltk
-from nltk.corpus import wordnet, movie_reviews, stopwords
+from nltk.corpus import movie_reviews, stopwords
 from cw1_base import *
-
-ENGLISH_STOPWORDS = set(stopwords.words("english"))
-def removeStopWords(words):
-	return [ w for w in words if not w in ENGLISH_STOPWORDS ]
 
 class MutualInformationAssociator:
 
@@ -77,19 +73,17 @@ class FeatureSelector:
 
 
 if __name__ == "__main__":
-	# Ensure random number generator has fresh seed
-	random.seed(time.time())	
+	# Parse command line arguments
+	if len(sys.argv) < 3:
+		sys.exit("Usage: python {0} <numFeaturesToUse> <filterStopWords>".format(sys.argv[0]))
+	numFeatures = int(sys.argv[1])
+	filterStopWords = (sys.argv[2] == "true")
+
 	# Load movie review dataset
 	dataset = getMovieReviewDataset()
 	allWords = getMovieReviewWords()
 	allClasses = getMovieReviewCategories()
-	# Remove all words in stoplist from every document in the dataset
-	# We do this here so none of the stopwords can become FEATURES
-	# if they're the most frequent (very likely words in the stoplist
-	# will also be most frequent as well!)
-	print "REMOVING STOPWORDS FROM DATASET"
-	for i in range(len(dataset)):
-		dataset[i] = (removeStopWords(dataset[i][0]), dataset[i][1])
+
 	trainingSet, testSet = splitDataset(dataset)
 
 	# Determine which features to keep

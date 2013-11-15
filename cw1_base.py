@@ -7,6 +7,7 @@ import nltk
 from nltk.classify import apply_features
 from nltk.tokenize import regexp_tokenize
 from nltk.corpus import movie_reviews
+from nltk.corpus import stopwords
 
 class BinomialExtractor:
 
@@ -63,6 +64,11 @@ class DocumentTypeClassifier:
         featureSet = self.featureExtractor.extractFeatures(tokens)
         return self.classifier.classify(featureSet)
     
+ENGLISH_STOPWORDS = set(stopwords.words("english"))
+def removeStopWords(words):
+    """Remove stopwords from given list."""
+    return [ w for w in words if not w in ENGLISH_STOPWORDS ]
+
 def getMovieReviewWords():
     return movie_reviews.words()
 
