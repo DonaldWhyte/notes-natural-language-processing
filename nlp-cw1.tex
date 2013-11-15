@@ -183,7 +183,9 @@ Therefore, care is needed when picking a value for $k$ so that the classifier ac
 
 \subsection{Mutual Information}
 
-TODO: what I did
+\textbf{Mutual information} is a numerical measure of the mutual dependence between two variables. In the context of text classification, this is the mutual dependence between a \textit{word existing in a document} and the \textit{document's class}. A word having a higher value for mutual information means it is more useful for determining whether or not a document is a particular class.
+
+One way of selecting features would be to compute the amount of mutual information between each word and the "positive" movie review class, and select the $k$ words with the highest mutual information. Table \ref{tab:mutual_information} shows the results of running such a method on the movie review dataset. 
 
 \begin{table}
 	\centering
@@ -208,11 +210,15 @@ TODO: what I did
 	\label{tab:mutual_information}
 \end{table}
 
-TODO: results and discussion
+Notice how the classification's accuracy on both the training and test datasets increases, and decreases, in a similar fashion to frequency cut-off as $k$ increases. The difference here is that all of the accuracies presented in this table are higher than than the corresponding accuracies in the frequency cutoff table. This indicates that mutual information is a \textbf{better approach to selecting features than frequency cutoff}, since the accuracies are higher regardless of the value used for $k$.
+
+The reason for this is because words that are frequent in the training corpus may be frequent in all documents in said corpus, regardless of class. Therefore, some frequent words don't help distinguish between different document classes, as they're \textit{frequent in all documents}.
 
 \subsection{Function Word Exclusion (Stopwords)}
 
-There are many functional words which occur often in most English text. Since they frequently occur in most texts, they offer no semantic value when using a bag of words model. NLTK has a stoplist containing these functional words. I used this list to exclude functional words from all the documents and then ran.
+There are many functional words which occur often in most English text. Since they frequently occur in most texts, they offer no semantic value when using a bag of words model. NLTK has a stoplist containing these functional words. I used this list to exclude functional words from all the documents and then trained/tested a binomial Naive Bayes classifier, just like the previous questions.
+
+To determine whether or not excluding function words actually made a significant difference, I used both the frequency and mutual information feature selection methods, with and without function words. Table \ref{tab:function_word_exclusion}
 
 \begin{table}
 	\centering
@@ -225,22 +231,29 @@ There are many functional words which occur often in most English text. Since th
 	 & \textbf{Feature Selection} & \textbf{Number of Features ($k$)}
 	 & \textbf{Training Acc.} & \textbf{Test Acc.} \\
 	\hline
-	3000 & 90.73\% & 65.20\% \\
-	No & Frequency Cutoff & 2000 & 92.00\% & 71.60\% \\
-	No & Mutual Information & TODO & 0.00\% & \% \\
-	Yes & Frequency Cutoff & 200 &  90.37\% & 75.0.00\% \\
-	Yes & Mutual Information & TODO & 0.00\% & 0.00\% \\
+	No & Frequency Cutoff & 3000 & 92.00\% & 71.60\% \\
+	No & Mutual Information & 3000 & 94.60\% & 86.40\% \\
+	Yes & Frequency Cutoff & 3000 &  90.37\% & 75.00\% \\
+	Yes & Mutual Information & 3000 & 94.47\% & 86.40\% \\
 	\hline
 	\end{tabular}
-	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information cut-off}
-	\label{tab:mutal_information}
+	\caption{Accuracy of different feature selection methods with and without function words}
+	\label{tab:function_word_exclusion}
 \end{table}
 
-TODO: results didn't change that much, because ratios will be quite balanced anyway. Just noise, so can't guarantee which way it'll go.
+As the results in the table show, removing function words barely affected the accuracy. Perhaps the reason this is the case when using frequency cutoff, even though function words will most likely be selected, there's still a relatively small number of function words being used as features compared to the large amount of other words used as features. In other words, it seems as if 
 
-TODO: results and discussion
+Even with function words still in the corpus, they don't affect mutual information feature selection either. This is because it is unlikely that they'll be selected because function words tend to have even distributions across all document classes (as they're used relatively evenly across the different document categories). Therefore, their mutual information score will be low and they won't be selected.
 
-\section{Generalising Words using WordNet}
+\subsection{Summary}
+
+To summarise the findings in this section, preventing less frequent words becoming features using frequency cutoff did increase classification accuracy and generalisation, up to a point. Removing too many words reduced accuracy, but not removing enough meant that classifiers overfit their training dataset.
+
+Selecting words with the highest amount of mutual information increased classification accuracy across the board, although you still had to be careful about how many features you kept.
+
+Removing function words from consideration didn't have much of an effect , regardless of the feature selection method used. TODO: wjhy.
+
+\section{Using WordNet to Product Different Features}
 
 TODO: generalise words in each document using WordNet lexicon (boil down words to their base meaning)
 

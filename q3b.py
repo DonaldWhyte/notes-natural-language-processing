@@ -19,6 +19,9 @@ if __name__ == "__main__":
 	dataset = getMovieReviewDataset()
 	allWords = getMovieReviewWords()
 	allClasses = getMovieReviewCategories()
+	if filterStopWords:
+		for i in range(len(dataset)):
+			dataset[i] = (removeStopWords(dataset[i][0]), dataset[i][1])		
 	trainingSet, testSet = splitDataset(dataset)
 
 	# Determine which features to keep
