@@ -1,8 +1,6 @@
 """Contains code for exercises in chapter 6 of the official NLTK book.
 The book, and this chapter, can be found at http://nltk.org/book/ch06.html."""
 
-import random
-import time
 import nltk
 from nltk.classify import apply_features
 from nltk.tokenize import regexp_tokenize
@@ -105,9 +103,6 @@ def getMovieReviewClassifier(dataset, numFeaturesToUse = 2000):
     classifier = DocumentTypeClassifier(featureExtractor)
     classifier.train(trainingSet)
     return (classifier, trainingSet, testSet)
-
-# Ensure random number generator has fresh seed
-random.seed(time.time())
 
 if __name__ == "__main__":
     classifier, trainingSet, testSet = getMovieReviewClassifier( getMovieReviewDataset() )

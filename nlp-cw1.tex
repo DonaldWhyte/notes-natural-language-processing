@@ -179,6 +179,7 @@ Therefore, care is needed when picking a value for $k$ so that the classifier ac
 	\end{tabular}
 	\caption{Accuracy of classifier with different amounts of features selected using frequency cut-off}
 	\label{tab:frequency_cutoff}
+\end{table}
 
 \subsection{Mutual Information}
 
@@ -190,14 +191,17 @@ TODO: what I did
 	\hline
 	\textbf{Number of Features $k$} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
 	\hline
-	25 & 0.00\% & 0.00\% \\
-	50 & 0.00\% & 0.00\% \\
-	100 & 0.00\% & 0.00\% \\
-	250 & 0.00\% & 0.00\% \\
-	500 & 0.00\% & 0.00\% \\
-	1000 & 0.00\% & 0.00\% \\
-	2000 & 0.00\% & 0.00\% \\
-	3000 & 0.00\% & 0.00\% \\
+	25 & 78.20\% & 69.40\% \\
+	50 & 81.87\% & 75.20\% \\
+	100 & 86.07\% & 79.80\% \\
+	250 & 88.47\% & 85.60\% \\
+	500 & 91.33\% & 87.40\% \\
+	1000 & 92.20\% & 86.20\% \\
+	2000 & 93.93\% & 85.40\% \\
+	3000 & 94.60\% & 86.40\% \\
+	5000 & 95.13\% & 82.20\% \\
+	10000 & 95.13\% & 75.40\% \\
+	15000 & 94.47\% & 73.00\% \\
 	\hline
 	\end{tabular}
 	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information}
