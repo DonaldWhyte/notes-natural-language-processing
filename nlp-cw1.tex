@@ -28,14 +28,11 @@
 
 \maketitle
 
+\textbf{NOTE:} The code used throughout this coursework is based on the NLTK book. The training/test datasets are still a 75\%-25\% and there is no randomisation, just like the later code snippets provided however, so it shouldn't impact the results.
+
 \section{Most Informative Features for Movie Review Classification}
 
 In order to determine whether or not a movie review is positive or negative, a Naive Bayes classifier can be used. Using NLTK, I trained a \textbf{binomial} Naive Bayes classifier like so:
-
-%
-%TODO: isolate splitting code into single function in cw1_base and use in all code
-%
-%TODO: mention explicitly that I'm using the code form the book (e.g. NOTE) , before she sent out the email about the other code. Still splitting by 3/4 AND NOT RANDOMISING THOUGH!
 
 \begin{lstlisting}
 # List of words to use as features for binomial classification
@@ -143,11 +140,9 @@ Like many people however, when I left the movie I felt disappointed. It was nowh
 
 The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
 
-Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically.
+Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. There is no mechanism for which determine \textbf{sentence subject} or \textbf{context} using the bag of words representation.
 
 Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
-
-Further examples of this are TODO.
 
 \section{Impact of Feature Selection Methods}
 
@@ -157,33 +152,11 @@ There are many different ways of selecting which features or words to consider f
 
 The code used for the previous two questions has been using a technique called \textit{frequency cutoff} to select which features to use for the classifier. That is, which words to look for in each document.
 
-The frequency of all the words in the training corpus is calculated, and the $k$ most frequent words are chosen as features. Table \ref{tab:frequency_cutoff} shows the accuracy of classifiers which use different amounts of features (different values for $k$).
+The frequency of all the words in the training corpus is calculated, and the $k$ most frequent words are chosen as features. Table \ref{tab:frequency_cutoff} shows the accuracy of classifiers which use different amounts of features (different values for $k$). Notice how as $k$ is increased, both accuracy on the training and test datasets increase.
 
-\begin{table}
-	\centering
-	\begin{tabular}{|l|l|l|}
-	\hline
-	\textbf{Number of Features $k$} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
-	\hline
-	25 & 0.00\% & 0.00\% \\
-	50 & 0.00\% & 0.00\% \\
-	100 & 0.00\% & 0.00\% \\
-	250 & 0.00\% & 0.00\% \\
-	500 & 0.00\% & 0.00\% \\
-	1000 & 0.00\% & 0.00\% \\
-	2000 & 0.00\% & 0.00\% \\
-	3000 & 0.00\% & 0.00\% \\
-	\hline
-	\end{tabular}
-	\caption{Accuracy of classifier with different amounts of features selected using frequency cut-off}
-	\label{tab:frequency_cutoff}
-\end{table}
+However, once $k$ reaches a certain point (between 3000 and 5000),  accuracies on the training dataset are still increased, but when the classifier is run on the test dataset (unseen data), the accuracy steadily decreases. This is a sign that as you increase the number of words to use for binomial Naive Bayes classification, classifiers start to overfit the training data and don't generalise well to new, unseen documents.
 
-TODO: results and discussion
-
-\subsection{Association Measure - Mutual Information}
-
-TODO: what I did
+Therefore, care is needed when picking a value for $k$ so that the classifier achieves high enough accuracies \textit{without} overfitting the training dataset.
 
 \begin{table}
 	\centering
@@ -201,21 +174,41 @@ TODO: what I did
 	3000 & 92.00\% & 71.60\% \\
 	5000 & 92.87\% & 65.00\% \\
 	10000 & 94.73\% & 59.00\% \\
+	15000 & 95.27\% & 54.20\% \\	
 	\hline
 	\end{tabular}
-	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information cut-off}
-	\label{tab:mutal_information}
+	\caption{Accuracy of classifier with different amounts of features selected using frequency cut-off}
+	\label{tab:frequency_cutoff}
+
+\subsection{Mutual Information}
+
+TODO: what I did
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+	\textbf{Number of Features $k$} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
+	\hline
+	25 & 0.00\% & 0.00\% \\
+	50 & 0.00\% & 0.00\% \\
+	100 & 0.00\% & 0.00\% \\
+	250 & 0.00\% & 0.00\% \\
+	500 & 0.00\% & 0.00\% \\
+	1000 & 0.00\% & 0.00\% \\
+	2000 & 0.00\% & 0.00\% \\
+	3000 & 0.00\% & 0.00\% \\
+	\hline
+	\end{tabular}
+	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information}
+	\label{tab:mutual_information}
 \end{table}
 
 TODO: results and discussion
 
 \subsection{Function Word Exclusion (Stopwords)}
 
-TODO: what I did
-
-TODO: results didn't change that much, because ratios will be quite balanced anyway. Just noise, so can't guarantee which way it'll go.
-
-TODO: table with frequency/mutual information for both STOPWORDS and NON-STOPWORDS
+There are many functional words which occur often in most English text. Since they frequently occur in most texts, they offer no semantic value when using a bag of words model. NLTK has a stoplist containing these functional words. I used this list to exclude functional words from all the documents and then ran.
 
 \begin{table}
 	\centering
@@ -228,9 +221,10 @@ TODO: table with frequency/mutual information for both STOPWORDS and NON-STOPWOR
 	 & \textbf{Feature Selection} & \textbf{Number of Features ($k$)}
 	 & \textbf{Training Acc.} & \textbf{Test Acc.} \\
 	\hline
-	No & Frequency Cutoff & TODO & 0.00\% & 0.00\% \\
-	No & Mutual Information & TODO & 0.00\% & 0.00\% \\
-	Yes & Frequency Cutoff & TODO &  0.00\% & 0.00\% \\
+	3000 & 90.73\% & 65.20\% \\
+	No & Frequency Cutoff & 2000 & 92.00\% & 71.60\% \\
+	No & Mutual Information & TODO & 0.00\% & \% \\
+	Yes & Frequency Cutoff & 200 &  90.37\% & 75.0.00\% \\
 	Yes & Mutual Information & TODO & 0.00\% & 0.00\% \\
 	\hline
 	\end{tabular}
@@ -238,12 +232,9 @@ TODO: table with frequency/mutual information for both STOPWORDS and NON-STOPWOR
 	\label{tab:mutal_information}
 \end{table}
 
+TODO: results didn't change that much, because ratios will be quite balanced anyway. Just noise, so can't guarantee which way it'll go.
 
 TODO: results and discussion
-
-\subsection{Summary}
-
-TODO: compare using all the different approaches and summarise discussion in other subsections
 
 \section{Generalising Words using WordNet}
 
@@ -274,6 +265,8 @@ TODO: results and discussion
 	\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'England', 'to', 'London', ',', 'Ontario']
 	\end{itemize}
 \end{itemize}
+
+TODO: wanting frequency vectors or sets?
 
 \section{Theory: Estimating Classifiers}
 
