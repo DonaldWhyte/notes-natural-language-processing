@@ -90,10 +90,10 @@ def splitDataset(dataset):
     testSet = dataset[startOfTest:]
     return (trainingSet, testSet)
 
-def getMovieReviewClassifier(dataset):
+def getMovieReviewClassifier(dataset, numFeaturesToUse = 2000):
     trainingSet, testSet = splitDataset(dataset)
     # Get a list of words to consider when extracting features from documents
-    wordsToConsider = getWordsToConsider(movie_reviews, 2000)
+    wordsToConsider = getWordsToConsider(movie_reviews, numFeaturesToUse)
     # Train classifier and return it
     featureExtractor = BinomialExtractor(wordsToConsider) # use binomial word features
     classifier = DocumentTypeClassifier(featureExtractor)

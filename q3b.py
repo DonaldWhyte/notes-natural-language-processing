@@ -5,30 +5,9 @@ import nltk
 from nltk.corpus import wordnet, movie_reviews, stopwords
 from cw1_base import *
 
-# IMPLEMENT WAYS OF 
-	# TODO: frequency cutoffs
-	# TODO: association measures
-
 ENGLISH_STOPWORDS = set(stopwords.words("english"))
 def removeStopWords(words):
 	return [ w for w in words if not w in ENGLISH_STOPWORDS ]
-
-NUM_FEATURES = 2000
-
-class FrequencyAssociator:
-
-	def __init__(self, classWords):
-		self.association = {}
-		for cls, words in classWords.items():
-			self.association[cls] = {}
-			wordTypes = set(words)
-			for wt in wordTypes: # initialise frequency to 0
-				self.association[cls][wt] = 0
-			for w in words: # increment counts
-				self.association[cls][w] += 1
-
-	def associate(self, word, cls):
-		return self.association[cls].get(word, 0) # case where word is not in dictionary is valid
 
 class MutualInformationAssociator:
 
@@ -116,12 +95,6 @@ if __name__ == "__main__":
 	# Determine which features to keep
 	print "DECIDING FEATURES"
 	# Build associator to rank words and classes
-	"""classWords = {}
-	for doc, cls in dataset:
-		if not cls in classWords:
-			classWords[cls] = []
-		classWords[cls] += doc
-	associator = FrequencyAssociator(classWords)"""
 	associator = MutualInformationAssociator(allWords, allClasses, dataset)
 	# Select specified number of features and construct feature extractor
 	selector = FeatureSelector(associator, allClasses)

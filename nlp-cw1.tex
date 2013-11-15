@@ -73,36 +73,36 @@ Table \ref{tab:informative_features_doc_classification} shows the 30 most inform
 	\hline
 	\textbf{Rank} & \textbf{Feature} & \textbf{Ratio} \\
 	\hline
-	1 & contains(outstanding) & positive:negative = 11.5:1.0 \\
-	2 & contains(mulan) & positive:negative = 9.0:1.0 \\
-	3 & contains(seagal) & negative:positive = 8.2:1.0 \\
-	4 & contains(wonderfully) & positive:negative = 7.0:1.0 \\
-	5 & contains(damon) & positive:negative = 6.3:1.0 \\
-	6 & contains(flynt) & positive:negative = 5.7:1.0 \\
-	7 & contains(wasted) & negative:positive = 5.5:1.0 \\
-	8 & contains(lame) & negative:positive = 5.5:1.0 \\
-	9 & contains(awful) & negative:positive = 5.3:1.0 \\
-	10 & contains(poorly) & negative:positive = 5.1:1.0 \\
-	11 & contains(ridiculous) & negative:positive = 5.0:1.0 \\
-	12 & contains(waste) & negative:positive = 5.0:1.0 \\
-	13 & contains(era) & positive:negative = 4.7:1.0 \\
-	14 & contains(worst) & negative:positive = 4.4:1.0 \\
-	15 & contains(bland) & negative:positive = 4.2:1.0 \\
-	16 & contains(unfunny) & negative:positive = 4.2:1.0 \\
-	17 & contains(allows) & positive:negative = 4.1:1.0 \\
-	18 & contains(jedi) & positive:negative = 4.1:1.0 \\
-	19 & contains(stupid) & negative:positive = 3.9:1.0 \\
-	20 & contains(dull) & negative:positive = 3.9:1.0 \\
-	21 & contains(fantastic) & positive:negative = 3.9:1.0 \\
-	22 & contains(laughable) & negative:positive = 3.9:1.0 \\
-	23 & contains(portrayal) & positive:negative = 3.8:1.0 \\
-	24 & contains(mess) & negative:positive = 3.8:1.0 \\
-	25 & contains(pointless) & negative:positive = 3.8:1.0 \\
-	26 & contains(terrific) & positive:negative = 3.8:1.0 \\
-	27 & contains(memorable) & positive:negative = 3.7:1.0 \\
-	28 & contains(superb) & positive:negative = 3.6:1.0 \\
-	29 & contains(boring) & negative:positive = 3.5:1.0 \\
-	30 & contains(badly) & negative:positive = 3.5:1.0 \\
+	1 & contains(outstanding) & pos : neg = 10.3 : 1.0 \\
+	2 & contains(mulan) & pos : neg = 10.0 : 1.0 \\
+	3 & contains(damon) & pos : neg = 7.8 : 1.0 \\
+	4 & contains(seagal) & neg : pos = 6.8 : 1.0 \\
+	5 & contains(wonderfully) & pos : neg = 6.6 : 1.0 \\
+	6 & contains(lame) & neg : pos = 6.5 : 1.0 \\
+	7 & contains(awful) & neg : pos = 6.1 : 1.0 \\
+	8 & contains(patch) & neg : pos = 5.5 : 1.0 \\
+	9 & contains(waste) & neg : pos = 5.2 : 1.0 \\
+	10 & contains(mess) & neg : pos = 5.1 : 1.0 \\
+	11 & contains(wasted) & neg : pos = 5.0 : 1.0 \\
+	12 & contains(terrible) & neg : pos = 5.0 : 1.0 \\
+	13 & contains(poorly) & neg : pos = 4.9 : 1.0 \\
+	14 & contains(flynt) & pos : neg = 4.7 : 1.0 \\
+	15 & contains(jedi) & pos : neg = 4.7 : 1.0 \\
+	16 & contains(stupid) & neg : pos = 4.4 : 1.0 \\
+	17 & contains(pointless) & neg : pos = 4.4 : 1.0 \\
+	18 & contains(ridiculous) & neg : pos = 4.3 : 1.0 \\
+	19 & contains(fantastic) & pos : neg = 4.3 : 1.0 \\
+	20 & contains(worst) & neg : pos = 4.3 : 1.0 \\
+	21 & contains(unfunny) & neg : pos = 4.3 : 1.0 \\
+	22 & contains(allows) & pos : neg = 4.3 : 1.0 \\
+	23 & contains(era) & pos : neg = 4.3 : 1.0 \\
+	24 & contains(portrayal) & pos : neg = 4.1 : 1.0 \\
+	25 & contains(dull) & neg : pos = 4.0 : 1.0 \\
+	26 & contains(bland) & neg : pos = 3.9 : 1.0 \\
+	27 & contains(laughable) & neg : pos = 3.8 : 1.0 \\
+	28 & contains(terrific) & pos : neg = 3.8 : 1.0 \\
+	29 & contains(julie) & neg : pos = 3.7 : 1.0 \\
+	30 & contains(zero) & neg : pos = 3.6 : 1.0 \\
 	\hline
 \end{tabular}
 \caption{30 Most Informative Features for Classifying Movie Reviews}
@@ -125,14 +125,9 @@ TODO: strong adjectives which imply positive or negative feelings, so not supris
 
 As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given below is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'segal' has. Since the review was classified as negative, it didn't have enough of this positive evidence.
 
 This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
-
-TODO: take a lot of evidence to balance out negative seagal
-
-TODO: mention other irrelevant statemnts that have negative statements
-
 
 \subsection{Movie Review 2 (Discourse, Sentence Subject and Context)}
 
@@ -148,21 +143,41 @@ Like many people however, when I left the movie I felt disappointed. It was nowh
 
 The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
 
-Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. TODO: lead into sentence subject!]
-
-TODO: further examples of limited sentence subject in this as well.
+Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically.
 
 Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
 
+Further examples of this are TODO.
+
 \section{Impact of Feature Selection Methods}
 
-TODO: feature selection code for EACH TYPE should a function EACH. 
+There are many different ways of selecting which features or words to consider for classifiers. This section will discuss different ways of selecting features, particular used in natural language processing, and discuss their impact on classification accuracy.
 
 \subsection{Frequency Cutoff}
 
-TODO: what I did (no new code)
+The code used for the previous two questions has been using a technique called \textit{frequency cutoff} to select which features to use for the classifier. That is, which words to look for in each document.
 
-TODO: table with different values for k
+The frequency of all the words in the training corpus is calculated, and the $k$ most frequent words are chosen as features. Table \ref{tab:frequency_cutoff} shows the accuracy of classifiers which use different amounts of features (different values for $k$).
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+	\textbf{Number of Features $k$} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
+	\hline
+	25 & 0.00\% & 0.00\% \\
+	50 & 0.00\% & 0.00\% \\
+	100 & 0.00\% & 0.00\% \\
+	250 & 0.00\% & 0.00\% \\
+	500 & 0.00\% & 0.00\% \\
+	1000 & 0.00\% & 0.00\% \\
+	2000 & 0.00\% & 0.00\% \\
+	3000 & 0.00\% & 0.00\% \\
+	\hline
+	\end{tabular}
+	\caption{Accuracy of classifier with different amounts of features selected using frequency cut-off}
+	\label{tab:frequency_cutoff}
+\end{table}
 
 TODO: results and discussion
 
@@ -170,7 +185,27 @@ TODO: results and discussion
 
 TODO: what I did
 
-TODO: different values of k with table
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+	\textbf{Number of Features $k$} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
+	\hline
+	25 & 67.33\% & 2.80\% \\
+	50 & 65.80\% & 22.20\% \\
+	100 & 70.53\% & 33.20\% \\
+	250 & 73.33\% & 57.20\% \\
+	500 & 80.60\% & 67.00\% \\
+	1000 & 86.47\% & 73.33\% \\
+	2000 & 90.73\% & 65.20\% \\
+	3000 & 92.00\% & 71.60\% \\
+	5000 & 92.87\% & 65.00\% \\
+	10000 & 94.73\% & 59.00\% \\
+	\hline
+	\end{tabular}
+	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information cut-off}
+	\label{tab:mutal_information}
+\end{table}
 
 TODO: results and discussion
 
@@ -182,9 +217,29 @@ TODO: results didn't change that much, because ratios will be quite balanced any
 
 TODO: table with frequency/mutual information for both STOPWORDS and NON-STOPWORDS
 
-TODO: results and discussion
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+	\begin{tabular}{c}
+		\textbf{Function Word} \\
+		\textbf{Exclusion}
+	\end{tabular}
+	 & \textbf{Feature Selection} & \textbf{Number of Features ($k$)}
+	 & \textbf{Training Acc.} & \textbf{Test Acc.} \\
+	\hline
+	No & Frequency Cutoff & TODO & 0.00\% & 0.00\% \\
+	No & Mutual Information & TODO & 0.00\% & 0.00\% \\
+	Yes & Frequency Cutoff & TODO &  0.00\% & 0.00\% \\
+	Yes & Mutual Information & TODO & 0.00\% & 0.00\% \\
+	\hline
+	\end{tabular}
+	\caption{Accuracy of classifier with different amounts of features selected when ranking features based on mutual information cut-off}
+	\label{tab:mutal_information}
+\end{table}
 
-From basic tests,
+
+TODO: results and discussion
 
 \subsection{Summary}
 
