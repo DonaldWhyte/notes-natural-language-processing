@@ -1,15 +1,25 @@
+import sys
 import nltk
 from nltk.corpus import wordnet, movie_reviews
 from cw1_base import *
 
 class WordNetFeatureExtractor:
 
-	def __init__(self, wordsToConsider):
+	def __init__(self, wordsToConsider, featureSetToUse):
 		self.wordsToConsider = wordsToConsider
+		# Determine which features are being considered
+		featureSetToUse = featureSetToUse.split("-")
+		self.considerWords = ("word" in featureSetToUse)
+		self.considerSynonyms = ("syn" in featureSetToUse)
+		self.considerHypernyms = ("hyp" in featureSetToUse)
+		self.considerAdjectives = ("adj" in featureSetToUse)
 		# Pre-compute feature names
-		self.containsFeatureNames = [ "contains(%s)" % word for word in self.wordsToConsider ]
-		self.containsSynonymFeatureNames = [ "containsSynonymOf(%s)" % word for word in self.wordsToConsider ]
-		self.containsHypernymFeatureNames = [ "containsHypernymOf(%s)" % word for word in self.wordsToConsider ]
+		if self.considerWords:
+			self.containsFeatureNames = [ "contains(%s)" % word for word in self.wordsToConsider ]
+		if self.considerSynonyms:
+			self.containsSynonymFeatureNames = [ "containsSynonymOf(%s)" % word for word in self.wordsToConsider ]
+		if self.considerHypernyms:
+			self.containsHypernymFeatureNames = [ "containsHypernymOf(%s)" % word for word in self.wordsToConsider ]
 
 	def extractFeatures(self, text):
 		# Make all words in text lowercase and turn it into a set for faster lookup
@@ -17,14 +27,29 @@ class WordNetFeatureExtractor:
 
 		featureSet = {}
 		for i in range(len(self.wordsToConsider)):
-			containsFeature = self.containsFeatureNames[i]
-			featureSet[containsFeature] = (self.wordsToConsider[i] in text)
+			if self.considerWords:
+				containsFeature = self.containsFeatureNames[i]
+				featureSet[containsFeature] = (self.wordsToConsider[i] in text)
+			# For synonyms and hypernyms, the word's synonym sets are required
+			if self.considerSynonyms or self.considerHypernyms:
+				wordSynsets = wordnet.synsets( self.wordsToConsider[i] )
+			if self.considerSynonyms:
+				containsSynonymFeature = self.containsSynonymFeatureNames[i]
+				featureSet[containsSynonymFeature] = self.containsSynonymOf(text, wordSynsets)
+			if self.considerHypernyms:
+				containsHypernymFeature = self.containsHypernymFeatureNames[i]
+				featureSet[containsHypernymFeature] = self.containsHypernymOf(text, wordSynsets)
 
-			containsSynonymFeature = self.containsSynonymFeatureNames[i]
-			containsHypernymFeature = self.containsHypernymFeatureNames[i]
-			wordSynsets = wordnet.synsets( self.wordsToConsider[i] )
-			featureSet[containsSynonymFeature] = self.containsSynonymOf(text, wordSynsets)
-			featureSet[containsHypernymFeature] = self.containsHypernymOf(text, wordSynsets)
+		if self.considerAdjectives:
+			for word in text:
+				adjectives = self.getAdjectives(word)
+				for adj in adjectives:
+					try:
+						index = self.wordsToConsider.index(adj)
+						containsFeature = self.containsFeatureNames[i]
+						featureSet[containsFeature] = True
+					except ValueError: # if element isn't in words to consider
+						pass
 		return featureSet
 
 	def containsSynonymOf(self, document, wordSynsets):
@@ -44,45 +69,32 @@ class WordNetFeatureExtractor:
 						return True
 		return False
 
-def removeRedundantFeatures(words):
-	# Cache synsets for all words to retrieval doesn't have to be repeated
-	cache = {}
-	for word in words:
-		cache[word] = wordnet.synsets(word)
-	# Only keep words which are NOT similar to each other
-	newWords = set(words)
-	for wordA in words:
-		for wordB in words:
-			if wordA == wordB:
-				continue # so we don't compare same words
-			elif wordSimilarity(cache[wordA], cache[wordB]):
-				newWords.remove(wordA)
-	return newWords
-
-SIMILARITY_THRESHOLD = 0.75
-def wordSimilarity(word1Synsets, word2Synsets):
-	# If average similarity between the two word's synsets is above
-	# a certain threshold, return zTrue
-	sumSimilarity = 0.0
-	for synset1 in word1Synsets:
-		for synset2 in word2Synsets:
-			sim = synset1.wup_similarity(synset2) # returns None if no path between words
-			if sim:
-				sumSimilarity += sim
-	avgSimilarity = sumSimilarity / max(1, (len(word1Synsets) * len(word2Synsets)))
-	return (avgSimilarity >= SIMILARITY_THRESHOLD)
-
-
-
 if __name__ == "__main__":
+	# Parse command line arguments
+	if len(sys.argv) < 2:
+		usage = "Usage: python {0} <featureSetToUse>".format(sys.argv[0])
+		possibleFeatureSets = """Possible Feature Sets:
+		word -- Exact word occurrences considered
+		syn -- Synonyms of words considered
+		hyp -- Hypernyms of words considered
+		word-adj -- Get all adjective meanings of words. If one of those adjectives
+			   is the same as a word feature, consider that adjective as being in
+			   the document (MUST BE USED WITH "word"
+
+		These can be combined using "-". For example, to consider words, synoynms
+		and hypernyms, use "word-syn-hyp".
+		"""
+		sys.exit("{0}\n{1}".format(usage, possibleFeatureSets))
+	featureSetToUse = sys.argv[1]
+
 	# Load movie review dataset and split it into training and test 
 	dataset = getMovieReviewDataset()
 	trainingSet, testSet = splitDataset(dataset)
 	# Construct frequency distribution of all the corpus' word, after being reduced.
 	print "FINDING FEATURES"
 	# Use most frequent 2000 words as the features
-	wordsToConsider = getWordsToConsider(movie_reviews, 2000)
-	featureExtractor = WordNetFeatureExtractor(wordsToConsider)
+	wordsToConsider = getWordsToConsider(movie_reviews, 1000)
+	featureExtractor = WordNetFeatureExtractor(wordsToConsider, featureSetToUse)
 	#wordsToConsider = removeRedundantFeatures(wordsToConsider)
 	# Build and train a classifier which uses a DIFFERENT feature extractor
 	print "TRAINING CLASSIFIER"
