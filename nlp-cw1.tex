@@ -333,13 +333,13 @@ Comparing accuracies on the test dataset shown in tables \ref{tab:adjective_syno
 
 \subsection{Word Similarity}
 
-TODO: discuss using word similarity - state that doc could have containsSimilarWordTo(x) feature if word y is similar enough to x (> 0) using path similarity
+WordNet has the ability to compare synonym sets to each other to determine how similar different words are. This similarity is based on the words' distance in the WordNet hierarchy. These similarities measures are numerical values, so one could compute the similarity between a word in the document and each word being used as a feature. If the similarity measure is above a threshold $T$, flag the feature word as being present in the document (even though it actually isn't). This would require tweaking the values of $k$ and $T$ until a suitable level of accuracy and generalisation is found. 
 
-TODO: mention computationally too slow to testout
+An alternative is having a separate feature for this similarity presence, say \textbf{containsSimilarWordTo(x)}. This would result in $2k$ features, as the original \textbf{contains(x)} features would also be present.
 
-\subsection{Feature Reduction using Similarity}
+So how would you compute word similarity? \textbf{Path similarity} could be used as the similarity measure (available in WordNet). This computes similarity based on the \textbf{shortest path that connects the two word senses} in the hypernym hierarchy. However, using this measure to compute similarity between \textit{every} word type in the document and \textit{every} feature word would be incredibly slow, as path similarity is often a non-trivial computation.
 
-TODO: if using containsSimilarWordTo feature, if two of the selected words are similar above a certain threshold, REMOVE lower ranked one! This attempts to prevent redundancy and increase classification performance and accuracy (generlaisation) through a reduced set of features. 
+Therefore, while applying a word similarity threshold to all words in a document may increase accuracy, it is not computationally feasible to use similarity in such a way. Another mechanism for incorporating word similarity should be used for greater efficiency, whilst also increasing accuracy.
 
 \subsection{Summary}
 
@@ -350,6 +350,9 @@ Considering adjective synonyms specially didn't have a major impact on the class
 Word similarity is an interesting avenue to pursue, but coming up with methods which use similarity in a useful manner, that also don't require much computation, is a difficult task.
 
 \section{Theory: Bag of Words Representations}
+
+I interpreted this question in two different ways:
+
 
 \begin{itemize}
 	\item \textbf{D1} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
