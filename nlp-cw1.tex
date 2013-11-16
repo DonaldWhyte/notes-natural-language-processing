@@ -124,7 +124,7 @@ Perhaps through such widely adopted opinion and usage of these names and terms, 
 
 As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'seagal' has. The review did not have enough of this positive evidence as it was classified as negative.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'seagal' has. The review did not have enough of this positive evidence as it was classified as negative. This could be combated by having the classifier take \textit{context} into account, so it could determine that 'seagal' is being used positively in this case.
 
 This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
 
@@ -270,7 +270,7 @@ This mean each document has a total of $3k$ features, $k$ for word occurrences, 
 
 Table \ref{tab:synonyms_and_hypernyms} shows accuracies on both the training and test datasets when these synonym and hypernym features are used. Different combinations of the three features were used to see what work best. Note that frequency cutoff with $k = 2000$ was used for feature selection.
 
-Unfortunately, many combinations resulted in worse accuracy on both the training and test datasets. Two combinations -- \textbf{word+synonyms} and just \textbf{synonyms} -- did actually result in higher accuracy on the training dataset (with marginally worse accuracy of training dataset).  This could indicate that use of synoynms can help increase generalisation, but perhaps it needs to be implemented in a more intelligent way than the method used here.
+Unfortunately, many combinations resulted in worse accuracy on both the training and test datasets. Two combinations -- \textbf{word+synonyms} and \textbf{just synonyms} -- did actually result in higher accuracy on the training dataset (with marginally worse accuracy of training dataset).  This could indicate that use of synoynms can help increase generalisation, but perhaps it needs to be implemented in a more intelligent way than the method used here.
 
 \begin{table}
 	\centering
@@ -351,9 +351,7 @@ Word similarity is an interesting avenue to pursue, but coming up with methods w
 
 \section{Theory: Bag of Words Representations}
 
-I interpreted this question in two different ways:
-
-
+In multinomial classification, the \textbf{frequency} of words is considered. Therefore, when given a document it needs a \textit{list} of words, not a \textit{set} like binomial classification. The following list shows how three documents (D1, D2 and D3) may be represented in multinomial and binomial classification and the differences between the two representations. Note that multiple instances of a token are present in multinomial.
 \begin{itemize}
 	\item \textbf{D1} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
 		\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'London', ',', 'Ontario', 'to', 'England']
@@ -370,7 +368,27 @@ I interpreted this question in two different ways:
 	\end{itemize}
 \end{itemize}
 
-TODO: wanting frequency vectors or sets?
+The above shows how the documents may be initially fed into the original classifier. How would the document be represented as a \textbf{feature set}? It could simply an associative array, where the keys are the words . The values would be the number of times a word occurred in the document, or a binary value (0 or 1) indicating whether or not the word was prewent, for multionomial and binomial classification respectively. This would give the following BOW representations for the three previous documents:
+
+\hspace{1pt}
+
+\textbf{Multinomial}:
+\begin{itemize}
+	\item \textbf{D1} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 2, "," : 3, "Ontario" : 1, "to" : 1, "England" : 1 ]
+	\item \textbf{D2} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 2, "," : 3, "Ontario" : 1, "to" : 1, "England" : 1 ]
+	\item \textbf{D3} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 3, "Ontario" : 1, "to" : 1, "England" : 1 ]
+\end{itemize}
+Notice how documents D1 and D2 appear to be the same, despite being different. This is because the only different between the two documents is  the \textit{position} of the words, which the BOW model discards. D3 is different to D1 and D2 because it has one less occurrence of "London".
+
+\hspace{1pt}
+
+\textbf{Bernoulli}:
+\begin{itemize}
+	\item \textbf{D1} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 1, "Ontario" : 1, "to" : 1, "England" : 1 ]
+	\item \textbf{D2} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 1, "Ontario" : 1, "to" : 1, "England" : 1 ]
+	\item \textbf{D3} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 1, "Ontario" : 1, "to" : 1, "England" : 1 ]
+\end{itemize}
+Here, all three documents \textbf{appear identical}. This is because both frequency and position information has been discarded. Each of the three documents contain the exact same \textbf{set} of word types.
 
 \section{Theory: Estimating Classifiers}
 
@@ -446,7 +464,7 @@ Therefore, a multinomial Naive Bayes classifier would label document 5 with the 
 
 \subsection{Bernoulli Naive Bayes Classifier}
 
-TODO: verify that this equation is correct
+% TODO: verify that this equation is correct %
 $P(e_i|c) = \frac{\#\;documents\;of\;class\;c\;that\;contain\;word w_i + 1}{\#\;documents\;of\;class\;c + 2}$
 
 For class $China$:
