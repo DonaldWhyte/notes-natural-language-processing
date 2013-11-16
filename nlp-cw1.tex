@@ -124,14 +124,14 @@ Perhaps through such widely adopted opinion and usage of these names and terms, 
 
 As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'segal' has. Since the review was classified as negative, it didn't have enough of this positive evidence.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'seagal' has. The review did not have enough of this positive evidence as it was classified as negative.
 
 This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
 
 \subsection{Movie Review 2 (Discourse, Sentence Subject and Context)}
 
 \begin{quote}
-"The original Star Wars trilogy is a masterpiece. It took the world by storm and captivated both children and adults. It was memorable, being talked about for years, and the conclusion to Epsiode VI was outstanding.
+"The original Star Wars trilogy is a masterpiece. It took the world by storm and captivated both children and adults. It was memorable, being talked about for years, and the conclusion to Episode VI was outstanding.
 
 It was the end of an era when Episode VI finished. When it was announced that George Lucas would be releasing a prequel trilogy, everyone was excited. What new adventures with the Jedi would happen in the exciting Star Wars universe?
 
@@ -257,24 +257,31 @@ Removing function words from consideration didn't have much of an effect , regar
 
 \section{Using WordNet to Product Different Features}
 
-WordNet is TODO. This section will describe different ways I used WordNet to extract new features from the dataset to use for classification, and discuss if they improved the accuracy or not.
+WordNet is a lexicon which provides groupings of words into synonyms, organising these synonym set into a hierarchy. This section will describe different ways I used WordNet to extract new features, or modify existing ones, from movie reviews corpus to use for classification, and discuss the impact these features had on classification accuracy and generalisation.
 
 \subsection{Synonyms and Hypernyms}
 
-TODO: containsSynonymOf
+For each word used as a feature, I introduced two additional features:
+\begin{itemize}
+	\item \textbf{containsSynonymOf(w)} -- set to True if a synonym of $w$ is present in the document
+	\item \textbf{containsHypernymOf(w)} -- set to True if a \textit{direct} hypernym of $w$ is present in the document. \textit{Direct} in this case means 
+	\end{itemize}
+This mean each document has a total of $3k$ features, $k$ for word occurrences, $k$ for word synonym occurrences and $k$ for word hypernym occurrences. This greatly increases the time it takes to train and execute the classifier, but it may help boost accuracies and generalisation.
 
-TODO: containsHypernymOf
+Table \ref{tab:synonyms_and_hypernyms} shows accuracies on both the training and test datasets when these synonym and hypernym features are used. Different combinations of the three features were used to see what work best. Note that frequency cutoff with $k = 2000$ was used for feature selection.
+
+Unfortunately, many combinations resulted in worse accuracy on both the training and test datasets. Two combinations -- \textbf{word+synonyms} and just \textbf{synonyms} -- did actually result in higher accuracy on the training dataset (with marginally worse accuracy of training dataset).  This could indicate that use of synoynms can help increase generalisation, but perhaps it needs to be implemented in a more intelligent way than the method used here.
 
 \begin{table}
 	\centering
 	\begin{tabular}{|l|l|l|l|l|}
 		\hline
-		$contains(x)$ Used &
-		$containsSynonymOf(x)$ Used &
-		$containsHypernym(x)$ Used &
+		contains(x) Used &
+		containsSynonymOf(x) Used &
+		containsHypernym(x) Used &
 		Training Acc. &
 		Test Acc. \\
-		\hline
+		\hline		
 		Yes & No & No & 90.73\% & 65.20\% \\
 		No & Yes & No & 83.60\% & 70.40\% \\
 		No & No & Yes & 71.93\% & 43.20\% \\
@@ -285,14 +292,46 @@ TODO: containsHypernymOf
 		\hline
 	\end{tabular}
 	\caption{Results of introducing synonym and hypernym features to movie review sentiment classification}
-	\ref{tab:synonyms_and_hypernyms}
+	\label{tab:synonyms_and_hypernyms}
 \end{table}
 
-\subsection{Adjectives}
+\subsection{Adjective Synonyms}
 
-TODO
+As the results from question 1 established, some of the most useful words for determining movie review sentiment are adjectives. It may be possible to take advantage of this fact to \textit{generalise} the classifier somewhat.
 
-\subsection{Word Similiarity}
+One way of doing this using WordNet is to perform the following, \textbf{for each word $w$ of a document}, during feature extraction:
+\begin{enumerate}
+	\item get all synonyms of $w$
+	\item remove all non-adjective synonyms
+	\item for each adjective synonym, check if it's a feature (i.e. word we're considering). If so, \textbf{mark that word} as being present in the document (even though it might not \textit{actually} be present)
+\end{enumerate}
+This will mean that words not present in the original training dataset may still help contribute to the classification, since there will be times where the adjective synonyms of these words match the words being used as features.
+
+Table \ref{tab:adjective_synonyms} shows the accuracy of the classifier when considering adjective synonyms. Frequency cutoff with different values of $k$ was used for feature selection. The idea here is that we should see an increase in accuracy in the test dataset (showing better  generalisation) when compared to just considering direct word occurrences (accuracies shown in table \ref{tab:frequency_cutoff}).
+
+Comparing accuracies on the test dataset shown in tables \ref{tab:adjective_synonyms} and \ref{tab:frequency_cutoff}, we do notice a \textit{marginal} increase in accuracies on the test dataset across most values of $k$ used when adjective synonyms are used. However, as the number of features rise, this increase starts to decline and become similar to not using adjective synonyms at all (see $k = 15000$ in both tables). To summarise, it doesn't seem adjective synonyms impact classification much at all.
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+	\textbf{Words Used as Features ($k$)} & \textbf{Training Acc.} & \textbf{Test Acc.} \\
+	\hline
+	250 & 73.33\% & 57.00\% \\
+	500 & 80.93\% & 66.80\% \\
+	1000 & 85.67\% & 73.60\% \\
+	2000 & 90.33\% & 74.20\% \\
+	3000 & 91.87\% & 72.60\% \\
+	5000 & 92.40\% & 66.00\% \\
+	10000 & 94.60\% & 59.40\% \\
+	15000 & 95.27\% & 55.20\% \\
+	\hline
+	\end{tabular}
+	\caption{Accuracy of classifier when considering the adjective synonyms of every word}
+	\label{tab:adjective_synonyms}
+\end{table}
+
+\subsection{Word Similarity}
 
 TODO: discuss using word similarity - state that doc could have containsSimilarWordTo(x) feature if word y is similar enough to x (> 0) using path similarity
 
@@ -304,7 +343,11 @@ TODO: if using containsSimilarWordTo feature, if two of the selected words are s
 
 \subsection{Summary}
 
-TODO: not much 
+To summarise, introducing synonym presence as features may help increase generalisation by making words that are not present in the training dataset still impact the classification. Results show that synonyms can increase accuracy on separate test datasets when used in conjunction with the direct word occurrences.
+
+Considering adjective synonyms specially didn't have a major impact on the classification accuracy, and is computationally quite expensive, so it's most likely not worth pursuing.
+
+Word similarity is an interesting avenue to pursue, but coming up with methods which use similarity in a useful manner, that also don't require much computation, is a difficult task.
 
 \section{Theory: Bag of Words Representations}
 

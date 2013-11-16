@@ -1,1 +1,65 @@
-TODO
+To run the binomial Naive Bayes classifier, using frequency cutoff with 2000 words
+for feature selection, run the following script:
+
+python cw1_base.py
+
+-------------------------------------------------------------------------------
+
+To find out the 30 most informative features for classification, run:
+
+python q1.py
+
+-------------------------------------------------------------------------------
+
+To see the two movie reviews described in section 2 of the report incorrectly
+classified, run:
+
+python q2.py
+
+-------------------------------------------------------------------------------
+
+To test the impact different values of k have with FREQUENCY CUTOFF, then
+you can run the following script:
+
+python q3a.py <numFeaturesTouse> <filterStopWords>
+
+where <numFeaturesToUse> is a positive integer which determines the number
+of features used for classification (value of k) and <filterStopWords> is
+a flag that decides if function words are exluded form the corpus. If
+<filterStopWords> = true, then function words will be excluded. Otherwise,
+they will be included in feature selection, extraction and classification.
+
+-------------------------------------------------------------------------------
+
+To test the impact different values of k have with MUTUAL INFORMATION, then
+you can run the following script:
+
+"python q3b.py <numFeaturesTouse> <filterStopWords>"
+
+where <numFeaturesTouse> and <filterStopWords> have the same use as they
+do in q3a.py.
+
+-------------------------------------------------------------------------------
+
+To test the accuracy of classifiers which use some of the additional features
+described in section 4 of the report (WordNet features), the following script
+can be used:
+
+python q4.py <featureSetToUse> <numFeaturesToUse>
+
+where <numFeaturesToUse> is the value of k to use for frequency cutoff feature
+selection and <featureSetToUse> determines which WordNet-related features to
+use.
+
+Possible Feature Sets:
+		word -- Exact word occurrences considered
+		syn -- Synonyms of words considered
+		hyp -- Hypernyms of words considered
+		word-adj -- Get all adjective meanings of words. If one of those adjectives
+			   is the same as a word feature, consider that adjective as being in
+			   the document (MUST BE USED WITH "word" feature set)
+
+These can be combined using "-". For example, to consider words, synoynms
+and hypernyms, use "word-syn-hyp".
+
+-------------------------------------------------------------------------------		

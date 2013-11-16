@@ -1,6 +1,7 @@
 import sys
 import nltk
 from nltk.corpus import wordnet, movie_reviews
+from nltk.corpus.reader.wordnet import ADJ
 from cw1_base import *
 
 class WordNetFeatureExtractor:
@@ -41,16 +42,28 @@ class WordNetFeatureExtractor:
 				featureSet[containsHypernymFeature] = self.containsHypernymOf(text, wordSynsets)
 
 		if self.considerAdjectives:
+			# convert wordsToConsider to set for faster lookup
+			setWordsToConsider = set(self.wordsToConsider)
+			# For each word in the text, get all of its adjectives and then see if thoser
+			# adjectives are being used as features. If so, consider that word as occuring in
+			# the document even if it hasn't.
 			for word in text:
 				adjectives = self.getAdjectives(word)
 				for adj in adjectives:
-					try:
-						index = self.wordsToConsider.index(adj)
-						containsFeature = self.containsFeatureNames[i]
+					if adj in setWordsToConsider:
+						containsFeature = "contains(%s)" % adj
 						featureSet[containsFeature] = True
-					except ValueError: # if element isn't in words to consider
-						pass
+
 		return featureSet
+
+	def getAdjectives(self, word):
+		"""Return set containing all adjective synonyms of given word."""
+		adjectives = set()
+		for synset in wordnet.synsets(word):
+			if synset.pos == ADJ:
+				for synonym in synset.lemma_names:
+					adjectives.add(synonym)
+		return adjectives
 
 	def containsSynonymOf(self, document, wordSynsets):
 		# Check if any of the given word's synonyms are in the document
@@ -71,8 +84,8 @@ class WordNetFeatureExtractor:
 
 if __name__ == "__main__":
 	# Parse command line arguments
-	if len(sys.argv) < 2:
-		usage = "Usage: python {0} <featureSetToUse>".format(sys.argv[0])
+	if len(sys.argv) < 3:
+		usage = "Usage: python {0} <featureSetToUse> <numFeaturesToUse>".format(sys.argv[0])
 		possibleFeatureSets = """Possible Feature Sets:
 		word -- Exact word occurrences considered
 		syn -- Synonyms of words considered
@@ -86,6 +99,7 @@ if __name__ == "__main__":
 		"""
 		sys.exit("{0}\n{1}".format(usage, possibleFeatureSets))
 	featureSetToUse = sys.argv[1]
+	numFeaturesToUse = int(sys.argv[2])
 
 	# Load movie review dataset and split it into training and test 
 	dataset = getMovieReviewDataset()
@@ -93,7 +107,7 @@ if __name__ == "__main__":
 	# Construct frequency distribution of all the corpus' word, after being reduced.
 	print "FINDING FEATURES"
 	# Use most frequent 2000 words as the features
-	wordsToConsider = getWordsToConsider(movie_reviews, 1000)
+	wordsToConsider = getWordsToConsider(movie_reviews, numFeaturesToUse)
 	featureExtractor = WordNetFeatureExtractor(wordsToConsider, featureSetToUse)
 	#wordsToConsider = removeRedundantFeatures(wordsToConsider)
 	# Build and train a classifier which uses a DIFFERENT feature extractor
