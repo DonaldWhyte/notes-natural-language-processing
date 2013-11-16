@@ -1,69 +1,95 @@
-import random
-import time
 import nltk
 from nltk.corpus import wordnet, movie_reviews
 from cw1_base import *
-
-def reduceWords(words):
-	"""Using WordNet, return same sized list where each word has been reduced to
-	a higher-level word with a similar semantic meaning (to group similar words
-	together so they look like the same thing to the classifier)."""
-	newWords = []
-	for word in words:
-		# Get first synset of word and from that, get the root hypernym
-		synonymSets = wordnet.synsets(word)
-		if len(synonymSets) > 0:
-			# Insert all the words from hypernym INTO the new words				
-			for synSet in synonymSets:
-				newWords += synSet.lemma_names
-			#roots = synonymSets[0].root_hypernyms()
-			#for root in roots:
-			#	newWords += root.lemma_names
-		else:
-			newWords.append(word)
-	return newWords
 
 class WordNetFeatureExtractor:
 
 	def __init__(self, wordsToConsider):
 		self.wordsToConsider = wordsToConsider
-
-	def __init__(self, wordsToConsider):
-		self.wordsToConsider = wordsToConsider
 		# Pre-compute feature names
-		self.featureNames = [ "contains(%s)" % word for word in self.wordsToConsider ]
+		self.containsFeatureNames = [ "contains(%s)" % word for word in self.wordsToConsider ]
+		self.containsSynonymFeatureNames = [ "containsSynonymOf(%s)" % word for word in self.wordsToConsider ]
+		self.containsHypernymFeatureNames = [ "containsHypernymOf(%s)" % word for word in self.wordsToConsider ]
 
 	def extractFeatures(self, text):
 		# Make all words in text lowercase and turn it into a set for faster lookup
 		text = set( [ word.lower() for word in text ] )
-		# Reduce each word to its core word using WordNet
-		reducedText = set( reduceWords(text) )
-		# Now detemrine which words out of the ones we're considering exist	in reduce text	
+
 		featureSet = {}
 		for i in range(len(self.wordsToConsider)):
-			key = self.featureNames[i]
-			featureSet[key] = (self.wordsToConsider[i] in reducedText)
+			containsFeature = self.containsFeatureNames[i]
+			featureSet[containsFeature] = (self.wordsToConsider[i] in text)
+
+			containsSynonymFeature = self.containsSynonymFeatureNames[i]
+			containsHypernymFeature = self.containsHypernymFeatureNames[i]
+			wordSynsets = wordnet.synsets( self.wordsToConsider[i] )
+			featureSet[containsSynonymFeature] = self.containsSynonymOf(text, wordSynsets)
+			featureSet[containsHypernymFeature] = self.containsHypernymOf(text, wordSynsets)
 		return featureSet
 
-		
+	def containsSynonymOf(self, document, wordSynsets):
+		# Check if any of the given word's synonyms are in the document
+		synonyms = [ ]
+		for synset in wordSynsets:
+			for syn in synset.lemma_names:
+				if syn in document:
+					return True
+		return False # if this is reached, no synoynms are present in document
+
+	def containsHypernymOf(self, document, wordSynsets):
+		for synset in wordSynsets:
+			for hypset in synset.hypernyms():
+				for hyp in hypset.lemma_names:
+					if hyp in document:
+						return True
+		return False
+
+def removeRedundantFeatures(words):
+	# Cache synsets for all words to retrieval doesn't have to be repeated
+	cache = {}
+	for word in words:
+		cache[word] = wordnet.synsets(word)
+	# Only keep words which are NOT similar to each other
+	newWords = set(words)
+	for wordA in words:
+		for wordB in words:
+			if wordA == wordB:
+				continue # so we don't compare same words
+			elif wordSimilarity(cache[wordA], cache[wordB]):
+				newWords.remove(wordA)
+	return newWords
+
+SIMILARITY_THRESHOLD = 0.75
+def wordSimilarity(word1Synsets, word2Synsets):
+	# If average similarity between the two word's synsets is above
+	# a certain threshold, return zTrue
+	sumSimilarity = 0.0
+	for synset1 in word1Synsets:
+		for synset2 in word2Synsets:
+			sim = synset1.wup_similarity(synset2) # returns None if no path between words
+			if sim:
+				sumSimilarity += sim
+	avgSimilarity = sumSimilarity / max(1, (len(word1Synsets) * len(word2Synsets)))
+	return (avgSimilarity >= SIMILARITY_THRESHOLD)
+
+
 
 if __name__ == "__main__":
-	# Ensure random number generator has fresh seed
-	random.seed(time.time())
 	# Load movie review dataset and split it into training and test 
 	dataset = getMovieReviewDataset()
 	trainingSet, testSet = splitDataset(dataset)
 	# Construct frequency distribution of all the corpus' word, after being reduced.
 	print "FINDING FEATURES"
-	allWords = [ w.lower() for w in movie_reviews.words() ]
-	wordFreqDist = nltk.FreqDist( reduceWords(allWords) )
 	# Use most frequent 2000 words as the features
-	wordsToConsider = wordFreqDist.keys()[:2000]
+	wordsToConsider = getWordsToConsider(movie_reviews, 2000)
 	featureExtractor = WordNetFeatureExtractor(wordsToConsider)
+	#wordsToConsider = removeRedundantFeatures(wordsToConsider)
 	# Build and train a classifier which uses a DIFFERENT feature extractor
 	print "TRAINING CLASSIFIER"
 	classifier = DocumentTypeClassifier(featureExtractor)
 	classifier.train(trainingSet)
-	print "TESTING CLASSIFIER"
-	print "Accuracy: %.2f%%" % (classifier.test(testSet) * 100)
+	trainingAcc = classifier.test(trainingSet)
+	testAcc = classifier.test(testSet)
+	print "Training accuracy: %.2f%%" % (trainingAcc * 100)
+	print "Test accuracy: %.2f%%" % (testAcc * 100)	
 	classifier.classifier.show_most_informative_features(30)

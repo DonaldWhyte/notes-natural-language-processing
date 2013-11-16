@@ -176,7 +176,7 @@ Therefore, care is needed when picking a value for $k$ so that the classifier ac
 	3000 & 92.00\% & 71.60\% \\
 	5000 & 92.87\% & 65.00\% \\
 	10000 & 94.73\% & 59.00\% \\
-	15000 & 95.27\% & 54.20\% \\	
+	15000 & 95.27\% & 54.20\% \\
 	\hline
 	\end{tabular}
 	\caption{Accuracy of classifier with different amounts of features selected using frequency cut-off}
@@ -257,15 +257,54 @@ Removing function words from consideration didn't have much of an effect , regar
 
 \section{Using WordNet to Product Different Features}
 
-TODO: generalise words in each document using WordNet lexicon (boil down words to their base meaning)
+WordNet is TODO. This section will describe different ways I used WordNet to extract new features from the dataset to use for classification, and discuss if they improved the accuracy or not.
 
-TODO: add all synonyms sets to document (UNLESS a synonym is BELOW a certain threshold with similarity measure - call it t). Provide a few values of t for results
+\subsection{Synonyms and Hypernyms}
 
-TODO: replace word with a hypernym (number of levels to go up should be tweakable - say p is max up)
+TODO: containsSynonymOf
 
-TODO: say what I'm going to generalise (synonyms, hypernynms, some additional creativity) and how I did it in code
+TODO: containsHypernymOf
 
-TODO: results and discussion
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|l|l|}
+		\hline
+		$contains(x)$ Used &
+		$containsSynonymOf(x)$ Used &
+		$containsHypernym(x)$ Used &
+		Training Acc. &
+		Test Acc. \\
+		\hline
+		Yes & No & No & 90.73\% & 65.20\% \\
+		No & Yes & No & 83.60\% & 70.40\% \\
+		No & No & Yes & 71.93\% & 43.20\% \\
+		Yes & Yes & No & 88.33\% & 75.40\% \\
+		Yes & No & Yes & 84.33\% & 63.60\% \\
+		Yes & Yes & Yes & 85.73\% & 68.40\% \\
+		No & Yes & Yes & 81.13\% & 61.20\% \\
+		\hline
+	\end{tabular}
+	\caption{Results of introducing synonym and hypernym features to movie review sentiment classification}
+	\ref{tab:synonyms_and_hypernyms}
+\end{table}
+
+\subsection{Adjectives}
+
+TODO
+
+\subsection{Word Similiarity}
+
+TODO: discuss using word similarity - state that doc could have containsSimilarWordTo(x) feature if word y is similar enough to x (> 0) using path similarity
+
+TODO: mention computationally too slow to testout
+
+\subsection{Feature Reduction using Similarity}
+
+TODO: if using containsSimilarWordTo feature, if two of the selected words are similar above a certain threshold, REMOVE lower ranked one! This attempts to prevent redundancy and increase classification performance and accuracy (generlaisation) through a reduced set of features. 
+
+\subsection{Summary}
+
+TODO: not much 
 
 \section{Theory: Bag of Words Representations}
 
