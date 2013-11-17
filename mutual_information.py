@@ -67,7 +67,7 @@ class BinaryMutualInformationAssociator:
 if __name__ == "__main__":
 	# Parse command line arguments
 	if len(sys.argv) < 2:
-		sys.exit("Usage: python <outputFilename>".format(sys.argv[0]))
+		sys.exit("Usage: python {0} <outputFilename>".format(sys.argv[0]))
 	outputFilename = sys.argv[1]
 	# Load movie review dataset
 	print "loading movie review dataset..."
