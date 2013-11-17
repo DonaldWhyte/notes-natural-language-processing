@@ -28,7 +28,7 @@
 
 \maketitle
 
-\textbf{NOTE:} The code used throughout this coursework is based on the NLTK book. The training/test datasets are still a 75\%-25\% and there is no randomisation, just like the later code snippets provided however, so it shouldn't impact the results.
+\textbf{NOTE:} The code used throughout this coursework is based on the NLTK book. However, the training/test datasets still use the 75\%-25\% and there is no randomisation, just like the later code snippets provided, so it shouldn't impact the results.
 
 \section{Most Informative Features for Movie Review Classification}
 
@@ -36,7 +36,7 @@ In order to determine whether or not a movie review is positive or negative, a N
 
 \begin{lstlisting}
 # List of words to use as features for binomial classification
-# This will be the 2000 most frequent tokens in the movie_reviews corpus
+# This is initially the 2000 most frequent tokens in the movie_reviews corpus
 WORDS_TO_CONSIDER = [ ... ]
 
 def docFeatureExtractor(text):
@@ -57,12 +57,12 @@ featureSet = apply_features(docFeatureExtractor, trainingSet)
 classifier = nltk.NaiveBayesClassifier.train(featureSet)
 \end{lstlisting}
 
-From this, it is possible to derive which features were the most useful in distinguishing positive or negative movie reviews using the following Python command:
+From this, it is possible to derive which words were the most useful in distinguishing positive or negative movie reviews using the following Python command:
 
 \begin{lstlisting}
 	classifier.show_most_informative_features(30)
 \end{lstlisting}
-Table \ref{tab:informative_features_doc_classification} shows the 30 most informative features for classifying movie reviews as positive or negative, outputted from the above command.
+Table \ref{tab:informative_features_doc_classification} shows the 30 most informative features for classifying movie reviews as positive or negative.
 
 \begin{table}
 \centering
@@ -106,13 +106,13 @@ Table \ref{tab:informative_features_doc_classification} shows the 30 most inform
 \label{tab:informative_features_doc_classification}
 \end{table}
 
-The majority of the features listed in table \ref{tab:informative_features_doc_classification} are adjectives that generally relate to positive or negative sentiments, such as "worst", "outstanding", "terrible" and "fantastic". It is unsurprising that these words are informative when determining whether or not a movie review is a positive or negative.
+The majority of the features listed in table \ref{tab:informative_features_doc_classification} are adjectives that generally relate to positive or negative sentiments, such as "worst", "outstanding", "terrible" and "fantastic". It is unsurprising that these words are informative when determining whether or not a movie review is positive or negative.
 
-Other words are not immediately obvious, such as "zero", "waste" or "portrayal". These are not adjectives and are not \textit{directly} negative. There words tend to be used often in a specific way in movie reviews; that is, they have a specific meaning \textit{in the context of a movie review}. Therefore, it's reasonable to say that,intuitively, these would be useful identifying a review's sentiment.
+Other words are not immediately obvious, such as "zero", "waste" or "portrayal". These are not adjectives and are not \textit{directly} negative. Often, these words are used in specific ways in movie reviews; that is, they have a specific meaning \textit{in the context of a movie review}. Therefore, it's reasonable to say that, intuitively, these would be useful identifying a review's sentiment.
 
-There are some surprising features, however. Specific actors or characters, such as "julie", "seagal" or "flynt", and even \textit{concepts}, such as "jedi", from movies relate to the document's sentiment. One reason these tend to be useful could be that the opinion of the majority regarding those particular movies or characters is so one-sided, that during training the classifier begins to associate those terms with positive and negative sentiment.
+There are some surprising features, however. Specific actors or characters, such as "julie", "seagal" or "flynt", and even \textit{concepts}, such as "jedi", from movies were found to be useful in classifying a review's sentiment. A reason these tend to be useful could be that the opinion of the majority regarding those particular movies or characters is so one-sided, that during training the classifier begins to associate those terms with positive and negative sentiment.
 
-Perhaps through such widely adopted opinion and usage of these names and terms, the semantics of these words have truly become associated to positive or negative sentiment in the English language. On the other hand, it could be an indication that the classifier has \textit{overfit} the training dataset. There may simply be a large amount of positive Star Wars reviews in the training dataset, meaning the word 'jedi' appears to be a positive word. There could also be many negative Star Wars reviews, but since the training dataset is not large or general enough to contain these, the classifier does not know. 
+Perhaps through such widely adopted opinion and usage of these names/terms, the semantics of these words have truly become associated to positive or negative sentiment in the English language. On the other hand, it could be an indication that the classifier has \textit{overfit} the training dataset. There may simply be a large amount of positive Star Wars reviews in the training dataset, meaning the word 'jedi' appears to be a positive word. There could also be many negative Star Wars reviews, but since the training dataset is not large or general enough to contain these, the classifier does not know.
 
 \section {Classification Mistakes}
 
@@ -122,9 +122,9 @@ Perhaps through such widely adopted opinion and usage of these names and terms, 
 "So this is the first time that Steven Seagal has starred in a Sci-Fi movie. I was blown away by "Sheer Space Seagal" and the amazing performances of every actor involved. I highly recommend you watch this movie."
 \end{quote}
 
-As table \ref{tab:informative_features_doc_classification} shows, the word 'seagal' tends to appear in negative movie reviews, based on the training data. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
+As table \ref{tab:informative_features_doc_classification} shows, based on the training data, the word 'seagal' tends to appear in negative movie reviews. Assumming 'seagal' is used in the context of Steven Seagal, a known actor in action movies, this appears to mean that the classifier has associated Seagal with bad movies.
 
-Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'seagal' has. The review did not have enough of this positive evidence as it was classified as negative. This could be combated by having the classifier take \textit{context} into account, so it could determine that 'seagal' is being used positively in this case.
+Since the negative:positive ratio is quite high for the word 'seagal', when 'seagal' does appear in a review it strongly pushes the review towards being classified as negative. The movie review given is a very positive review of a movie that Seagal starred in. Despite the overall language being positive, the review has been classified as negative due to the occurrence of 'seagal'. A very high amount of positive evidence is required to balance out the heavy negative weighting the word 'seagal' has. The review did not have enough of this positive evidence, so it was classified as negative. This could be combated by having the classifier take \textit{context} into account, so it could determine that 'seagal' is being used positively in this case.
 
 This implies that the classifier may have \textit{overfit} the training data, identifying distinguishing features specific to the training dataset itself and not movie reviews as whole. This is the reason the classifier has not generalised well and incorrectly classifies this particular review as negative.
 
@@ -140,9 +140,9 @@ Naturally, there's been a lot of discussion about Episode I. Everyone was queuei
 Like many people however, when I left the movie I felt disappointed. It was nowhere near the same fantastic quality the original trilogy had. In fact, I think it was a poor movie. Remember that when going into this movie."
 \end{quote}
 
-The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} into account. Discourse is the relationship between sentences and text at different positions of a document.
+The reason the classifier struggles to identify the following text as a negative review of Star Wars Episode I is because it does not take \textit{discourse} and \textit{context} into account.
 
-Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. There is no mechanism for which determine \textbf{sentence subject} or \textbf{context} using the bag of words representation.
+Discourse is the relationship between sentences and text at different positions of a document. Since the bag of words model does not take position into account, the classifier has no way of distinguishing between words about the original Star Wars trilogy from words that are about Episode I specifically. There is no mechanism for which determine \textbf{sentence subject} or \textbf{context} using the bag of words representation.
 
 Therefore, when the writer is praising the original trilogy, the classifier just assumes that the writer is praising the movie being reviewed. This results in the classifier thinking it's a positive review, when in actual fact it's a negative review (as shown by the last paragraph).
 
@@ -152,11 +152,9 @@ There are many different ways of selecting which features or words to consider f
 
 \subsection{Frequency Cutoff}
 
-The code used for the previous two questions has been using a technique called \textit{frequency cutoff} to select which features to use for the classifier. That is, which words to look for in each document.
+The code used for the previous two questions has been using a technique called \textbf{frequency cutoff} to select which features to use for the classifier (i.e. which words to look for in each document). The frequency of all the words in the training corpus is calculated and the $k$ most frequent words are chosen as features. Table \ref{tab:frequency_cutoff} shows the accuracy of classifiers which use different amounts of features (different values for $k$). Notice how as $k$ is increased, both accuracy on the training and test datasets increase.
 
-The frequency of all the words in the training corpus is calculated, and the $k$ most frequent words are chosen as features. Table \ref{tab:frequency_cutoff} shows the accuracy of classifiers which use different amounts of features (different values for $k$). Notice how as $k$ is increased, both accuracy on the training and test datasets increase.
-
-However, once $k$ reaches a certain point (between 3000 and 5000),  accuracies on the training dataset are still increased, but when the classifier is run on the test dataset (unseen data), the accuracy steadily decreases. This is a sign that as you increase the number of words to use for binomial Naive Bayes classification, classifiers start to overfit the training data and don't generalise well to new, unseen documents.
+Once $k$ reaches a certain point (between 3000 and 5000), accuracies on the training dataset is still increasing, but accuracy on the test dataset (unseen data) is steadily decreasing. This is a sign that as you increase the number of words to use for binomial Naive Bayes classification, classifiers start to overfit the training data and don't generalise well to new, unseen documents.
 
 Therefore, care is needed when picking a value for $k$ so that the classifier achieves high enough accuracies \textit{without} overfitting the training dataset.
 
@@ -187,7 +185,7 @@ Therefore, care is needed when picking a value for $k$ so that the classifier ac
 
 \textbf{Mutual information} is a numerical measure of the mutual dependence between two variables. In the context of text classification, this is the mutual dependence between a \textit{word existing in a document} and the \textit{document's class}. A word having a higher value for mutual information means it is more useful for determining whether or not a document is a particular class.
 
-One way of selecting features would be to compute the amount of mutual information between each word and the "positive" movie review class, and select the $k$ words with the highest mutual information. Table \ref{tab:mutual_information} shows the results of running such a method on the movie review dataset. 
+One way of selecting features would be to compute the amount of mutual information between each word and the "positive" movie review class, and select $k$ words with the highest mutual information. Table \ref{tab:mutual_information} shows the results of running such a method on the movie review dataset. 
 
 \begin{table}
 	\centering
@@ -214,13 +212,13 @@ One way of selecting features would be to compute the amount of mutual informati
 
 Notice how the classification's accuracy on both the training and test datasets increases, and decreases, in a similar fashion to frequency cut-off as $k$ increases. The difference here is that all of the accuracies presented in this table are higher than than the corresponding accuracies in the frequency cutoff table. This indicates that mutual information is a \textbf{better approach to selecting features than frequency cutoff}, since the accuracies are higher regardless of the value used for $k$.
 
-The reason for this is because words that are frequent in the training corpus may be frequent in all documents in said corpus, regardless of class. Therefore, some frequent words don't help distinguish between different document classes, as they're \textit{frequent in all documents}.
+The reason for this is because words that are frequent in the training corpus may be frequent in all documents in said corpus, regardless of class. These frequent words don't help distinguish between different document classes, as they're \textit{frequent in all documents}. With frequency cutoff they're still used as features, whereas mutual information will give these words a low score, meaning they're less likely to be selected.
 
 \subsection{Function Word Exclusion (Stopwords)}
 
 There are many functional words which occur often in most English text. Since they frequently occur in most texts, they offer no semantic value when using a bag of words model. NLTK has a stoplist containing these functional words. I used this list to exclude functional words from all the documents and then trained/tested a binomial Naive Bayes classifier, just like the previous questions.
 
-To determine whether or not excluding function words actually made a significant difference, I used both the frequency and mutual information feature selection methods, with and without function words. Table \ref{tab:function_word_exclusion}
+To determine whether or not excluding function words actually made a significant difference, I used both the frequency and mutual information feature selection methods, with and without function words.
 
 \begin{table}
 	\centering
@@ -243,9 +241,9 @@ To determine whether or not excluding function words actually made a significant
 	\label{tab:function_word_exclusion}
 \end{table}
 
-As the results in the table show, removing function words barely affected the accuracy. Perhaps the reason this is the case when using frequency cutoff, even though function words will most likely be selected, there's still a relatively small number of function words being used as features compared to the large amount of other words used as features. In other words, it seems as if 
+As the results in table \ref{tab:function_word_exclusion} show, removing function words barely affected the accuracy. One reason this could be the case for frequency cutoff, is that even though function words will most likely be selected, there's still a relatively small number of function words being used as features compared to the large amount of other words used as features. In other words, there'll still be large amount of other, more semantically rich words being used for classification. 
 
-Even with function words still in the corpus, they don't affect mutual information feature selection either. This is because it is unlikely that they'll be selected because function words tend to have even distributions across all document classes (as they're used relatively evenly across the different document categories). Therefore, their mutual information score will be low and they won't be selected.
+Even with function words still in the corpus, they don't affect mutual information feature selection either. This is because it is unlikely that they'll be selected because function words tend to have even frequency distributions across all document classes (as they're used relatively evenly across the different document categories). Therefore, their mutual information score will be low and they won't be selected.
 
 \subsection{Summary}
 
@@ -253,24 +251,24 @@ To summarise the findings in this section, preventing less frequent words becomi
 
 Selecting words with the highest amount of mutual information increased classification accuracy across the board, although you still had to be careful about how many features you kept.
 
-Removing function words from consideration didn't have much of an effect , regardless of the feature selection method used. This is due to the way the words to use as features are selected.
+Removing function words from consideration didn't have much of an effect, regardless of the feature selection method used. This is due to the way the words to use as features are selected.
 
 \section{Using WordNet to Product Different Features}
 
-WordNet is a lexicon which provides groupings of words into synonyms, organising these synonym set into a hierarchy. This section will describe different ways I used WordNet to extract new features, or modify existing ones, from movie reviews corpus to use for classification, and discuss the impact these features had on classification accuracy and generalisation.
+WordNet is a lexicon which groups words into synonyms, organising sets of synonyms into a hierarchial structure. This section will describe different ways I used WordNet to extract new features, or modify existing ones, from the movie reviews corpus to use for classification. It will then discuss the impact these features had on classification accuracy and generalisation.
 
 \subsection{Synonyms and Hypernyms}
 
 For each word used as a feature, I introduced two additional features:
 \begin{itemize}
 	\item \textbf{containsSynonymOf(w)} -- set to True if a synonym of $w$ is present in the document
-	\item \textbf{containsHypernymOf(w)} -- set to True if a \textit{direct} hypernym of $w$ is present in the document. \textit{Direct} in this case means 
+	\item \textbf{containsHypernymOf(w)} -- set to True if a \textit{direct} hypernym of $w$ is present in the document. \textit{Direct} in this case means a word which is in the synonym set which is an immediate parent of $w$'s synonym set
 	\end{itemize}
-This mean each document has a total of $3k$ features, $k$ for word occurrences, $k$ for word synonym occurrences and $k$ for word hypernym occurrences. This greatly increases the time it takes to train and execute the classifier, but it may help boost accuracies and generalisation.
+This mean each document has a total of $3k$ features; $k$ for word occurrences, $k$ for word synonym occurrences and $k$ for word hypernym occurrences. This greatly increases the time it takes to train and execute the classifier, but it may help boost accuracies and generalisation.
 
-Table \ref{tab:synonyms_and_hypernyms} shows accuracies on both the training and test datasets when these synonym and hypernym features are used. Different combinations of the three features were used to see what work best. Note that frequency cutoff with $k = 2000$ was used for feature selection.
+Table \ref{tab:synonyms_and_hypernyms} shows accuracies on both the training and test datasets when these synonym and hypernym features are used. Different combinations of the three features were used to see what worked best. Note that frequency cutoff with $k = 2000$ was used for feature selection.
 
-Unfortunately, many combinations resulted in worse accuracy on both the training and test datasets. Two combinations -- \textbf{word+synonyms} and \textbf{just synonyms} -- did actually result in higher accuracy on the training dataset (with marginally worse accuracy of training dataset).  This could indicate that use of synoynms can help increase generalisation, but perhaps it needs to be implemented in a more intelligent way than the method used here.
+Unfortunately, many combinations resulted in worse accuracy on both the training and test datasets. Two combinations -- \textbf{word+synonyms} and \textbf{just synonyms} -- did actually result in higher accuracy on the test dataset, with marginally worse accuracy of training dataset.  This could indicate that use of synoynms can help increase generalisation, but perhaps it needs to be implemented in a more intelligent way than the method used here.
 
 \begin{table}
 	\centering
@@ -297,19 +295,17 @@ Unfortunately, many combinations resulted in worse accuracy on both the training
 
 \subsection{Adjective Synonyms}
 
-As the results from question 1 established, some of the most useful words for determining movie review sentiment are adjectives. It may be possible to take advantage of this fact to \textit{generalise} the classifier somewhat.
-
-One way of doing this using WordNet is to perform the following, \textbf{for each word $w$ of a document}, during feature extraction:
+As the results from question 1 established, some of the most useful words for determining movie review sentiment are adjectives. It may be possible to take advantage of this fact to \textit{generalise} the classifier somewhat. One way of doing this using WordNet is to perform the following, \textbf{for each word \textit{w} of a document}, during feature extraction:
 \begin{enumerate}
 	\item get all synonyms of $w$
 	\item remove all non-adjective synonyms
-	\item for each adjective synonym, check if it's a feature (i.e. word we're considering). If so, \textbf{mark that word} as being present in the document (even though it might not \textit{actually} be present)
+	\item for each adjective synonym, check if it's a feature (i.e. word we're considering). If so, \textbf{mark that word} as being present in the document
 \end{enumerate}
-This will mean that words not present in the original training dataset may still help contribute to the classification, since there will be times where the adjective synonyms of these words match the words being used as features.
+This will mean that words not present in the original training dataset may still help contribute to the classification, since there will be times where the adjective synonyms of these words will match words being used as features.
 
 Table \ref{tab:adjective_synonyms} shows the accuracy of the classifier when considering adjective synonyms. Frequency cutoff with different values of $k$ was used for feature selection. The idea here is that we should see an increase in accuracy in the test dataset (showing better  generalisation) when compared to just considering direct word occurrences (accuracies shown in table \ref{tab:frequency_cutoff}).
 
-Comparing accuracies on the test dataset shown in tables \ref{tab:adjective_synonyms} and \ref{tab:frequency_cutoff}, we do notice a \textit{marginal} increase in accuracies on the test dataset across most values of $k$ used when adjective synonyms are used. However, as the number of features rise, this increase starts to decline and become similar to not using adjective synonyms at all (see $k = 15000$ in both tables). To summarise, it doesn't seem adjective synonyms impact classification much at all.
+Comparing accuracies on the test dataset shown in tables \ref{tab:adjective_synonyms} and \ref{tab:frequency_cutoff}, we do notice a \textit{marginal} increase in accuracies on the test dataset across most values of $k$ used when adjective synonyms are used. However, as the number of features rise, this increase starts to decline and become similar to not using adjective synonyms at all (see $k = 15000$ in both tables). Therefore, it seems adjective synonyms has very little impact on classification accuracy.
 
 \begin{table}
 	\centering
@@ -333,42 +329,42 @@ Comparing accuracies on the test dataset shown in tables \ref{tab:adjective_syno
 
 \subsection{Word Similarity}
 
-WordNet has the ability to compare synonym sets to each other to determine how similar different words are. This similarity is based on the words' distance in the WordNet hierarchy. These similarities measures are numerical values, so one could compute the similarity between a word in the document and each word being used as a feature. If the similarity measure is above a threshold $T$, flag the feature word as being present in the document (even though it actually isn't). This would require tweaking the values of $k$ and $T$ until a suitable level of accuracy and generalisation is found. 
+WordNet has the ability to compare synonym sets to each other to determine how similar different words are. This similarity is based on the the two words' distance in the WordNet synonym hierarchy. These similarities measures are numerical values, so one could compute the similarity between a word in the document and each word being used as a feature. If the similarity measure is above a threshold $T$, flag the feature word as being present in the document (even though it actually isn't). This would require tweaking the values of $k$ and $T$ until a suitable level of accuracy and generalisation is found. 
 
-An alternative is having a separate feature for this similarity presence, say \textbf{containsSimilarWordTo(x)}. This would result in $2k$ features, as the original \textbf{contains(x)} features would also be present.
+An alternative is having a separate feature for this similarity presence, say \textbf{containsSimilarWordTo(x)}. \textbf{containsSimilarWordTo(x)}. would be set to True if a word is similar enough (similarity $\geq T$) to $w$ is present in the document. This would result in $2k$ features, as the original \textbf{contains(x)} features would also be present.
 
-So how would you compute word similarity? \textbf{Path similarity} could be used as the similarity measure (available in WordNet). This computes similarity based on the \textbf{shortest path that connects the two word senses} in the hypernym hierarchy. However, using this measure to compute similarity between \textit{every} word type in the document and \textit{every} feature word would be incredibly slow, as path similarity is often a non-trivial computation.
+So how would you compute word similarity? \textbf{Path similarity} could be used as the similarity measure (available in WordNet). This computes similarity based on the \textbf{shortest path that connects the two word senses} in the hypernym hierarchy. However, using this measure to compute similarity of \textit{every} word type in the document and \textit{every} feature word would be incredibly slow, as path similarity is often a non-trivial computation.
 
 Therefore, while applying a word similarity threshold to all words in a document may increase accuracy, it is not computationally feasible to use similarity in such a way. Another mechanism for incorporating word similarity should be used for greater efficiency, whilst also increasing accuracy.
 
 \subsection{Summary}
 
-To summarise, introducing synonym presence as features may help increase generalisation by making words that are not present in the training dataset still impact the classification. Results show that synonyms can increase accuracy on separate test datasets when used in conjunction with the direct word occurrences.
+To summarise, introducing synonym presence as features may help increase generalisation, as it allows words that are not present in the training dataset impact classification (whereas before they were simply ignored). Results show that synonyms can increase accuracy on separate test datasets when used in conjunction with the direct word occurrences.
 
-Considering adjective synonyms specially didn't have a major impact on the classification accuracy, and is computationally quite expensive, so it's most likely not worth pursuing.
+Considering adjective synonyms specially didn't have a major impact on the classification accuracy, and is computationally quite expensive, so it is most likely not worth pursuing.
 
-Word similarity is an interesting avenue to pursue, but coming up with methods which use similarity in a useful manner, that also don't require much computation, is a difficult task.
+Word similarity is an interesting avenue to pursue, but coming up with methods which use similarity in a useful manner that also don't require a high amount computation (or high algorithmic complexity), is a difficult task.
 
 \section{Theory: Bag of Words Representations}
 
-In multinomial classification, the \textbf{frequency} of words is considered. Therefore, when given a document it needs a \textit{list} of words, not a \textit{set} like binomial classification. The following list shows how three documents (D1, D2 and D3) may be represented in multinomial and binomial classification and the differences between the two representations. Note that multiple instances of a token are present in multinomial.
+In multinomial classification, the \textbf{frequency} of words is considered. Therefore, when given a document it needs a \textit{list} of words, not a \textit{set} like binomial classification. The following list shows how three documents (D1, D2 and D3) may be fed into multinomial and binomial classification algorithms, and highlights differences between the two representations. Note that multiple instances of a token are present in the multinomial input.
 \begin{itemize}
-	\item \textbf{D1} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
+	\item \textbf{D1} -- there are differences between the two inputs, because commas and the word "London" appear more than once. \begin{itemize}
 		\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'London', ',', 'Ontario', 'to', 'England']
 		\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'London', ',', 'Ontario'. ',', 'to', 'London', ',', 'England']
 		\end{itemize}
-	\item \textbf{D2} -- there are differences between the two BOW representation, because commas and the word "London" appear more than once. \begin{itemize}
+	\item \textbf{D2} -- there are differences between the two inputs, because commas and the word "London" appear more than once. \begin{itemize}
 		\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'London', ',', 'England', 'to', 'Ontario']
 		\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'London', ',', 'England', ',', 'to', 'London', ',', 'Ontario']
 	  \end{itemize}
-	\item \textbf{D3} -- there are no differences in the BOW representations, as there are no repeated tokens.
+	\item \textbf{D3} -- there are no differences in the two inputs, as there are no repeated tokens in D3.
 	\begin{itemize}
 	\item \textbf{Bernoulli Model}: ['He', 'moved', 'from', 'England', 'to', 'London', ',', 'Ontario']
 	\item \textbf{Multinomial Model}: ['He', 'moved', 'from', 'England', 'to', 'London', ',', 'Ontario']
 	\end{itemize}
 \end{itemize}
 
-The above shows how the documents may be initially fed into the original classifier. How would the document be represented as a \textbf{feature set}? It could simply an associative array, where the keys are the words . The values would be the number of times a word occurred in the document, or a binary value (0 or 1) indicating whether or not the word was prewent, for multionomial and binomial classification respectively. This would give the following BOW representations for the three previous documents:
+The above shows how the documents may be initially fed into the original classifier. How would the document be represented as a \textbf{feature set}? It could simply an associative array, where the keys are the words. The values would be the number of times a word occurred in the document (multinomial), or a binary value (0 or 1) indicating whether or not the word was present (binomial). This would give the following BOW representations for the three previous documents:
 
 \hspace{1pt}
 
@@ -378,7 +374,7 @@ The above shows how the documents may be initially fed into the original classif
 	\item \textbf{D2} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 2, "," : 3, "Ontario" : 1, "to" : 1, "England" : 1 ]
 	\item \textbf{D3} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 3, "Ontario" : 1, "to" : 1, "England" : 1 ]
 \end{itemize}
-Notice how documents D1 and D2 appear to be the same, despite being different. This is because the only different between the two documents is  the \textit{position} of the words, which the BOW model discards. D3 is different to D1 and D2 because it has one less occurrence of "London".
+Notice how documents D1 and D2 appear to be the same, despite being different in reality. This is because the only difference between the two documents is the \textit{position} of the words, which the BOW model discards. D3 is different to D1 and D2 because it has one less occurrence of "London".
 
 \hspace{1pt}
 
@@ -388,7 +384,7 @@ Notice how documents D1 and D2 appear to be the same, despite being different. T
 	\item \textbf{D2} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 1, "Ontario" : 1, "to" : 1, "England" : 1 ]
 	\item \textbf{D3} -- [ "He" : 1, "moved" : 1, "from" : 1, "London" : 1, "," : 1, "Ontario" : 1, "to" : 1, "England" : 1 ]
 \end{itemize}
-Here, all three documents \textbf{appear identical}. This is because both frequency and position information has been discarded. Each of the three documents contain the exact same \textbf{set} of word types.
+Here, all three documents \textbf{appear identical}. This is because both frequency and position information has been discarded. Each of the three documents contain the exact same \textbf{set} of word types, so they'll appear the same to a binomial classifier.
 
 \section{Theory: Estimating Classifiers}
 
@@ -464,14 +460,13 @@ Therefore, a multinomial Naive Bayes classifier would label document 5 with the 
 
 \subsection{Bernoulli Naive Bayes Classifier}
 
-% TODO: verify that this equation is correct %
-$P(e_i|c) = \frac{\#\;documents\;of\;class\;c\;that\;contain\;word w_i + 1}{\#\;documents\;of\;class\;c + 2}$
+$P(e_i|c) = \frac{(\#\;documents\;of\;class\;c\;that\;contain\;word\;w_i) + 1}{(\#\;documents\;of\;class\;c) + (\#\;of\;classes)}$
 
 For class $China$:
 \begin{align}
 P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
 P(Taiwan|China) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
-P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
+P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{2 + 2} = \frac{1}{4}
 \end{align}
 
 For class $notChina$:
