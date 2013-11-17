@@ -453,7 +453,7 @@ Applying classifier to document 5:
 	& \propto \frac{1}{2} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\
 	& \propto \frac{6}{12} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\	
 	& \propto \frac{72}{20736} \\
-	& \propto 0.00372
+	& \propto 0.003472
 \end{align}
 
 Therefore, a multinomial Naive Bayes classifier would label document 5 with the class $notChina$.
@@ -471,9 +471,9 @@ P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{2 + 2} = \frac
 
 For class $notChina$:
 \begin{align}
-P(Japan|China) = P(Osaka|China) = P(Taiwan|China) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
-P(Sapporo|China) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
-P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
+P(Japan|notChina) = P(Osaka|notChina) = P(Taiwan|notChina) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
+P(Sapporo|notChina) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
+P(Taipei|notChina) = P(Macao|notChina) = P(Shanghai|notChina) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
 \end{align}
 
 Applying classifier to document 5:
