@@ -39,82 +39,544 @@
 % Start the paper on a new page.
 \pagebreak
 
-\section{Challenges of NLP}
+\section{Words}
+
+\subsection{Tokenisation}
 
 TODO
 
-\section{Bag of Words Model}
+\subsection{Morphology}
+
+\subsubsection{Inflectional}
+
+TODO
+
+\subsubsection{Derivational}
+
+TODO
+
+\subsubsection{Concatinative}
+
+TODO
+
+\subsubsection{Templatic}
+
+TODO
+
+\subsection{Rule-based Stemmers}
+
+TODO: Porter Stemmer
+
+TODO: WordNet's morphy()
+
+TODO: other stemmers
+
+\subsection{Database Look-up Stemmers}
+
+TODO: CatVar
+
+\subsection{(Unsupervised) Machine Learning Stemmers}
+
+TODO: just mention issues with using rule-based systems or dictionary lookups (cannot generalise to different languages!) machine learning can be used to find recurring pattern
+
+\section{Counting Words}
+
+\subsection{Frequency Distributions}
+
+TODO: absolute and relative
+
+\subsection{Zipf's Law}
+
+TODO: discuss how to derive Zipf's law, formula and graphs
+
+TODO: discuss everything these findings mean/relate to
+
+TODO: make sure to mention how this leads to data sparseness
+
+\section{Information Retrieval}
 
 \subsection{Definition}
 
-TODO
+TODO: the task (Katja)
 
-\subsection{Text Preprocessing}
+TODO: need for this and what the terms like "documents" are being used like here (slides 2 and 4)
 
-TODO
 
-\subsubsection{Tokenisation}
 
-TODO
+\subsection{Architecture}
 
-\subsubsection{Stemming}
+TODO: slide 6
 
-TODO
+\subsection{Indexing}
 
-\subsubsection{Counting Words}
+TODO: slide 3 of Eric
 
-TODO
+TODO: Katja's stuff on indexing here too (mention sophisticated version)
 
-\subsubsection{Spelling Correction}
+TODO: discussion topics (as many docs as possible??)
 
-TODO
-
-\subsection{Topic Classification}
+\subsection{Notation}
 
 TODO
 
-\subsection{Sentiment Mining}
+\subsection{Set Model}
+
+TODO: use BOTH KATJA AND ERIC
+
+\subsection{Vector Space Model}
+
+TODO: use BOTH KATJA AND ERIC
+
+TODO: statistical model
+
+TODO: term weighting (KATJA)
+
+\subsection{Set Model vs. Vector Model}
+
+TODO: comparison on slide 19 and 20
+
+\subsection{Recall/Precision Cutoff}
+
+TODO: refer to eval measures section for IR!
+
+TODO: recall/precision cut-off with example
+
+TODO: average precision with example
+
+\subsection{Issues to Think About}
+
+TODO: slides 21 and 22
+
+\subsection{IR vs. Databases}
+
+TODO: slide 4 elaborated on
+
+\subsection{Query Broadening}
+
+TODO: main idea
+
+\subsubsection{Relevance Feedback}
+
+TODO: formulae
+
+TODO: example
+
+TODO: PROS/CONS
+
+todo: positive and negative feedback
+
+\subsubsection{Thesaurus/Ontology}
+
+TODO: definition
+
+TODO: synonyms, hypernyms, hyponyms
+
+TODO: coordinate terms
+
+\subsubsection{Language Normalisation}
+
+TODO: what this is with architecture
+
+TODO: example
+
+TODO: how it uses ontology (thesaurus use)
+
+\section{Text Classification}
+
+TODO: stuff it's used for (e.g. topic classification, spam/not-spam)
+
+TODO: definition of problem w/ maths
+
+\subsection{Classification Methods}
+
+TODO: manual, rule-based and  brief mention of supervised machine learning
+
+\subsection{BOW Text Classification}
+
+TODO: how BOW is  used for text classification at a high level overview
+
+\subsection{Naive Bayes}
+
+TODO: intro to Naive Bayes
+
+\subsubsection{Multinomial Naive Bayes}
+
+TODO: smoothing
+
+TODO: summary
+
+\subsubsection{Binomial Naive Bayes}
+
+TODO: idea, maths
+
+TODO: summary
+
+\subsubsection{Multinomial vs. Binomial}
 
 TODO
 
-\subsection{Textual Similarity and Clustering}
+\subsubsection{Advantages/Disadvantages}
+
+TODO: of Naive Bayes
+
+\subsection{Feature Selection}
+
+TODO: why feature selection
+
+\subsubsection{Frequency Cutoff}
 
 TODO
+
+\subsubsection{Mutual Information Cutoff}
+
+TODO: definition of MU mathematically and what it means
+
+TODO: example!
+
+TODO: its effect on performance
+
+\subsection{Multi-class Text Classification}
+
+TODO: > 2 classes
+
+\subsection{Evaluating Multi-class Classifiers}
+
+TODO: micro and macro averaging
+
+\subsection{Examples of Binary/Multiclass Classification}
+
+TODO: EXAMPLES of text classification from end of first+second sets of slides
+
+\subsection{Semantic Similarity}
+
+TODO: automatically determine which words mean similar things is goal!
+
+\subsubsection{Vector Space Model}
+
+TODO: what isi t and how to use it to derive similar words
+
+\subsubsection{Context Features}
+
+TODO: using context (n-grams???)
+
+TODO: size of context
+
+\subsubsection{Use of Association Measure}
+
+TODO
+
+\subsubsection{Similarity Measures}
+
+TODO: similarity measures (cosine, Euclidean)
+
+TODO: actual example
+
+TODO: evaluation of similarity measures
+
+\subsubsection{Clustering}
+
+TODO: clustering approaches
+
+TODO: evaluation of clustering approaches
+
+\section{$n$-Gram Modelling}
+
+TODO: what it's used for
+
+\subsection{Probabilistic Language Modelling}
+
+TODO: assign probability of sentence
+
+TODO: context and Markov assumption
+
+\subsection{$n$-Gram Models}
+
+TODO: definition of n-grams with diagram
+
+TODO: advantages and disadvantages
+
+TODO: why it works!!! (Penn Treebank)
+
+\subsection{Deriving Language Model}
+
+TODO: deriving probabilistic model of $n$-grams from frequency counts
+
+TODO:
+
+\subsection{Limitations of MLE}
+
+TODO: limitations of MLE (MLE???)
+
+TODO: how zero probabilities break down an entire model! DATA SPARSENESS
+
+\subsection{Smoothing}
+
+TODO: Laplace
+
+TODO: Lidstone
+
+TODO: Good-Turing smoothing
+
+TODO: Class-based smoothing
+
+TODO: web-based smoothing
+
+TODO: summary table of all smoothings + the ones from "other" that have no detail
+
+\subsection{Applications}
+
+TODO: list of applications
+
+\subsection{Application: Spell Checking}
+
+TODO: confusion sets
+???
+
+\subsection{Application: Adjective Ordering}
+
+TODO
+
+???
+
+\section{Information Theory}
+
+TODO: uses
+
+\subsection{Information and Entropy}
+
+TODO: definition of information
+
+TODO: definition of Entropy
+TODO: 2 examples of entropy
+
+\subsection{Joint and Condtional Entropy} 
+
+TODO: definitions
+
+TODO: examples
+
+\subsection{Chain Rule}
+
+TODO: definition
+
+TODO: example
+
+\subsection{Entroy Rate of Language}
+
+TODO: language definitions
+
+TODO: cross-entropy
+
+TODO: entropy of English
+
+\subsection{Mutual Information}
+
+TODO: have the other mutual information section refer to this??
+
+TODO: pointwise mutual information
+
+\section{Evaluation Measures}
 
 \subsection{Information Retrieval}
 
+TODO: recall, precision, f-measure
+
+\subsection{Classification}
+
+(slightly different perspective to IR)
+TODO: recall, precision, f-measure
+
+\section{Part-of-Speech Tagging}
+
+TODO: what is is roughlyand applications
+
+\subsection{Word Classes}
+
+TODO: CLASS TYPES
+
+TODO: example class nouns + hierarchy
+
+TODO: table showing all COMMON WORD CLASSES THAT MAY HAVE TO BE USED IN THE EXAME!!!!!!!!! SEE LAST REVISION LECTURE NOTES FOR SOME EXAMPLES OF THESE AS WELL AS SLIDES/WORKSHEETS
+
+\subsection{Tagsets and Dictionaries}
+
+TODO: tagset
+
+TODO: dictionary
+
+TODO: example sentence taggings
+
+TODO: ambiguity
+
+\subsection{POS Tagging as Classification}
+
+TODO: definition of classification problem
+
+\subsubsection{Information Sources for Tagging}
+
+TODO: two information sources in tagging
+
+\subsection{Markov Model Tagging}
+
+TODO: definition of Markov model and how it's derived
+
+TODO: example picture (state probabilities)
+
+TODO: tag-tag model
+
+TODO: word-tag model
+
+TODO: examples of two models
+
+\subsubsection{Variations}
+
 TODO
 
-\section{Structural Techniques}
+\subsubsection{Advantages/Disadvantages}
 
 TODO
 
-\subsection{Limitations of Bag of Words}
+\subsection{Transformation-Based Tagging}
+
+TODO: general idea
+
+TODO: templates
+
+TODO: learning algorithm
+
+TODO: examples
+
+\subsubsection{Advantages/Disadvantages}
 
 TODO
 
-\subsection{$n$-gram Modelling and Word Prediction}
+\subsection{Evaluation of Taggers}
+
+TODO: how to evaluate, current accuracies
+
+\subsection{Caveats}
+
+TODO: caveats of tagging
+
+
+TODO: something on required reading for transformed-based tagging????????????????????????????????
+
+\section{Grammar and Parsing}
+
+\subsection{Constituents}
+
+TODO: what they are and properties
+
+\subsection{Limitations with $n$-grams and Regular Expressions}
+
+TODO: comparison with $n$-grams - why the latter are crap
+
+TODO: problems with regexes to parse sentences using POS tags
+
+TODO: attachment means nested within each other, means hierarchy which regexes cannot express
+
+\subsection{Grammar}
+
+TODO: definitions
+
+TODO: example grammar and using it to derive sentences (step-by-step and tree shown)
+
+TODO: labelled bracketing and examples
+
+TODO: mention of recursion
+
+\subsubsection{Context-free Grammar vs. Regular Grammar}
 
 TODO
 
-\subsection{Part-of-Speech Tagging and Parsing}
+\subsubsection{Limitations}
 
-TODO: assigning grammatical structure
+TODO: agreement
 
-\subsection{Disambiguation}
+TODO: semantics
 
-TODO
+TODO: language dependency
 
-\subsubsection{Search}
-
-TODO
-
-\subsubsection{Probabilistic Models}
+\subsubsection{Context-Free Languages Enough?}
 
 TODO
 
-\section{Application of NLP}
+TODO: summary of grammar too
+
+\subsection{Language Universals}
 
 TODO
+
+???
+
+\subsection{Parsing}
+
+TODO: definition of it
+
+TODO: top-down parsing
+
+TODO: bottom-up parsing
+
+TODO: example of top-down
+
+TODO: properties such parsing approaches (essentially DFS)
+
+\subsubsection{Limitations}
+
+TODO: can combine with bottom-up filtering to prevent rules with illegal POS taggings
+
+TODO: infinite recursion!
+
+TODO: effort duplication w/ example
+TODO: chart parsing and how it can be used to store already seen parts of tree in table (saves effort)
+
+\subsubsection{Summary}
+
+TODO: summary slide augmented w/ extra details
+
+\subsection{Global Ambiguity}
+
+TODO: example of ambiguity
+
+TODO: mention 3 types of ambiguity
+
+TODO: syntactic ambiguity, catalan numbers and exponential explosion
+
+TODO: global ambiguity, issues with this and how it can be resolved in TWO WAYS
+
+\subsubsection{Probabilistic Context Free Grammars}
+
+TODO: probabilistic conext free grammars + example
+
+TODO: example that shows problem
+
+\subsubsection{Frame Preferences}
+
+TODO: what this is
+
+TODO: frame probabilities and how to compute them
+
+TODO: using frame preferences to compute likelihood of parse tree
+
+\subsection{Local Ambiguity}
+
+TODO: what it is
+
+TODO: serial and parallel parsers
+
+\subsubsection{Garden Path}
+
+TODO: Garden Paths definition w/ ALL EXAMPLES W/ EXPLANATION!
+	(each different type of ambiguity)
+
+TODO: WHICH PARSER IS A HUMAN AND WHAT SHOULD WE USE??? THE "SO?" slide
+
+\subsubsection{Pruning Unlikely Trees}
+
+TODO: briefly mention Jurafsky's model
+
+TODO: show garden path example
+
+TODO: define beam width, state how it can used to prune trees by assuming they're garden paths IF PROBABILITY RATIO IS HIGHER THAN BEAM WIDTH!
 
 \end{document}
