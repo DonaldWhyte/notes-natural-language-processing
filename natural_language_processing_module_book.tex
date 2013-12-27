@@ -13,6 +13,8 @@
 % For graphic files
 \usepackage{graphicx}
 \usepackage{epstopdf}
+\usepackage{float}
+\usepackage{amsmath}
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 % Set the title, author, and date.
@@ -40,95 +42,484 @@
 
 \section{Words}
 
+\subsection{Corpora}
+
+A \textbf{corpus} is a finite body of naturally occurring text that is \textit{not} automatically generated or written specifically for use in NLP. The text used is normally selected according to criteria derived from the needs of the NLP application.
+
+What corpus you use changes what you learn, so it is important to be careful and choose data representative of the problem you're trying to solve. For example, well-edited text (e.g. news articles) is better for deriving grammatical structure. Facebook conversations (say) would have a lot of incorrect spelling and grammar; these errors are simply noise that make it harder for AI to derive grammar.
+
+Properties of corpora:
+\begin{itemize}
+	\item \textbf{Language Type} -- is it edit text, spontaneous speech? Is it written following standards or are there dialects present?
+	\item \textbf{Genre and Domain} -- is it 18th century novels, newspaper text, train enquiry dialogue, FB conversations, etc.?
+	\item \textbf{Media} -- text, audio or video?
+	\item \textbf{Size} -- how large is the corpus. Bigger almost always means better!
+\end{itemize}
+
+A \textbf{balanced corpus} is one which tries to be representative across an entire language or domain. It contains many different tones of text from a language, instead of specifying a single area (not just news or FB conversations -- all kinds of text!)
+
+Common corpora:
+\begin{itemize}
+	\item \textbf{Brown} -- Famous early corporate of 1 million words. Part-of-speech tagged. Balanced corpus of written American English.
+	\item \textbf{LOB} -- Lancaster-Oslo/Bergen corpus. Published British English text.
+	\item \textbf{Web 1T Corpus (2006)} -- 1 trillion words of text grabbed from the web, with many domains and languages.
+	\item \textbf{Penn Treebank} -- \textbf{parsed}, not just tokenised, text of 2 million words. Domain is newswire and language is American English.
+\end{itemize}
+
 \subsection{Tokenisation}
 
-TODO
+\subsubsection{Definitions}
+
+\textbf{Tokenisation} is a \textbf{processing step} where the input text is automatically divided into atomic units called tokens. A \textbf{token} is either a word, number, or a punctuation mark. \textbf{Word} throughout this document means:
+\begin{quote}
+	\textit{"continuous alphanumeric characters, delineated by whitespace"}
+\end{quote}
+where \textbf{whitespace} is spaces, tabs and newlines.
+
+A token is an \textit{individual occurrence} of a word. A textbf{token type} is the word itself without context. For example, the sentence "what is the big elephant and what makes it big?" has 11 tokens (including the question mark) and 9 token types (what and big appear twice).
+
+Delimiting by whitespace may not be enough however. Consider the case below:
+Here "data base" carries the atomic meaning but will be considered \textit{two} tokens. Additionally, "it's," contains a \textit{trailing comma}. This is not desired because it makes it look like a different token type to "it's", so it may look like it has a different meaning (when it doesn't). Using \textbf{regular expressions} for tokenising may be more suitable, as it can deal with such cases (especially trailing punctuation).
+
+\textbf{Lexical diversity} (see Equation) \ref{eq:lexical-diversity} measures how diverse the vocabulary of a body of a text is. This measurement is the \textbf{average} number of times a token type occurs in the text. Therefore, if the same words are used often there will be \textbf{high} lexical diversity. Likewise, if there is large variety of words, then lexical diversity will be \textbf{low}.
+
+\begin{equation}
+	\frac{numTokens}{numTokenTypes}
+	\label{eq:lexical-diversity}
+\end{equation}
+
+\subsubsection{Issues}
+
+\begin{itemize}
+	\item \textbf{Sentence Boundaries} -- e.g. punctuation, quotation marks around sentences? What does a sentence begin/end? For example, "I said 'Bye Joe.' and laughed!". This a whole sentence, but a tokeniser might think "Joe." is the end of the sentence due to the full stop.
+	\item \textbf{Proper Names} -- proper names are often composed of multiple words delimited by spaces, such as "Donald Whyte" or "New York". How do we detect that they belong together as a single unit?
+	\item \textbf{Contractions/Possession} -- when is an apostrophe used for contractions or possession? "That’s Fred’s jacket’s pocket." should jacket's be expanded to "jacket is" just like that's to "that is"? What makes "jacket's" possession but not "that's"? How commonly it's usedas a contraction in labelled corpora?
+\end{itemize}
 
 \subsection{Morphology}
 
+\textbf{Morphology} is the study of the way words are built up from \textbf{smaller meaning units}. \textbf{Morphemes} are the \textit{smallest meaningful unit} in the grammar of a language. A word is composed of one or more morphemes.
+
+Morpheme definitions:
+\begin{itemize}
+	\item \textbf{Root} -- portion of word that is \textbf{common} to a set of derived or inflected forms when all \textbf{affixes are removed}. The root cannot be broken down into further analysable, meaning elements and it carries the \textbf{principle portion} of the meaning of the words.
+	\item \textbf{Stem} -- The root(s) of a word with \textbf{derivational affixes} included, but \textbf{inflectional affixes removed} This form is ready for inflectional affixes to be added, but the stem does not contain these.
+	\item \textbf{Affix} -- a \textbf{bound} morpheme that cannot be used by itself. It must be joined \textbf{before, after} or \textbf{within} a root or stem. There are four types of affixes:
+	\begin{itemize}
+		\item \textbf{Prefixes} -- before stem, such as \textbf{antidis}establishmentarianism
+		\item \textbf{Suffixes} -- after stem, such as antidisestablish\textbf{mentarianism}
+		\item \textbf{Infixes} -- in the middle of the stem. Hingi (borrow) to h\textbf{um}ingi (borrower) in Tagalog
+		\item \textbf{Circumfixes} -- at the start and end of stem. Sagen(say) to \textbf{ge}sag\textbf{t} (said) in German
+	\end{itemize}
+	\item \textbf{Clitic} -- morpheme which functions \textbf{syntactically like a word}, but does not appear as an individual word
+\end{itemize}
+
+\textbf{"unladylike"} is a word with 3 morphemes and 4 syllables. The three morphemes are:
+\begin{enumerate}
+	\item "un-" -- means "not" (derivational affix)
+	\item "lady" -- means "(well behaved) female adult human" (root)
+	\item "-like" -- having the characters of (derivational affix)
+\end{enumerate}
+These three units cannot be broken down further \textit{without distorting the meaning of the units into something they're not}. The \textbf{stem} of "unladylike" is "unladylike" , since no inflectional affixes are used.
+
+\textbf{"technique"} has a single morpheme and two syllables. The root and stem are therefore "technique" as well.
+
+\textbf{"dogs"} has two morphemes and one syllable. The two morphemes are:
+\begin{enumerate}
+	\item "dog" -- animal (root)
+	\item "-s" -- plural marker on nouns (inflectional)
+\end{enumerate}
+ The \textbf{stem} of "dogs" is "dog", as the inflectional affix "-s" has been removed.
+ 
 \subsubsection{Inflectional}
 
-TODO
+\textbf{Inflection} is a variation in the form of a word that expresses a grammatical contrast. It doesn't change the word class but causes the word to serve a \textbf{new grammatical role}. Inflection adds tense, number/counts, person, mood and aspect to words.
+
+The change is usually achieved by adding an \textbf{inflectional affix}. This affix usually produces a predictable change of meaning. That is, the change is consistent across most/all words. For example, "-s" is an inflection affix which typically pluralises nouns and makes transforms a verb:
+\begin{quote}
+	\textit{"apple -$>$ apples"}
+\end{quote}
+\begin{quote}
+	\textit{"run -$>$ runs"}
+\end{quote}
 
 \subsubsection{Derivational}
 
-TODO
+\textbf{Derivation} is the formation of a new word or inflectable stem from another word or stem. An example of this is:
+\begin{quote}
+	\textit{"compute -$>$ computer -$>$ computerisation"}
+\end{quote}
+The two latter words contain the same root "compute", but through derivational affixes "-r" and "-isation" mean different things.
 
-\subsubsection{Concatinative}
+Derivation can \textbf{change the word class}, such as verb $\rightarrow$ noun and noun $\rightarrow$ adjective. For example, "compute" is a verb which is transformed into the noun "computer" by adding "-r".
 
-TODO
+\subsection{Stemming}
 
-\subsubsection{Templatic}
+\textbf{Stemming} is the process of taking a word, complete with all its derivational and inflectional affixes and finding the \textbf{stem} of the original word. That is, a stemmer removes all inflectional affixes while leaving the stem intact.
 
-TODO
+Rule-based stemmers stem words based on rules. An example of this is the \textbf{Porter stemmmer}, which simply hacks off the end of the use. It is frequently used, especially for information retrieval, but the results are ugly.
 
-\subsection{Rule-based Stemmers}
+Original:
+\begin{quote}
+Pierre Vinken , 61 years old , will join the board as a nonexecutive
+director Nov. 29 . Mr. Vinken is chairman of Elsevier N.V. , the Dutch
+publishing group . Rudolph Agnew , 55 years old and former chairman of
+Consolidated Gold Fields PLC , was named a nonexecutive director of
+this British industrial conglomerate . A form of asbestos once used to
+make Kent cigarette filters has caused a high percentage of cancer
+deaths among a group of workers exposed to it more than 30 years ago ,
+researchers reported.
+\end{quote}
 
-TODO: Porter Stemmer
+Porter stemmed version:
+\begin{quote}
+Pierr Vinken , 61 year old , will join the board as a nonexecut
+director Nov. 29 . Mr. Vinken is chairman of Elsevi N.V. , the Dutch
+publish group . Rudolph Agnew , 55 year old and former chairman of
+Consolid Gold Field PLC , wa name a nonexecut director of thi British
+industri conglomer . A form of asbesto onc use to make Kent cigarett
+filter ha caus a high percentag of cancer death among a group of
+worker expos to it more than 30 year ago , research report .
+\end{quote}
 
-TODO: WordNet's morphy()
+While the results are ugly, it might not matter. Bad stemming is not necessarily a problem for \textbf{automated information retrieval} as long as the stemming is \textit{consistently} bad/incorrect. If so, then the automated document searching, which is based on keywords that also get stemmed using the same stemmer, will still work efficiently, taking into consideration correct word stems (correct in that they are consistently incorrect).
 
-TODO: other stemmers
+WordNet's morphy() is a slightly more sophisticated rule-based stemmer. It uses different rules based on the part-of-speech tag of a word and has an exception list for irregular words. Some of the rules are listed in Figure\ref{fig:morphy-rules}
 
-\subsection{Database Look-up Stemmers}
+One approach is to "cheat" and not use rules at all. Instead,, all variants of a stem are stored in a \textbf{dictionary}. Stepping a word is simply a matter of looking up that word in a dictionary and retrieving the associated stem.
 
-TODO: CatVar
+\textbf{Categorical Variation Database (CatVar)} is a "database of clusters of uninflected words and their categorical (i.e. part-of-speech) variants".
 
-\subsection{(Unsupervised) Machine Learning Stemmers}
-
-TODO: just mention issues with using rule-based systems or dictionary lookups (cannot generalise to different languages!) machine learning can be used to find recurring pattern
+Rule-based systems and dicitonary systems cannot \textbf{generalise} to different languages. \textbf{Unsupervised Machine learning}, on the other hand, can be used to find recurring patterns in languages which researchers can use to understand how to stem words in any language better.
 
 \section{Counting Words}
 
 \subsection{Frequency Distributions}
 
-TODO: absolute and relative
+\textbf{Word frequency} is the number of types a token type appears in the text. \textbf{Absolute frequency} is the number of times a word occurs in a body of text. \textbf{Relative frequency} is the number of times a word occurs in a body of text, \textbf{relative} to all the other words in the text (i.e. the text's size). Relative frequency is computed using Equation \ref{eq:rel-freq}, where $f(x)$ is the frequency of word $x$ and $T$ is a list of all the tokens/words in the document.
+
+\begin{equation}
+	rf(x) = \frac{frequency\;of\;x}{total\;frequency} =
+	\frac{f(x)}{ \sum_{y \in T} {f(y)} }
+	\label{eq:rel-freq}
+\end{equation}
+
+The frequencies of all word \textit{types} can be counted and put in a \textbf{frequency distribution}, which is table of word types and their frequencies (\textbf{ordered} from most frequency to least). Table \ref{tab:freqdist} and Figure \ref{fig:freqdist} shows an examples of frequency distribution tables and plots.
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Token} & \textbf{Frequency} \\
+		\hline
+		the & 350 \\
+		and & 212 \\
+		to & 191 \\
+		of & 167 \\
+		a & 165 \\
+		i & 160 \\
+		that & 134 \\
+		... & ...\\
+		but & 68 \\
+		... & ...\\
+		donald & 1 \\
+		\hline
+	\end{tabular}
+	\caption{Example Frequency Distribution Table (ordered from most-frequent to least}
+	\label{tab:freqdist}
+\end{table}
+
+TODO: frequency distribution example plot
 
 \subsection{Zipf's Law}
 
-TODO: discuss how to derive Zipf's law, formula and graphs
+The \textbf{rank} of a word is its position in an ordered frequency distribution table. If a word has a rank of 1, it is the \textbf{most frequent} word in the text.
 
-TODO: discuss everything these findings mean/relate to
+\textbf{Zipf's law} captures the relation between the frequency and rank of a word. Let $r$ and $f$ be the rank and frequency of a word. There is a constant $k$ such that:
+\begin{equation}
+	k = f \cdot r
+\end{equation}
+Alternative, $f$ is proportional to $r$ like so:
+\begin{equation}
+	f \propto \frac{1}{r}
+\end{equation}
 
-TODO: make sure to mention how this leads to data sparseness
+Figure \ref{fig:log-zipf} is a logorithmic plot showing this relation. Figure \ref{fig:zipf-corpus} plots the frequency distribution of a one million word corpus (rank/freq, not word itself) against Zipf's law. As evident by these plots, Zipf's law does apply to real, natural text.
+
+TODO: two Zipf plots
+
+So what does this mean?
+\begin{itemize}
+	\item There is a \textbf{very small number of very common words}
+	\item There is a small-medium number of middle frequency words
+	\item There is a \textbf{very large number of words which are infrequent} (especially words with a frequency of one)
+	\item The relationship between frequency and rank can be \textbf{approximated by a line} (in logarithmic scales)
+	\item This is different from the bell curve/normal distribution (which is a common statistical distribution for real word data)
+\end{itemize}
+
+Zipf's law highlights a common issue that affects many NLP techniques. \textbf{Data sparseness} refers to the fact that most words will have very few, or no, examples in training data. This leads to unreliable frequency counts and probabilities, which are often used in NLP.
 
 \section{Information Retrieval}
 
 \subsection{Definition}
 
-TODO: the task (Katja)
+Information retrieval (IR) addresses the following task:
+\begin{quote}
+	given a query, find documents that are "relevant" to the query
+\end{quote}
 
-TODO: need for this and what the terms like "documents" are being used like here (slides 2 and 4)
+The problem has the following inputs and outputs:
+\paragraph{} \begin{tabular}{ll}
+	\textbf{Input:} & a large, static document collection \\
+	\textbf{Input:} & keyboard-based query \\
+	\textbf{Output:} & find all documents relevant to query, and \textbf{only} those relevant documents \\
+\end{tabular}
 
+A \textbf{document} here refers to a body of text, but IR extends beyond items of text -- it can be any item you want to find (e.g. image, video, etc.) A document is described by a set of \textbf{index terms}, which in this case are the words in the document. 
 
+\paragraph{}
+
+Example uses of IR systems include:
+\begin{itemize}
+	\item search set of abstracts (of research papers)
+	\item search newspaper article
+	\item library search
+	\item search the web
+\end{itemize}
 
 \subsection{Architecture}
 
-TODO: slide 6
+Figure \ref{fig:ir-architecture} shows the architecture of a typical IR system. IR systems have \textbf{three main components}:
+\begin{itemize}
+	\item \textbf{Query Matcher} -- matches a given query to set of documents it believes are relevant to said query
+	\item \textbf{Learning Component} -- receives feedback from the user and from that the system learns about which documents are relevant to which queries/terms
+	\item \textbf{Object Base} -- database of documents and their index terms (descriptions)
+\end{itemize}
+
+An example sequence of events is:
+\begin{enumerate}
+	\item \textbf{User} enters query "red trousers"
+	\item \textbf{Query Matcher} uses that to find three documents in the \textbf{Object Base} it believes are relevant to "red trousers" and returns them to the user
+	\item \textbf{User} gives feedback about which of the three documents were relevant or not (e.g. clicking on web page, explicitly clicking "not relevant" button", etc.)
+	\item \textbf{Learning Component} uses this feedback to learn/alter itself to reduce the chances of the documents marked irrelevant show up the next time someone types "red trousers". This may involve updating documents' descriptions in the \textbf{Object Base}.
+\end{enumerate}
+
+TODO: architecture diagram from slide 6
 
 \subsection{Indexing}
 
-TODO: slide 3 of Eric
+Automatic indexing is a process which associates documents to index terms (descriptors) for fast look-up by the query matcher. If we consider \textbf{documents} to be bodies of text and the words contained with the text to be the \textbf{index terms}, then an \textbf{inverted file structure} can be established.
 
-TODO: Katja's stuff on indexing here too (mention sophisticated version)
+First we construct a list of numbered documents and the words contained within each document, as shown in Table \ref{tab:doc-word}. This may involve removing case (e.g. all lowercase), punctuation and common words, such as "the" and "at", which have little semantic meaning (known as \textbf{stopwords}) so only meaningful tokens remain. We could even stem words or use pairs of words (bigrams, computationally expensive) for collocation information.
+
+We then \textbf{invert} the table so it is indexed by words, instead of documents. This creates a list of words and the documents those words are present in, like the one in Table \ref{tab:word-doc}.
+
+More sophisticated inverted file structures can be created, which can track the \textbf{frequency} of a word in a document and its \textbf{position} in the document. Table\ref{tab:word-doc-sophisticated} shows an inverted file structure which lists the \textit{index} position of the token in the document (e.g. 'cold' is the 6th word in document 1).
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Document} & \textbf{Text} \\
+		\hline		
+		1 & Pease porridge hot, pease porridge cold \\
+		2 & Pease porridge in the pot \\
+		3 & Nine days old \\
+		4 & Some like it hot, some like it cold \\
+		5 & Some like it in the pot \\
+		6 & Nine days old \\
+		\hline				
+	\end{tabular}
+	\caption{List of documents and the tokens contained within those documents}
+	\label{tab:doc-word}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Number} & \textbf{Tokens} & \textbf{Documents} \\
+		\hline
+		1 & cold & 1,4 \\
+		2 & days & 3,6 \\
+		3 & hot & 1,4 \\
+		4 & in & 2,5 \\
+		5 & it & 4,5 \\
+		6 & like & 4,5 \\
+		7 & nine & 3,6 \\
+		8 & old & 3,6 \\
+		9 & pease & 1,2 \\
+		10 & porridge & 1,2 \\		
+		11 & pot & 2,5 \\
+		12 & some & 4,5 \\
+		13 & the & 2,5 \\		
+		\hline
+	\end{tabular}
+	\caption{List of tokens and the documents those tokens are contained in}
+	\label{tab:word-doc}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Number} & \textbf{Tokens} & \textbf{(Document; Word Index)} \\
+		\hline		
+		1 & cold & (1;6), (4;8) \\
+		2 & days & (3;2), (6;2) \\
+		3 & hot & (1;3), (4;4) \\
+		4 & in & (2;3), (5;4) \\
+		5 & it & (4;3,7), (5;3) \\
+		6 & like & (4;2,6), (5;2) \\
+		7 & nine & (3;1), (6;1) \\
+		8 & old & (3;3), (6;3) \\
+		9 & pease & (1;1,4), (2;1) \\
+		10 & porridge & (1;2,5), (2;2) \\		
+		11 & pot & (2;5), (5;6) \\
+		12 & some & (4;1,5), (5;1) \\
+		13 & the & (2;4), (5;5) \\	
+		\hline
+	\end{tabular}
+	\caption{List of tokens and the documents those tokens are contained in (augmented with the \textbf{location} of the token in the document(s))}
+	\label{tab:word-doc-sophisticated}
+\end{table}
+
+TODO: FIGURE FROM slide 3 of Eric
 
 TODO: discussion topics (as many docs as possible??)
 
+Indexing as many documents as possible sounds like a good way to provide a \textbf{more comprehensive search}, but it may not be the thing to do.  There are \textbf{disadvantages}:
+\begin{itemize}
+	\item if you only want to look at a certain type of document, it is much more difficult to get precise, relevant hits when everything but the kitchen sink is in the system
+	\item more documents means greater storage requirements and slower processing/search times
+	\item more documents might not always given you \textit{new} information. You could have five different documents which all contain the same information -- why have all three?
+\end{itemize}
+
 \subsection{Notation}
 
-TODO
+We now deal with the \textbf{Query Matcher} component of the IR system. That is, how do we find documents relevant to a given a \textbf{search query}?
 
-\subsection{Set Model}
+\paragraph{}
 
-TODO: use BOTH KATJA AND ERIC
+\begin{tabular}{p{4cm}p{12cm}}
+	$D$ & list of $m$ documents \\
+	$m$ & number of documents \\
+	$T$ & list of index terms (words) \\
+	$n$ & number of index terms \\
+	$w_{ij}$ & \textbf{weight of association} between the $i$th index term $i$ and the $j$th document \\
+	$d_j = (w_{1,j}, w_{2,j}, ..., w_{i,j})$ & Index term vector for $j$th document, which contains the weights between all index terms and document $j$.
+\end{tabular}
+
+\paragraph{}
+
+\begin{tabular}{p{16cm}}
+	\textbf{Example} \\
+	$T = \lbrace pudding, jam, traffic, lane, treacle \rbrace$ \\
+	$d_1 = (1, 1, 0, 0, 0)$ \\
+	$d_2 = (0, 0, 1, 1, 0)$ \\
+	$d_3 = (1, 1, 1, 1, 0)$ \\
+\end{tabular}
+
+\subsection{Set Theoretic Model}
+
+The \textbf{set theoretic} model uses set theory to find documents which uses \textbf{boolean expressions} as search queries, like the one in Equation \ref{eq:set-theoretic-query}. After receiving such a query, the following steps are performed:
+\begin{enumerate}
+	\item the query is transformed into \textbf{Disjunctive Normal Form (DNF)} (example in Equation \ref{eq:set-theoretic-dnf})
+	\item let $R = \emptyset$ be the set containing
+	\item for each document $d_j = (w_{1,j}, w_{2,j}, ..., w_{i,j})$:
+	\begin{enumerate}
+		\item take the truth values (weights) in $d_j$ and check if it matches \textit{any} component of the DNF equation. This process is denoted using Equation \ref{eq:set-theoretic-similarity}
+		\item if the output of the DNF expression was 1, then the document matches the original boolean query exactly. Add $d_j$ to $R$
+	\end{enumerate}
+	\item return $R$
+\end{enumerate}
+
+\begin{equation}
+	(Jam \lor Treacle) \land Pudding \land \neg{Lane} \land \neg{Traffic}
+	\label{eq:set-theoretic-query}
+\end{equation}
+
+\begin{equation}
+	(1, 1, 0, 0, 0) \lor (1, 0, 0, 0, 1) \lor (1, 1, 0, 0, 1)
+	\label{eq:set-theoretic-dnf}
+\end{equation}
+
+\begin{equation}
+	sim(d, q_{DNF}) = \begin{cases}
+		1,& \text{if }d\text{ is equal to any component of }q_{DNF} \\
+		0,& \text{otherwise}
+	\end{cases}
+	\label{eq:set-theoretic-similarity}
+\end{equation}
+
+\paragraph{\textbf{EXAMPLE}} Taking the three documents $d_1$, $d_2$ and $d_3$, as well as the query and its DNF equivalent in Equations \ref{eq:set-theoretic-query} and \ref{eq:set-theoretic-dnf}, an example of using the set theoremtic model to find which documents are relevant to the query is given. Steps:
+\begin{enumerate}
+	\item Does $d_1 = (1, 1, 0, 0, 0)$ match a component in the DNF equation? \textbf{Yes}, $R = R \cup \lbrace d_1 \rbrace$.
+	\item Does $d_2 = (0, 0, 1, 1, 0)$ match a component in the DNF equation? \textbf{No}, don't add $d_2$ to $R$.
+	\item Does $d_3 = (1, 1, 1, 1, 0)$ match a component in the DNF equation? \textbf{No}, don't add $d_3$ to $R$.
+\end{enumerate}
+$R =  \lbrace d_1 \rbrace$, so only one relevant document is returned ($d_1$).
+
+TODO: in-place figure showing the venn diagram from Eric's slides (second venn)
+
+TODO: put Katja's venn diagram here too
 
 \subsection{Vector Space Model}
 
-TODO: use BOTH KATJA AND ERIC
+The \textbf{vector space model} treats documents as points in \textbf{high dimensional space}. Queries are also represented in vector space. Documents with the highest document-query similarity are selected. An \textbf{ordered list of relevant documents} is returned, going from \textbf{most relevant to least} (based on the similarity measure used).
 
-TODO: statistical model
+Figure \ref{fig:vector-space-model} shows an IR system with three documents and two index terms, "car" and "insurance". The three documents and the given input query are represented as vectors in the space of index terms (which is 2D in this case as there are two terms). $d_3 = (5, 1)$ because it has 5 occurrences of insurance and 1 occurrence of car. This means that the \textbf{document-term weights are no longer binary values}.
 
-TODO: term weighting (KATJA)
+Therefore, an $m \times n$ \textbf{document-by-word} matrix $M$ is constructed, where the rows are documents, the columns are terms and entry $M_{ij}$ is the \textbf{frequency} of the $j$th term appearing in the $i$th document. A query is a \textbf{vector} $q$ of size $n$, which contains weightings for each index term. An example of these is shown in Tables \ref{tab:doc-by-word-vector-space} and \ref{tab:query-vector-space}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|p{1cm}|p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}|}
+	\hline
+	& $Term_1$ & $Term_2$ & $Term_3$ & ... & $Term_n$ \\
+	\hline
+	$Doc_1$ & 14 & 6 & 1 & ... & 0 \\
+	$Doc_2$ & 0 & 1 & 3 & ... & 1 \\
+	$Doc_3$ & 0 & 1 & 0 & ... & 2 \\
+	... & ... & ... & ... & ... & ... \\
+	$Doc_n$ & 4 & 7 & 0 & ... & 5 \\
+	\hline
+	\end{tabular}
+	\caption{Example Document-By-Word Matrix with Word Frequencies}
+	\label{tab:doc-by-word-vector-space}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|p{1cm}|p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}|}
+	\hline
+	$q$ & 0 & 1 & 0 & ... & 1 \\
+	\hline
+	\end{tabular}
+	\caption{Example Query Vector with Weightings for each Index Term}
+	\label{tab:query-vector-space}
+\end{table}
+
+A \textbf{similarity measure} $sim(\vec{d}, \vec{q})$, which compares the similarity between a document $\vec{d}$ and a search query $\vec{q}$ must be given. The similarity measure uses throughout this module summary is in Equation \ref{eq:cosine-similarity}. This is the \textbf{cosine} of the two vectors and measures the angle between two vectors in vector space. \textbf{Smaller angles} between the documents mean they are more similar and the opposite for larger angles. This also \textbf{normalises} the output so long documents don't \textbf{skew the ranked list} of relevant documents with larger values.
+
+\begin{equation}
+	sim(\vec{d}, \vec{q}) = cos(\vec{d}, \vec{q}) = \frac{\vec{d} \cdot \vec{q}}{|\vec{d}| |\vec{q}|}
+	\label{eq:cosine-similarity}
+\end{equation}
+
+So how do we decide what \textbf{weights} to given each index term in the documents and in the search query $q$? We could use the \textbf{frequency} of the term in documents, but what if the term is generally frequent in \textbf{all documents}? Then, it doesn't really you find relevant documents, as all documents contain the word. This highlights a key issue:
+\begin{quote}
+	\textbf{Not all terms describe a document equally well!}
+\end{quote}
+
+\paragraph{}
+
+\begin{tabular}{ll}
+	\textbf{Definitions} & \\
+	$tf_{i,j}$ & number of times $w_i$ occurs in $_J$ \\
+	$df_w$ & number of documents that contain $w$ \\
+	$|D|$ & total number of documents in IR system 
+\end{tabular}
 
 \subsection{Set Model vs. Vector Model}
 
