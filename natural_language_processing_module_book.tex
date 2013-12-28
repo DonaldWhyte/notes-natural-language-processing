@@ -1382,62 +1382,110 @@ If you only choose one measure to evaluate the performance of your multi-class c
 
 \section{$n$-Gram Modelling}
 
-TODO: what it's used for
+Up to now, all the techniques that have been covered involved counting individual words, which also used the Bags of Words model. The probabilities of word \textit{sequences} (i.e. sentences) can be computed, which creates a \textbf{probabilistic language model}. This model can be applied to various tasks, such as:
+\begin{itemize}
+	\item speech recognition
+	\item handwriting recognition
+	\item context-sensitive spelling correction
+	\item word completion for texting
+\end{itemize}
 
-\subsection{Probabilistic Language Modelling}
+To predict what word is next, we can use a \textbf{history-based model}, in which we predict following things from past things (history $\approx$ context).  But how far in history do we go back? The \textbf{Markov assumption} states that $w_i$ only depends on \textit{immediately} preceding tokens. How many tokens you look back at is the \textbf{order} of the Markov assumption:
+\paragraph{}
+\begin{tabular}{rll}
+\textbf{0th order} &(Unigram) & $P(w_i|w_1...w_{i - 1}) \approx P(w_i)$ \\
+\textbf{First order} & (Bigram) & $P(w_i|w_1...w_{i - 1}) \approx P(w_i|w_{i-1}) = \frac{P(w_{i-1}w_i)}{P(w_{i-1})}$ \\
+\textbf{Second order} & (Trigram) & $P(w_i|w_1...w_{i - 1}) \approx P(w_i|w_{i-2}w_{i-1})$ \\
+\end{tabular}
 
-TODO: assign probability of sentence
+An $n$-gram is a continuous sequence of $n$ words. Building a language model using $n$-grams requires the $(n - 1)$th order Markov assumption. These language models are also known as \textbf{Markov models}.
 
-TODO: context and Markov assumption
+Equation \ref{eq:ngram-for-sentences} shows how you can \textbf{compute the probability of a sentence} using a \textbf{bigram language model}. Note that the first word just uses its own probability as there is no previous word. Figure \ref{fig:bigram-model} shows a graphical representation of the model. Each word is a node, which the word itself in the centre of it. Moving from $w_1$ to $w_2$ adds a multiplier to the final sequence probability; each time you move to the next node $w_j$ from $w_i$ a new multiplier is applied. These multipliers are determined by the probability of the bigram composed by the words $w_i$ and $w_j$, until we reach the end the sentence.
 
-\subsection{$n$-Gram Models}
+TODO: bi-gram diagram
 
-TODO: definition of n-grams with diagram
+\begin{multline}\\
+	P(\text{He often wears tight trousers}) \approx \\
+	P(\text{He}) \cdot P(\text{often$|$He}) \cdot P(\text{wears$|$often}) \cdot P(\text{tight$|$wears}) \cdot P(\text{trousers$|$tight})
+	\label{eq:ngram-for-sentences}
+\\\end{multline}
 
-TODO: advantages and disadvantages
+Bigram models have been tremendously successful, even though they only look one token back. This is because \textbf{long-distance dependencies} between words, like the one in Figure \ref{fig:long-distance-dependency} are rare. 74\% of all dependencies in the Penn Treebank are with an \textbf{adjacent} word, which can be captured by bigrams. This is not always the case however. The 26\% of other dependencies are still lost with bigrams, as evident by the example Figure \ref{fig:long-distance-dependency}. Depending on the text being processed, higher order models (e.g. trigrams) may be required.
 
-TODO: why it works!!! (Penn Treebank)
+TODO: figure showing example text highlighting dependant words
 
 \subsection{Deriving Language Model}
 
-TODO: deriving probabilistic model of $n$-grams from frequency counts
+To \textbf{construct} a probabilistic language model in practice, get a corpus and do the following steps:
+\begin{enumerate}
+	\item Start with a \textbf{vocabulary} $V$ (token types), which can be:
+	\begin{itemize}
+		\item all word types in corpus
+		\item $k$th most frequent word types in corpus
+		\item word types with highest mutual information with document classes (topic classification)
+	\end{itemize}
+	\item Pick a \textbf{model type}, such as unigrams, bigrams, trigrams, etc.
+	\item Estimate the \textbf{parameters}, or \textbf{word/sequence probabilities}. This is typically done using \textbf{frequency counts}
+\end{enumerate}
 
-TODO:
+The probabilities of each word/sequence is the \textbf{relative frequency}. Equations \ref{eq:unigram-prob}, \ref{eq:bigram-prob} and \ref{eq:trigram-prob} show hot to compute the probabilities of unigrams, bigrams and trigrams of occurring respectively. $N$ is the number of words in the entire corpus, $f(w_i)$ is the frequency of word $w_i$ in the corpus and $f(w_1, w_2, ..., w_n)$ is the frequency of sequence $w_1w_2...w_n$ occurring in the corpus.
 
-\subsection{Limitations of MLE}
+\begin{equation}
+	P(w_1) = \frac{f(w_1)}{N}
+	\label{eq:unigram-prob}
+\end{equation}
+\begin{equation}
+	P(w_2|w_1) = \frac{f(w_1, w_2)}{f(w_1)}
+	\label{eq:bigram-prob}
+\end{equation}
+\begin{equation}
+	P(w_3|w_1,w_2) = \frac{f(w_1, w_2, w_3)}{f(w_1, w_2)}
+	\label{eq:trigram-prob}
+\end{equation}
 
-TODO: limitations of MLE (MLE???)
+Figure \ref{fig:brown-bigram-model} shows part of a bigram model generated from the \textbf{Brown} corpus, which has one million words. Figure \ref{fig:bnc-bigram-model} shows part of a bigram generated from the \textbf{BNC} corpus, with 100 million tokens. Notice how these models are being represented by \textbf{frequency tables}, where the entry at row $i$ and column $j$ is the number of times the bigram $w_i w_j$ occurred in the corpus.
 
-TODO: how zero probabilities break down an entire model! DATA SPARSENESS
+TODO: Brown bigram model
+TODO: BNC bigram model
 
 \subsection{Smoothing}
 
-TODO: Laplace
+In the ideal scenario, higher $n$ (meaning higher order $n$-grams) means more discrimination (more accurate results). The same works for corpora -- bigger corpora work better than small ones. However, the higher $n$ is, the more \textbf{data sparseness} we have. Data sparseness means more zero probabilities, which lead to \textbf{complete failure} when predicting the next work in a sequence , or computing the probability of a sentence.
 
-TODO: Lidstone
+The problem with using such a language model is that it is surprised when unseen $n$-grams appear ($P(unseen) = 0$). This happens often, especially if $n$ is high. Data sparseness means that, not only is the probability of zero count words too \textit{low}, but the probability of nonzero count words is too \textbf{high]}.
+
+This problem can be solved by \textbf{smoothing}, which re-evaluates the zero-probability and low-probability $n$-grams and assign them \textbf{non-zero values}. This addresses data sparseness and prevents the model from completely breaking down.
+
+\textbf{Laplace's law} is one method of smoothing, which simply adds one to each frequency. To keep the balance, the vocabulary size is added to the denominator used to compute the probability. Laplace smoothing applied to the probability of aw \textbf{word sequence of length $n$} is given in Equation \ref{eq:laplace-n-sequence}. Laplace applied to the probability of a \textbf{bigram} is given in Equation \ref{eq:laplace-bigram}. $N$ is the length of the corpus and $V$ is the vocabulary size.
+
+\begin{equation}
+	P_{+1}(w_1,w_2,...,w_n) = \frac{f(w_1,w_2,...,w_n) + 1}{N + V^{n}}
+	\label{eq:laplace-n-sequence}
+\end{equation}
+
+\begin{equation}
+	P_{+1}(w_2|w_1) = \frac{f(w_1,w_2) + 1}{f(w_1) + V}
+	\label{eq:laplace-bigram}
+\end{equation}
+
+What happens if $N$ or $V$ is very large? Then you start \textbf{assigning too high probabilities to unseens}. A quick fix to this is \textbf{Lidstone's law}, which reduces the denominators magnitude by $\lambda$, as shown in Equations \ref{eq:lidstone-n-sequence} and \ref{eq:lidstone-bigram}.
+
+\begin{equation}
+	P_{+\lambda}(w_1,w_2,...,w_n) = \frac{f(w_1,w_2,...,w_n) + \lambda}{N + \lambda V^{n}}
+	\label{eq:lidstone-n-sequence}
+\end{equation}
+
+\begin{equation}
+	P_{+\lambda}(w_2|w_1) = \frac{f(w_1,w_2) + \lambda}{f(w_1) + \lambda V}
+	\label{eq:lidstone-bigram}
+\end{equation}
+
+This prevents us from assigning too much probability mass to unseens, providing we find a good estimate for $\lambda$ (which requires trial and error).
 
 TODO: Good-Turing smoothing
+????
 
-TODO: Class-based smoothing
-
-TODO: web-based smoothing
-
-TODO: summary table of all smoothings + the ones from "other" that have no detail
-
-\subsection{Applications}
-
-TODO: list of applications
-
-\subsubsection{Spell Checking}
-
-TODO: confusion sets
-???
-
-\subsubsection{Adjective Ordering}
-
-TODO
-
-???
+Smoothing methods typically try to "squeeze" more information out of the given data. But what about  \textbf{adding more data}? \textbf{Web-based smoothing} uses vast amounts of data automatically collected from the web. The web counts are used to compute $n$-gram probabilities if the original counts resulted in an textbf{unreliable prediction} (model broke down because of zero probabilities).
 
 \section{Information Theory}
 
