@@ -1115,16 +1115,82 @@ TODO: figure with two sizes
 \subsection{Association Measures}
 \label{sec:association-measures}
 
-TODO
+There many different association measures that could be used to link words to context words:
+\begin{itemize}
+	\item \textbf{Binary Co-occurrence} -- 0 if word has \textit{never} occurred with the context word and 1 if it has at least once
+	\item \textbf{Co-occurrence Frequency} -- as discussed before, this is the number of times the context word has appeared in the word's \textbf{context window}
+	\item \textbf{Pointwise Mutual Information (PMI)} -- uses concept of information to associate word with context word (see Section \ref{sec:mutual-information}). See Table \ref{tab:pmu-association-example} for PMI. Notice how words like "Pepsi" are associated much more to "drink" than "it", even though it co-occurs less. This is because the PMI measure has considered the fact that "it" is more common and co-occurs with many other words as well (whereas "Pepsi" will co-occur with less).
+\end{itemize}
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Object} & \textbf{Co-occurrence Count} & \textbf{PMI} \\
+		\hline
+		tea & 4 & 11.75 \\
+		Pepsi & 2 & 11.75 \\
+		beer & 5 & 10.20 \\
+		much & 3 & 2.54 \\
+		it & 3 & 1.24 \\
+		\hline
+	\end{tabular}
+	\caption{Words co-occurring with context word "drink" and their PMI association measure (Hindle, 1990)}
+	\label{tab:pmu-association-example}
+\end{table}
 
 \subsection{Similarity Measures}
 \label{sec:similarity-measures}
 
-TODO: similarity measures (cosine, Euclidean)
+Each word is represented as a vector of $m$ values -- $\vec{x} = (x_1, x_2, ..., x_m)$. $\vec{x}$'s components contain association measures of the word represent by $\vec{x}$ to all $m$ context words. Therefore, to determine the similarity between two words we perform some operation on the two words' vectors. This is the \textbf{similarity measure} $s(\vec{x}, \vec{y})$.
 
-TODO: actual example
+The \textbf{Euclidean distance} between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:euclidean-distance-sim}. The \textbf{cosine} of the angle between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:cosine-similarity-duplicate}. The former measures how close/far apart two vectors are and the latter measures the angle between two two vectors.
 
-TODO: evaluation of similarity measures
+Both of the these are commonly used as the similarity measure. \textbf{Cosine similarity} tends to be used more however, because TODO.
+
+\begin{equation}
+	|\vec{x} - \vec{y}| = \sqrt{ \sum_{i=1}^n {x_i - y_i}^2 }
+	\label{eq:euclidean-distance-sim}
+\end{equation}
+\begin{equation}
+	cos(\vec{x}, \vec{y}) = \frac{\vec{x} \cdot \vec{y}}{|\vec{x}| |\vec{y}|}
+	\label{eq:cosine-similarity-duplicate}
+\end{equation}
+
+Suppose we have five words in the vocabulary -- "cosmonaut", "astronaut", "moon", "car", "truck" -- and the context words are these same five words. Using co-occurrence frequency as the association measure, considering all context windows gives us the vectors in Table \ref{tab:similarity-measure-example}.
+
+Using the cosine of the angle between vectors as the similarity measure, the similarity of "cosmonaut" and "moon", as well as "cosmonaut" and "truck", are given in Equation \ref{eq:similarity-measure-example}.
+
+\begin{table}
+	\centering
+	\begin{tabular}{|r|l|l|l|l|l|}
+		& \textbf{cosmonaut} & \textbf{astronaut} & \textbf{moon} & \textbf{car} & \textbf{truck} \\
+		\textbf{cosmonaut} & 2 & 0 & 1 & 1 & 0 \\
+		\textbf{astronaut} & 0 & 1 & 1 & 0 & 0 \\
+		\textbf{moon} & 1 & 1 & 2 & 1 & 0 \\
+		\textbf{car} & 1 & 0 & 1 & 3 & 1 \\
+		\textbf{truck} & 0 & 0 & 0 & 1 & 2 \\								
+	\end{tabular}
+	\caption{Co-occurrence frequency of five words with each other}
+	\label{tab:similarity-measure-example}
+\end{table}
+
+\begin{equation}
+\begin{aligned}[b]
+	cos(\vec{cosmonaut}, \vec{moon}) = 
+	\frac{\vec{cosmonaut} \cdot \vec{moon}}{|\vec{cosmonaut}| |\vec{moon}|}
+	&= \frac{2 \cdot 1 + 0 \cdot 1 + 1 \cdot 2 + 1 \cdot 1 + 0 \cdot 0}{ \sqrt{2^2 + 0^2 + 1^2 + 1^2 + 0^2} \sqrt{1^2 + 1^2 + 2^2 + 1^2 + 0^2} } \\
+	&= \frac{5}{\sqrt{6}\sqrt{7}} = \frac{5}{6.481} = 0.77 \\
+	\\
+	cos(\vec{cosmonaut}, \vec{truck}) = 
+	\frac{\vec{cosmonaut} \cdot \vec{truck}}{|\vec{cosmonaut}| |\vec{truck}|}
+	&= \frac{2 \cdot 0 + 0 \cdot 0 + 1 \cdot 0 + 1 \cdot 1 + 0 \cdot 2}{ \sqrt{2^2 + 0^2 + 1^2 + 1^2 + 0^2} \sqrt{0^2 + 0^2 + 0^2 + 1^2 + 2^2} } \\
+	&= \frac{1}{\sqrt{6}\sqrt{5}} = \frac{1}{5.477} = 0.18 \\
+	\label{eq:similarity-measure-example}
+\end{aligned}
+\end{equation}
+
+Therefore, because the similarity measure for "cosmonaut" and "truck" is \textbf{smaller} than "cosmonaut" and "moon", "cosmonaut" and "moon" are more similar to each other than "cosmonaut" and "truck". 
 
 \subsection{Clustering}
 
@@ -1479,7 +1545,7 @@ Using the \textbf{Reuters} training corpora, computing the mutual information be
 \end{aligned}
 \end{equation}
 
-TODO: pointwise mutual information
+TODO: pointwise mutual information (see slides on similarity measures too for this)
 
 \section{Part-of-Speech Tagging}
 
