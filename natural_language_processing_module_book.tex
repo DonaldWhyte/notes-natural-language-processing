@@ -1052,25 +1052,73 @@ If you want to build a classifier which assigns \textbf{only one class} to a doc
 
 See Section \ref{sec:multiclass-classifier-evaluation} for ways to evaluate multiclass classifiers.
 
-\subsection{Semantic Similarity}
+\section{Semantic Similarity}
 
-TODO: automatically determine which words mean similar things is goal!
+Suppose you want to group words according to how similar they are. For example, you may group "apple", "orange" and "banana" together, as they're all edible fruit. How is it possible to do this automatically, just by processing text How do you \textbf{measure} the similarity of two words? Two words are similar if their meaning is roughly the same. That is, they're \textbf{semantically} similar.
 
-\subsubsection{Vector Space Model}
+\subsection{Vector Space Model}
 
-TODO: what is it and how to use it to derive similar words
+The \textbf{Vector Space Model} can be used to determine the similarity of two words, just like how it was used for IR. It makes the assumption that word meaning $\approx$ context; that is, words mean similar things if they are \textbf{used in similar contexts}. The model represent words as vectors in multidimensional space. Words whose vectors are \textbf{closer in space} are more similar to each other.
 
-\subsubsection{Context Features}
+Figure \ref{fig:vsm-similar} shows a collection of words represented in vector space.Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
 
-TODO: using context (n-grams???)
+Let $W$ be all the words in the vocabulary and $n = |W|$ be the number of words. Each word is represented by an $m$-dimensional vector, where $m$ is the number of context words, or features. \textbf{Context words} are words specifically chosen to be used for extracting semantics.  Each \textbf{component} of the $m$-dimensional vector is an \textbf{association measure} of the word the vector is representing and the context word that component refers to. 
 
-TODO: size of context
+Here, a \textbf{co-occurrence vector} is used to represent a word. This vector contains an association measure between a word and all the context words, based on \textbf{how many times the two words appear together}. This measures how often a word is used in a particular context, so once you have that you can check the contexts two words are used in to be if they're used in similar ones (thus, they are similar).
 
-\subsubsection{Use of Association Measure}
+\paragraph{\textbf{NOTE:} } You could use an $n$-dimensional vector to represent all $n$ words, which each component being an association measure of two words. However, this is very expensive computationally and storage-wise.
+\paragraph{}
+
+To construct an association measure between a word and context word, a \textbf{predefined window} of words is often considered for the context. Let $d$ be the size of the window. This means that, for each occurrence of word, look $\frac{d}{2}$ words before it and $\frac{d}{2}$ after. Then, count the \textbf{number of times each context word appears in those windows}, and use that frequency as the association measure.
+
+Suppose we have a vocabulary of three \textbf{words} -- "first", "learning" and "discovering". We have five \textbf{context words} -- "these", "meaning", "the", "practical", "come". Suppose we are using a window size of 6 ($d = 3$) and examining the text elow. We look for each occurrence of a word in the vocabulary and count the number of times context words appear in that window. After doing this, we're left with Table \ref{tab:vsm-co-occurrence-vectors}, which represents each of the three words as 5-dimensional \textbf{co-occurrence} vector.
+
+\begin{quote}
+"And this is the last thing the anthropologist who tries to understand symbols can afford to do. He must start with the explanations and commentaries which his informants themselves offer about their \textit{"symbols. These must \textbf{first} be examined in"} the contexts in which they are usually employed, where they occur naturally, although subsequent generalizing discussion helps the anthropologist to improve his very \textit{"superficial initial standing. \textbf{Learning} the meaning of"} symbols is part of the \textit{"anthropologist's practical semantics: \textbf{discovering} the meaning of"} words, noticing when their use is appropriate and when it is not. all this requires imagination, patience, considerable linguistic skill, but above all a rigorous respect for the facts. \textit{"These must come \textbf{first}; fantasy can come"} later"
+\end{quote}
+
+\paragraph{\textbf{NOTE:}} Context windows are italicised and the occurrences of regular words are emboldened.
+
+\paragraph{}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|l|l|l|}
+		\hline
+		& these & meaning & the & practical & same \\
+		\hline
+		first & 2 & 0 & 0 & 0 & 2 \\
+		learning & 0 & 1 & 1 & 0 & 0 \\
+		discovering & 0 & 1 & 1 & 1 & 0 \\
+		\hline
+	\end{tabular}
+	\caption{Three words represented as co-occurrence vectors with respect to five context words}
+	\label{tab:vsm-co-occurrence-vectors}
+\end{table}
+
+The steps of constructing a vector space model to measure word similarity are as follows:
+\begin{enumerate}
+	\item Determine a \textbf{set of context words} -- an example of this is selecting the $k$ most frequent words in the corpus
+	\item Determine a \textbf{window size} -- e.g. 10 words (5 to the left and 5 to the right)
+	\item Compute \textbf{co-occurrence vector} for each word in corpus -- this uses an \textbf{association measure} (Section \ref{sec:association-measures}, such as how many often a word co-occurs with context words in the given window
+	\item Use a \textbf{similarity measure} (Section \ref{sec:similarity-measures} to compute whether vectors are close in space (i.e. words are similar)
+\end{enumerate}
+
+\subsection{Variations}
+
+\textbf{Stop words (function words)} could be eliminated as \textbf{context words}, as they're often used near \textit{most} words at some point and have little semantic meaning. Therefore, they just add noise to the final similarity measure. Additionally, the \textbf{roots/stems} of words could be used instead of the word itself, which adds a layer of generalisation to the association.
+
+The \textbf{size of the context} (window size) has a big impact on how words are associated to one another. Small windows (e.g. 2) result in \textbf{paradigmatic} associations, which means words are seen as similar if they are the same type/category of word (e.g. words are both vehicles, fruit, pets, etc.). Large windows (e.g. 30) result in \textbf{syntagmatic} associations which relate worlds that are part of the same high-level topic. This is shown in Figure \ref{fig:size-of-context-effect}, where "car" is similar to "van", "truck", etc. with a 2-word window but is related to more broader concepts with a 30-word window, such as "drive" and "park".
+
+TODO: figure with two sizes
+
+\subsection{Association Measures}
+\label{sec:association-measures}
 
 TODO
 
-\subsubsection{Similarity Measures}
+\subsection{Similarity Measures}
+\label{sec:similarity-measures}
 
 TODO: similarity measures (cosine, Euclidean)
 
@@ -1078,7 +1126,9 @@ TODO: actual example
 
 TODO: evaluation of similarity measures
 
-\subsubsection{Clustering}
+\subsection{Clustering}
+
+???
 
 TODO: clustering approaches
 
