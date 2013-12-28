@@ -386,8 +386,6 @@ More sophisticated inverted file structures can be created, which can track the 
 
 TODO: FIGURE FROM slide 3 of Eric
 
-TODO: discussion topics (as many docs as possible??)
-
 Indexing as many documents as possible sounds like a good way to provide a \textbf{more comprehensive search}, but it may not be the thing to do.  There are \textbf{disadvantages}:
 \begin{itemize}
 	\item if you only want to look at a certain type of document, it is much more difficult to get precise, relevant hits when everything but the kitchen sink is in the system
@@ -820,12 +818,86 @@ To summarise, multinomial Naive Bayes:
 	\item \textbf{ignores} words in test document that \textbf{do not occur}. There is no \textit{negative} evidence to reduce probabilities, only \textit{positive} evidence to increase it
 \end{itemize}
 
-TODO: example from coursework
+Table \ref{tab:example-naive-bayes} shows an example training dataset for a topic classifier, where the two topics (classes) are "china" and "notChina". There are four documents in the training dataset, which will be used to build the probability model, and one document to test the learnt classifier on. Building a multinomial Naive Bayes model using the training dataset and using it on the test document is shown after the table.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|l|}
+	\hline
+	& \textbf{Document ID} & \textbf{Words in Document} & \textbf{in $c=$China?} \\
+	\hline
+	Training Set & 1 & Taipei Taiwan & yes \\
+	& 2 & Macao Taiwan Shanghai & yes \\
+	& 3 & Japan Sapporo & no \\
+	& 4 & Sapporo Osaka Taiwan & no \\
+	\hline
+	Test Document & 5 & Taiwan Taiwan Sapporo & ? \\
+	\hline 
+	\end{tabular}
+	\caption{Training Dataset and Test Document for Naive Bayes Classifiers}
+	\label{tab:example-naive-bayes}
+\end{table}
+
+\begin{multline}\\
+	P(China) = \frac{2}{4} \\
+	P(notChina) = \frac{2}{4} \\
+	V = \lbrace Taipei, Taiwan, Macao, Shanghai, Japan, Sapporo, Osaka \rbrace \\
+	|V| = 7 \\
+\label{eq:example-class-prob}
+\end{multline}
+
+\begin{tabular}{l}
+\textbf{Large document} for class $China$ is: "Taipei Taiwan Macao Taiwan Shanghai". \\
+\textbf{Large document} for class $notChina$ is: "Japan Sapporo Sapporo Osaka Taiwan" \\
+\end{tabular}
+
+\hspace{2pt}
+
+Word probabilities for class $China$:
+\begin{equation}
+\begin{aligned}[b]
+n^{China} = 5 \\
+P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{1 + 1}{5 + 7} = \frac{2}{12} \\
+P(Taiwan|China) = \frac{2 + 1}{5 + 7} = \frac{3}{12} \\
+P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{5 + 7} = \frac{1}{12}
+\end{aligned}
+\end{equation}
+
+Word probabilities for class $notChina$:
+\begin{equation}
+\begin{aligned}[b]
+n^{notChina} = 5 \\
+P(Japan|notChina) = P(Osaka|notChina) = P(Taiwan|notChina) = \frac{1 + 1}{5 + 7} = \frac{2}{12} \\
+P(Sapporo|notChina) = \frac{2 + 1}{5 + 7} = \frac{3}{12} \\
+P(Taipai|China) = P(Macao|China) = P(Shanghai|China) = \frac{0 + 1}{5 + 7} = \frac{1}{12} \\
+\end{aligned}
+\end{equation}
+
+Applying classifier with computed probability model to document 5:
+\begin{equation}
+\begin{aligned}[b]
+	P(China|doc5) & \propto P(China) \cdot \prod_{i \in positions} {P(w_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|China) \cdot P(Taiwan|China) \cdot P(Sapporo|China) \\
+	& \propto \frac{1}{2} \cdot \frac{3}{12}^2 \cdot \frac{1}{12} \\
+	& \propto \frac{6}{12} \cdot \frac{3}{12}^2 \cdot \frac{1}{12} \\
+	& \propto \frac{54}{20736} \\
+	& \propto 0.002604 \\
+	& \nonumber \\ 
+	P(notChina|doc5) & \propto P(notChina) \cdot \prod_{i \in positions} {P(w_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|notChina) \cdot P(Taiwan|notChina) \cdot P(Sapporo|notChina) \\
+	& \propto \frac{1}{2} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\
+	& \propto \frac{6}{12} \cdot \frac{2}{12}^2 \cdot \frac{3}{12} \\	
+	& \propto \frac{72}{20736} \\
+	& \propto 0.003472
+\end{aligned}
+\end{equation}
+
+Therefore, a multinomial Naive Bayes classifier would label document 5 with the class $notChina$.
 
 \subsubsection{Binomial Naive Bayes}
 
-\textbf{Binomial Naive Bayes} does not take the frequency of words in the document into consideration, it only cares if the word occurs in the document at all. Equation \ref{eq:binomial-naive-bayes-base} shows how this, combined with Bayes' rule and BOW, can be used to find the most likely class for a document $d$.
- 
+\textbf{Binomial Naive Bayes} does not take the frequency of words in the document into consideration, it only cares if the word occurs in the document at all. Equation \ref{eq:binomial-naive-bayes-derivation} shows how this, combined with Bayes' rule and BOW, can be used to find the most likely class for a document $d$, where $e_i$ is defined in Equation \ref{eq:binomial-e-i}.
+
 \begin{equation}
 \begin{aligned}[b]
 	C_{d} &= max_{c \in C} \; P(c|D) \\
@@ -833,15 +905,82 @@ TODO: example from coursework
 	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{by Bayes' rule} \\
 	&= max_{c \in C} \; P(d|c)P(c) 
 	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{we \textit{know} we have document }d\text{, so } P(d) = 1 \\
-	&= max_{c \in C} \; P(e_1,e_2,...,e_{|V|}| c) P(c)
+	&= max_{c \in C} \; P(e_1,e_2,...,e_{|V|}| c)P(c)
 	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{expanding }P(d|c) \\	
-	&= max_{c \in C} \; P(c) \prod_{w_i \in V} P(e_i|c}
+	&= max_{c \in C} \; P(C) \cdot \prod_{w_i \in V} {P(e_i|c)}
 	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{rearranging} \\
 \end{aligned}
-\label{eq:binomial-naive-bayes-base}
+\label{eq:biomial-naive-bayes-derivation}
 \end{equation}
 
-TODO: summary
+\begin{equation}
+	e_i = \begin{cases}
+		1,& \text{if word }w_i\text{ occurs in document }d \\
+		0,& \text{otherwise}
+	\end{cases}
+	\label{eq:binomial-e-i}
+\end{equation}
+
+The last line of that derivation contains the formula used to determine the class of document $d$ given a probability model:  $P(C) \cdot \prod_{w_i \in V} {P(e_i|c)}$. Binomial Naive Bayes requires two kinds of probabilities. As before, it requires the probability of any document be a certain class, $P(c)$. This is computed using Equation \ref{eq:naive-bayes-class-prob}, in the same way as multinomial Naive Bayes.
+
+The formula also requires the probability of any word $w_i$ occurring \textit{at all} in a document, \textit{given} that the document is a particular class, $P(e_i|c)$. This is computed using Equation \ref{eq:binomial-word-existence-prob}. Note that \textbf{smoothing} has been applied here much like in multinomial Naive Bayes, to prevent zero probabilities skewing the final classification.
+
+\begin{equation}
+	P(e_i|c) = \frac{(\#\;documents\;of\;class\;c\;that\;contain\;word\;w_i) + 1}{(\#\;documents\;of\;class\;c) + (\#\;of\;classes)}	
+	\label{eq:binomial-word-existence-prob}
+\end{equation}
+
+Table \ref{tab:example-naive-bayes} will again to be used as an example. Building a binomial Naive Bayes model using the training dataset and using it on the test document from Table \ref{tab:example-naive-bayes} is shown below.
+
+The \textbf{class probabilities} $P(c)$ are the \textbf{same as in multinomial Naive Bayes}.
+
+Word probabilities for class $China$:
+\begin{equation}
+\begin{aligned}[b]
+P(Taipei|China) = P(Macao|China) = P(Shanghai|China) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
+P(Taiwan|China) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
+P(Japan|China) = P(Sapporo|China) = P(Osaka|China) = \frac{0 + 1}{2 + 2} = \frac{1}{4}
+\end{aligned}
+\end{equation}
+
+Word probabilities for class $notChina$:
+\begin{equation}
+\begin{aligned}[b]
+P(Japan|notChina) = P(Osaka|notChina) = P(Taiwan|notChina) = \frac{1 + 1}{2 + 2} = \frac{2}{4} \\
+P(Sapporo|notChina) = \frac{2 + 1}{2 + 2} = \frac{3}{4} \\
+P(Taipei|notChina) = P(Macao|notChina) = P(Shanghai|notChina) = \frac{0 + 1}{2 + 4} = \frac{1}{4}
+\end{aligned}
+\end{equation}
+
+Applying classifier to document 5:
+\begin{equation}
+\begin{aligned}[b]
+	P(China|doc5) & \propto P(China) \cdot \prod_{w_i \in V} {Pe_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|China) \cdot P(Sapporo|China) \nonumber \\
+	& \cdot (1 - P(Taipei|China)) \cdot (1 - P(Macao|China)) \cdot (1 - P(Shanghai|China)) \nonumber \\
+	& \cdot (1 - P(Japan|China)) \cdot (1 - P(Osaka|China)) \\
+	& \propto \frac{1}{2} \cdot \frac{3}{4} \cdot \frac{1}{4}
+	\cdot \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{2}{4}
+	\cdot \frac{3}{4} \cdot \frac{3}{4} \\
+	& \propto \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{1}{4}
+	\cdot \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{2}{4}
+	\cdot \frac{3}{4} \cdot \frac{3}{4} \\
+	& \propto \frac{432}{65536} \\
+	& \propto 0.006591 \\
+	& \nonumber \\
+	P(notChina|doc5) & \propto P(notChina) \cdot \prod_{w_i \in V} {Pe_i|China)} \\
+	& \propto \frac{1}{2} \cdot P(Taiwan|notChina) \cdot P(Sapporo|notChina) \nonumber \\
+	& \cdot (1 - P(Taipei|notChina)) \cdot (1 - P(Macao|notChina)) \nonumber \\
+	& \cdot (1 - P(Shanghai|notChina)) \cdot (1 - P(Japan|notChina)) \nonumber \\
+	& \cdot (1 - P(Osaka|notChina)) \\	
+	& \propto \frac{1}{2} \cdot \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{2}{4} \cdot \frac{2}{4} \\
+	& \propto \frac{2}{4} \cdot \frac{2}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{3}{4} \cdot \frac{2}{4} \cdot \frac{2}{4} \\
+	& \propto \frac{1296}{64436} \\
+	& \propto0.01977
+\end{aligned}
+\end{equation}
+
+Therefore, a Bernoulli, binomial Naive Bayes classifier would label document 5 with the class $notChina$.
 
 \subsubsection{Multinomial vs. Binomial}
 
