@@ -620,20 +620,6 @@ Table \ref{tab:tf-idf} lists some terms and their frequency within a document $d
 	\item Makes the assumption that terms are \textbf{independant}. This is \textbf{not realistic}, as natural language has phrases, collocations and grammar.
 \end{itemize}
 
-\subsection{Precision Cutoff}
-
-\textbf{Precision} and \textbf{recall} are ways of evaluating the effectiveness of IR systems, as described in Section \ref{sec:ir-evaluation}. Recall and precision change depending on the number of relevant documents returned by the IR system.
-
-Take the example in Figure \ref{fig:precision-cutoff}. The precision for the first ranking after running through the \textbf{first five documents in order} is 1.0. The second ranking has a precision of 0, since the first five documents are all non-relevant (but there are five relevant documents after that!) When counting relevant/non-relevant documents through the \textit{entire} ordered document list, the precision will be same regardless of order.
-
-\textbf{Precision cut-off} is when you only return a pre-defined \textbf{maximum} of documents. This may improve precision, but recall is reduced (as less documents are returned). Therefore, it is important to \textbf{tweak} the point at which you stop counting to optimise recall and precision to where you want them. Too short a cut-off and precision may appear \textit{low}, as it hasn't had a chance to sample enough returned documents. Too long and there will be many irrelevant documents, which will also result in low precision.
-
-TODO: precision cutoff figure
-
-\textbf{Average precision} is another way of measuring precision, which \textbf{averages} the precision measurements from using different cut-off values.An example of this is shown in Figure \ref{fig:average-precision-figure}.
-
-TODO: average precision figure
-
 \subsection{Manipulation of IR Systems}
 
 One big limitation with IR systems is that they're often \textbf{easy to manipulate}. Many people exploit web search engines to get their pages high in searches, for example. One might hide loads of terms in their web pages which fool IR systems in thinking the page is relevant when it's not (causing the user to visit it). This is why most systems' query ranks are \textbf{supplemented by popularity measures} (e.g. page hits), so that kind of abuse is prevented.
@@ -1103,7 +1089,68 @@ TODO: evaluation of clustering approaches
 \subsection{Information Retrieval}
 \label{sec:ir-evaluation}
 
-TODO: recall, precision, f-measure
+\textbf{Evaluation} of information retrieval systems is typically done using two main measurements -- precision and recall. \textbf{Recall} is the proportion of \textit{relevant} documents returned out of all the relevant documents that exist. \textbf{Precision} refers to the proportion of returned documents that are actually relevant (how \textit{precise} is the result). These values range from 0 to 1, where 1 is maximum recall/precision and 0 is none. Figure \ref{fig:recall-precision-vis} illustrates what recall and precision mean.
+
+TODO: figure showing recall/precision from slides, the labelled version at end!!!
+
+To compute these values, a \textbf{contingency table} must first be computed. This records the number of times the IR system:
+\begin{itemize}
+	\item retrieved a document that was \textit{was} relevant
+	\item retrieved a document when it \textit{wasn't} relevant
+	\item \textit{did not} retrieved a document that was \textit{was} relevant
+	\item \textit{did not} retrieved a document when it \textit{wasn't} relevant
+\end{itemize}
+An example of this is given in Table \ref{tab:example-contingency}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|l|}
+		\hline
+		& \textbf{Relevant} & \textbf{Non-relevant} & \textbf{Total} \\
+		\hline
+		\textbf{Retrieved} & $N_{11}$ & $N_{10}$ & $N_{11} + N_{10}$ \\
+		\textbf{Not Retrieved} & $N_{01}$ & $N_{00}$ & $N_{01} + N_{00}$ \\
+		\hline
+		\textbf{Total} & $N_{11} + N_{01}$ & $N_{10} + N_{00}$  & $N_{11} + N_{01} + N_{10} + N_{00}$ \\
+		\hline
+	\end{tabular}
+	\caption{Frequency/Contingency Table for Class One}
+	\label{tab:example-contingency}
+\end{table}
+
+Equations \ref{eq:recall} and \ref{eq:precision} show how to compute recall and precision respectively, using the contents of the contingency table.
+
+\begin{equation}
+	\frac{N_{11}}{N_{11} + N_{01}}
+	\label{eq:recall}
+\end{equation}
+
+\begin{equation}
+	\frac{N_{11}}{N_{11} + N_{10}}
+	\label{eq:precision}
+\end{equation}
+
+\textbf{F-measure} combines both precision and recall into a single measurement. The formula is given in Equation \ref{eq:f-measure}, where $\alpha \in [0..1]$ determines how heavily the measurement weights precision and recall. \textbf{High} $\alpha$ makes \textbf{recal}  more important and \textbf{low} $\alpha$ makes \textbf{precision} more important. The most common value for $\alpha$ is 0.5 ($F_{0.5} = \frac{2PR}{P + R}$).
+
+\begin{equation}
+	F_{\alpha} = \frac{1}{\alpha \frac{1}{P} + (1-\alpha)\frac{1}{R}}
+	\label{eq:f-measure}
+\end{equation}
+
+\subsubsection{Precision Cutoff}
+
+Recall and precision change depending on the number of relevant documents returned by the IR system.
+
+Take the example in Figure \ref{fig:precision-cutoff}. The precision for the first ranking after running through the \textbf{first five documents in order} is 1.0. The second ranking has a precision of 0, since the first five documents are all non-relevant (but there are five relevant documents after that!) When counting relevant/non-relevant documents through the \textit{entire} ordered document list, the precision will be same regardless of order.
+
+\textbf{Precision cut-off} is when you only return a pre-defined \textbf{maximum} of documents. This may improve precision, but recall is reduced (as less documents are returned). Therefore, it is important to \textbf{tweak} the point at which you stop counting to optimise recall and precision to where you want them. Too short a cut-off and precision may appear \textit{low}, as it hasn't had a chance to sample enough returned documents. Too long and there will be many irrelevant documents, which will also result in low precision.
+
+TODO: precision cutoff figure
+
+\textbf{Average precision} is another way of measuring precision, which \textbf{averages} the precision measurements from using different cut-off values.An example of this is shown in Figure \ref{fig:average-precision-figure}.
+
+TODO: average precision figure
+
 
 \subsection{Binary Classification}
 
