@@ -1130,7 +1130,7 @@ Equations \ref{eq:recall} and \ref{eq:precision} show how to compute recall and 
 	\label{eq:precision}
 \end{equation}
 
-\textbf{F-measure} combines both precision and recall into a single measurement. The formula is given in Equation \ref{eq:f-measure}, where $\alpha \in [0..1]$ determines how heavily the measurement weights precision and recall. \textbf{High} $\alpha$ makes \textbf{recal}  more important and \textbf{low} $\alpha$ makes \textbf{precision} more important. The most common value for $\alpha$ is 0.5 ($F_{0.5} = \frac{2PR}{P + R}$).
+\textbf{F-measure} combines both precision and recall into a single measurement. The formula is given in Equation \ref{eq:f-measure}, where $R$ is recall, $P$ is precision and $\alpha \in [0..1]$ determines how heavily the measurement weights precision and recall. \textbf{High} $\alpha$ makes \textbf{recal}  more important and \textbf{low} $\alpha$ makes \textbf{precision} more important. The most common value for $\alpha$ is 0.5 ($F_{0.5} = \frac{2PR}{P + R}$).
 
 \begin{equation}
 	F_{\alpha} = \frac{1}{\alpha \frac{1}{P} + (1-\alpha)\frac{1}{R}}
@@ -1151,13 +1151,33 @@ TODO: precision cutoff figure
 
 TODO: average precision figure
 
-
 \subsection{Binary Classification}
 
-(slightly different perspective to IR)
-TODO: recall, precision, f-measure
+When you have two classes, evaluating classifiers is done in the same way as information retrieval systems. You create a $2 \times 2$ \textbf{contingency table} and then use the values inside it to compute the precision, recall and F-measure. This is shown in Table \ref{tab:bin-classify-example-contingency} and Equations \ref{eq:bin-classify-recall} and \ref{eq:bin-classify-precision}. $t_p$ and $t_n$ are the number of \textbf{true} positives and negatives, while $f_p$ and $f_n$ are the number \textbf{false} positives and negatives.
 
-TODO: text classification II
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& \textbf{Real Class = Yes} & \textbf{Real Class = No} \\
+		\hline
+		\textbf{Output Class = Yes} & $t_p$ & $f_p$ \\
+		\textbf{Output Class = No} & $f_n$ & $t_n$ \\
+		\hline
+	\end{tabular}
+	\caption{Contingency Table for Binary Classification}
+	\label{tab:bin-classify-example-contingency}
+\end{table}
+
+\begin{equation}
+	\frac{t_p}{t_p + f_n}
+	\label{eq:bin-classify-recall}
+\end{equation}
+
+\begin{equation}
+	\frac{t_p}{t_p + f_p}
+	\label{eq:bin-classify-precision}
+\end{equation}
 
 \subsection{Multi-class Classification}
 \label{sec:multiclass-classifier-evaluation}
