@@ -1058,15 +1058,13 @@ TODO: impact on performance figure
 
 \subsection{Multi-class Text Classification}
 
-TODO: > 2 classes
+Rather than saying whether a document is about China or not, what if we wanted to know if a document is about China, Japan, South or North Korea? Each of the four countries would be a class, so we have \textbf{multiclass} classification, instead of \textbf{binary} classification.
 
-\subsection{Evaluating Multi-class Classifiers}
+Even though Naive Bayes is inherently a binary classifier, we can use it for multiclass classification. We build a Naive Bayes classifier $\gamma_c$ for each class $c \in C$. When we want to classify a test document $d$, we run $d$ through each classifier and assign $d$ the class $c$ for all $c$ in which $\gamma_c$ returns true.
 
-TODO: micro and macro averaging
+If you want to build a classifier which assigns \textbf{only one class} to a document, then simply run the classification as before and choose the class $c$ with the \textbf{highest score (highest probability)} out of all the classes where $\gamma_c$ returns true.
 
-\subsection{Examples of Binary/Multiclass Classification}
-
-TODO: EXAMPLES of text classification from end of first+second sets of slides
+See Section \ref{sec:multiclass-classifier-evaluation} for ways to evaluate multiclass classifiers.
 
 \subsection{Semantic Similarity}
 
@@ -1107,13 +1105,97 @@ TODO: evaluation of clustering approaches
 
 TODO: recall, precision, f-measure
 
-\subsection{Classification}
+\subsection{Binary Classification}
 
 (slightly different perspective to IR)
 TODO: recall, precision, f-measure
 
 TODO: text classification II
 
+\subsection{Multi-class Classification}
+\label{sec:multiclass-classifier-evaluation}
+
+Evaluating the performance of binary classifiers using precision and recall is simple. When you have a classifier which can assign more than two potential classes to a data item, things get a little more complicated.
+
+You can compute the precision and recall \textbf{per class} (say, for each classifier $\gamma_c$), but then how do you \textbf{combine} the multiple performance measures into one?
+
+\textbf{Macroaveraging} computes the performance for each class, then averages the results. \textbf{Microaveraging} collects the \textit{decisions} for all classes, computes a contigency table and \textit{then} evaluates.
+
+To compute \textbf{macroaverage} precision:
+\begin{enumerate}
+	\item Construct $2 \times 2$ frequency table for each class $c \in C$
+	\item Compute precision of each class table
+	\item Compute average precision from individual precisions
+\end{enumerate}
+
+To compute \textbf{microaverage} precision:
+\begin{enumerate}
+	\item Construct $2 \times 2$ frequency table for each class $c \in C$
+	\item Sum entries of all tables together to create a new table
+	\item Compute precision using values in combined table
+\end{enumerate}
+
+Example of computing microaverage and macroaverage for a two-class problem is given below. Tables \ref{tab:multiclass-eval-class1} \ref{tab:multiclass-eval-class2} show the frequency tables (and precision of them) for the two classes and \ref{tab:multiclass-eval-classsum} is the sum of the two tables (for computing microaverage).
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& is class & is not class \\
+		\hline
+		classifier output = "yes" & $N_{11} = 10$ & $N_{10} = 10$ \\
+		classifier output = "no" & $N_{01} = 10$ & $N_{00} = 970$ \\
+		\hline
+		\textbf{Precision} & \multicolumn{2}{l|}{
+			$\frac{N_{11}}{N_{10}} = \frac{10}{10 + 10} = \frac{10}{20} = 0.5$
+		} \\
+		\hline
+	\end{tabular}
+	\caption{Frequency/Contingency Table for Class One}
+	\label{tab:multiclass-eval-class1}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& is class & is not class \\
+		\hline
+		classifier output = "yes" & $N_{11} = 90$ & $N_{10} = 10$ \\
+		classifier output = "no" & $N_{01} = 10$ & $N_{00} = 890$ \\
+		\hline
+		\textbf{Precision} & \multicolumn{2}{l|}{
+			$\frac{N_{11}}{N_{10}} = \frac{90}{90 + 10} = \frac{90}{100} = 0.9$
+		} \\
+		\hline
+	\end{tabular}
+	\caption{Frequency/Contingency Table for Class Two}
+	\label{tab:multiclass-eval-class2}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& is class & is not class \\
+		\hline
+		classifier output = "yes" & $N_{11} = 100$ & $N_{10} = 20$ \\
+		classifier output = "no" & $N_{01} = 20$ & $N_{00} = 1860$ \\
+		\hline
+		\textbf{Precision} & \multicolumn{2}{l|}{
+			$\frac{N_{11}}{N_{10}} = \frac{100}{100 + 20} = \frac{100}{120} = 0.83$
+		} \\
+		\hline
+	\end{tabular}
+	\caption{Micro-averaged Frequency/Contingency Table (Sum of Tables \ref {tab:multiclass-eval-class1} and \ref{tab:multiclass-eval-class2})}
+	\label{tab:multiclass-eval-classsum}
+\end{table}
+
+The macroaverage is the average precision of all individual contingency tables, which takes it $\frac{0.5 + 0.9}{2} = 0.7$. The microaverage is the precision of the contingency table constructed by summing the individual contingency tables, which is $\frac{100}{100 + 20} = \frac{100}{120} = 0.83$.
+
+Notice how these are measures are \textbf{significantly different}. The microaveraged precision is \textbf{dominated} by the score on the \textbf{common classes}. This means if you perform really well on rare classes and poorly on common classes, the precision is lower. The macroaverage precision weights the performance on all classes \textbf{equally}, so if rare classes are classified correctly, then the precision is increased.
+
+If you only choose one measure to evaluate the performance of your multi-class classifier, then be sure to think it through carefully. If classifying common classes accurately is more important to use, then use microaveraging. If you don't care about that and you care about all classes equally (e.g. you just didn't have that much of one class in a test dataset, but you still care about it as much), then use macroaveraging. Alternatively, you can always just compute both and use the results from both to determine the effectiveness of the classifier.
 
 \section{$n$-Gram Modelling}
 
