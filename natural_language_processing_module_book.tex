@@ -464,6 +464,20 @@ TODO: in-place figure showing the venn diagram from Eric's slides (second venn)
 
 TODO: put Katja's venn diagram here too
 
+\subsubsection{Summary}
+
+\paragraph{\textbf{Advantages}}
+\begin{itemize}
+	\item Boolean model is simple and queries have \textbf{precise semantics}, giving user complete control
+	\item Popular with bibliographic systems and also available on some search engines
+	\item Set-theoretic model can be extended to form a partial-matching system using \textbf{Fuzzy set model} and the \textbf{extended Boolean model}
+\end{itemize}
+\paragraph{\textbf{Disadvantages}}
+\begin{itemize}
+	\item Only returns \textbf{exact matches}. What if the user didn't know exactly what they were looking for or how to phrase it?
+	\item Users find boolean queries hard to formulate
+\end{itemize}
+
 \subsection{Vector Space Model}
 
 The \textbf{vector space model} treats documents as points in \textbf{high dimensional space}. Queries are also represented in vector space. Documents with the highest document-query similarity are selected. An \textbf{ordered list of relevant documents} is returned, going from \textbf{most relevant to least} (based on the similarity measure used).
@@ -500,12 +514,49 @@ Therefore, an $m \times n$ \textbf{document-by-word} matrix $M$ is constructed, 
 	\label{tab:query-vector-space}
 \end{table}
 
+\subsubsection{Similarity Measure}
+
 A \textbf{similarity measure} $sim(\vec{d}, \vec{q})$, which compares the similarity between a document $\vec{d}$ and a search query $\vec{q}$ must be given. The similarity measure uses throughout this module summary is in Equation \ref{eq:cosine-similarity}. This is the \textbf{cosine} of the two vectors and measures the angle between two vectors in vector space. \textbf{Smaller angles} between the documents mean they are more similar and the opposite for larger angles. This also \textbf{normalises} the output so long documents don't \textbf{skew the ranked list} of relevant documents with larger values.
 
 \begin{equation}
 	sim(\vec{d}, \vec{q}) = cos(\vec{d}, \vec{q}) = \frac{\vec{d} \cdot \vec{q}}{|\vec{d}| |\vec{q}|}
 	\label{eq:cosine-similarity}
 \end{equation}
+
+Figure \ref{fig:cosine-similarity-example} illustrates how this similarity measure \textbf{relates to} the spatial representation of the documents and query. Table \ref{tab:cosine-similarity-example} and Equation \ref{eq:cosine-similarity-example} show the cosine similarity function applied to two documents, given a query $q$.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|l|}
+		\hline
+		& $q$ & $d_{7655}$ & $d_{454}$ \\
+		\hline
+		hunter & 19.2 & 56.4 & 112.2 \\
+		gatherer & 34.5 & 122.4 & 0 \\
+		Scandinavia & 13.9 & 0 & 30.9 \\
+		30,000 & 0 & 457.2 & 0 \\
+		years & 0 & 12.4 & 0 \\
+		BC & 0 & 200.2 & 0 \\
+		prehistoric & 0 & 45.3 & 0 \\
+		deer & 0 & 0 & 23.6 \\
+		rifle & 0 & 0 & 452.2 \\
+		Mesolithic & 0 & 344.2 & 0 \\
+		\hline
+	\end{tabular}
+	\caption{Two documents and a query vector represented in 10D term space, with weights for each 10 terms}
+	\label{tab:cosine-similarity-example}
+\end{table}
+
+\begin{multline}\\
+	sim(d_{7655}, q) = cos(d_{7655}, q) = \frac{d_{7655} \cdot q}{|d_{7655}| |q|} = \frac{5305.68}{41.86(622.86)} = \frac{5305.68}{26071.72} = 0.20 \\
+	sim(d_{4655}, q) = cos(d_{454}, q) = \frac{d_{454} \cdot q}{|d_{454}| |q|} = \frac{2583.75}{41.86(467.53)} = \frac{2583.75}{19569.97} = 0.13 \\
+	cos^{-1}(0.20) = 78.46^{\circ}
+	\;\;\;\;\;\;\;\;\;\;\;
+	cos^{-1}(0.13) = 82.53^{\circ} \\
+	\label{eq:cosine-similarity-example}
+\end{multline}
+
+\subsubsection{Term Weighting}
 
 So how do we decide what \textbf{weights} to given each index term in the documents and in the search query $q$? We could use the \textbf{frequency} of the term in documents, but what if the term is generally frequent in \textbf{all documents}? Then, it doesn't really you find relevant documents, as all documents contain the word. This highlights a key issue:
 \begin{quote}
@@ -516,34 +567,105 @@ So how do we decide what \textbf{weights} to given each index term in the docume
 
 \begin{tabular}{ll}
 	\textbf{Definitions} & \\
-	$tf_{i,j}$ & number of times $w_i$ occurs in $_J$ \\
+	$tf_{w,d}$ & number of times word $w$ occurs in document $d$ \\
 	$df_w$ & number of documents that contain $w$ \\
 	$|D|$ & total number of documents in IR system 
 \end{tabular}
 
-\subsection{Set Model vs. Vector Model}
+Terms which are \textbf{frequent in a document} are better: $tf_{w,d} = freq_{w,d}$. Terms that are \textbf{rare in the overall document} collection are better: $idf_{w,D} = \log_{10} \frac{|D|}{df_w}$. Therefore, we combine these two measurements using Equation \ref{eq:tf-idf} to formulate a measurement of how \textbf{useful a term is at describing  a specific document}. This measurement is called \textbf{TF/IDF}.
 
-TODO: comparison on slide 19 and 20
+\begin{equation}
+	tfidf_{w,d,D} = tf_{w,d} \cdot idf_{w,D} = freq_{w,d} \cdot \log_{10} \frac{|D|}{df_w}
+	\label{eq:tf-idf}
+\end{equation}
 
-\subsection{Recall/Precision Cutoff}
+This combined measurement gives high weighting to frequent terms, but \textbf{penalises} terms which are frequent in \textit{all} documents, as they are less helpful in distinguishing which documents are relevant and which are not).
 
-TODO: refer to eval measures section for IR!
+Table \ref{tab:tf-idf} lists some terms and their frequency within a document $d$ and the whole document collection $D$. It also contains the TF/IDF measurement for each word. Notice how "general" has low frequency compared to "the", but since it appears in much less documents in the overall collection, it has a much higher weighting when using TF/IDF. The process of computing the TF/IDF value for the word "the" is shown in Equation \ref{eq:tf-idf-example}.
 
-TODO: recall/precision cut-off with example
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|l|l|}
+		\hline
+		\textbf{Term} & $tf_{w,d}$ & $df_w$ & $|D|$ & TF/IDF ($tfidf_{w,d,D}$) \\
+		\hline
+		the & 312 & 28,799 & 30,000 & 500 \\
+		in & 179 & 26,452 & 30,000 & 9.78 \\
+		general & 136 & 179 & 30,000 & 302.50 \\
+		fact & 131 & 231 & 30,000 & 276.87 \\
+		explosives & 63 & 98 & 30,000 & 156.561 \\
+		nations & 45 & 142 & 30,000 & 104.62 \\
+		haven & 37 & 227 & 30,000 & 78.48 \\
+		\hline
+	\end{tabular}
+	\caption{Table showing frequencies of words for a specific document $d$ for a collection of documents $D$. The TF/IDF index of each word for document $D$ is given.}
+	\label{tab:tf-idf}
+\end{table}
 
-TODO: average precision with example
+\begin{multline}\\
+	idf_{the,D} = \log_{10} \frac{30,000}{28,799} = 0.0178 \\
+	tf_{the,d} = freq_{w,d} = 312 \\
+	tfidf_{the,d,D} = tf_{the,d} \cdot idf_{the,D} = 312 \cdot 0.0178 = 5.55 \\
+	\label{eq:tf-idf-example}
+\end{multline}
 
-\subsection{Issues to Think About}
+\subsubsection{Summary}
 
-TODO: slides 21 and 22
+\paragraph{\textbf{Advantages}}
+\begin{itemize}
+	\item The vector space model is simply, \textbf{fast} and leads to "good" results
+	\item \textbf{Partial matching} makes it more likely the user will get a hit, and also allows for ranked list of outputted documents
+	\item Popular model for search engines
+\end{itemize}
+\paragraph{\textbf{Disadvantages}}
+\begin{itemize}
+	\item Makes the assumption that terms are \textbf{independant}. This is \textbf{not realistic}, as natural language has phrases, collocations and grammar.
+\end{itemize}
+
+\subsection{Precision Cutoff}
+
+\textbf{Precision} and \textbf{recall} are ways of evaluating the effectiveness of IR systems, as described in Section \ref{sec:ir-evaluation}. Recall and precision change depending on the number of relevant documents returned by the IR system.
+
+Take the example in Figure \ref{fig:precision-cutoff}. The precision for the first ranking after running through the \textbf{first five documents in order} is 1.0. The second ranking has a precision of 0, since the first five documents are all non-relevant (but there are five relevant documents after that!) When counting relevant/non-relevant documents through the \textit{entire} ordered document list, the precision will be same regardless of order.
+
+\textbf{Precision cut-off} is when you only return a pre-defined \textbf{maximum} of documents. This may improve precision, but recall is reduced (as less documents are returned). Therefore, it is important to \textbf{tweak} the point at which you stop counting to optimise recall and precision to where you want them. Too short a cut-off and precision may appear \textit{low}, as it hasn't had a chance to sample enough returned documents. Too long and there will be many irrelevant documents, which will also result in low precision.
+
+TODO: precision cutoff figure
+
+\textbf{Average precision} is another way of measuring precision, which \textbf{averages} the precision measurements from using different cut-off values.An example of this is shown in Figure \ref{fig:average-precision-figure}.
+
+TODO: average precision figure
+
+\subsection{Manipulation of IR Systems}
+
+One big limitation with IR systems is that they're often \textbf{easy to manipulate}. Many people exploit web search engines to get their pages high in searches, for example. One might hide loads of terms in their web pages which fool IR systems in thinking the page is relevant when it's not (causing the user to visit it). This is why most systems' query ranks are \textbf{supplemented by popularity measures} (e.g. page hits), so that kind of abuse is prevented.
 
 \subsection{IR vs. Databases}
 
-TODO: slide 4 elaborated on
+So what stops us from simply using a \textbf{DBMS (Database Management System)} to store documents and just using database queries to find what we want? Depending on the system and use case, it may actually make sense to do that instead. Table \ref{tab:ir-db-comparison} compares the two different approaches. The core difference is that DBMSes require exact queries to be inputted and output exact matches. IR systems are less sensitive to variance, requiring a loose query from the user and outputs \textit{likely} matches.
+ 
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		& \textbf{DBMS} & \textbf{IR} \\
+		\hline
+		\textbf{match} & exact & partial or best match \\
+		\textbf{inference} & deduction & induction \\
+		\textbf{model} & record/field & text document \\
+		\textbf{query language} & artificial & natural? \\
+		\textbf{query specification} & complete & incomplete \\
+		\textbf{items wanted} & matching & relevant \\
+		\textbf{error response} & sensitive & insensitive \\
+		\hline
+	\end{tabular}
+	\caption{Comparison of Information Retrieval to DBMS for Document Searching}
+	\label{tab:ir-db-comparison}
+\end{table}
 
 \subsection{Query Broadening}
 
-TODO: main idea
+TODO: main idea???
 
 \subsubsection{Relevance Feedback}
 
@@ -573,31 +695,151 @@ TODO: how it uses ontology (thesaurus use)
 
 \section{Text Classification}
 
-TODO: stuff it's used for (e.g. topic classification, spam/not-spam)
+Text classification can be thought as a \textbf{standing query}, which is when you run a query periodically to find \textbf{new} items. The query does not rank items but \textbf{classifies} them as relevant vs. not relevant (to a specific topic). This section will focus on \textbf{topic classification}. An example of topic classification isdetermining if an email is spam or not, or what topic a news article is about (e.g. technology, economics, biology, etc.).
 
-TODO: definition of problem w/ maths
+\paragraph{}
+
+\begin{tabular}{ll}
+\textbf{Problem Definition} \\
+\textbf{Given} & a representation of a \textbf{document} $d$ \\
+& a fixed set of \textbf{classes} (or labels or categories) $C = \lbrace c_1, c_2, ..., c_j \rbrace$ \\
+\textbf{Determine} & \textbf{category} of $d$, $\gamma(d) \in C$ \\
+& where $\gamma$ is a \textbf{classification function} that maps documents onto classes \\
+\end{tabular}
 
 \subsection{Classification Methods}
 
-TODO: manual, rule-based and  brief mention of supervised machine learning
+Documents can be \textbf{manually} by humans. This typically results in higher accuracy, but is much, much slower. \textbf{Hand-coded rule-based} classifiers are also possible, but to correctly classify even the simplest of documents, very precise rules are required. The rules must constantly evolve to handle outliers/corner cases that are always found. It's very hard to do in the long term.
+
+Another approach is to use \textbf{supervised machine learning}, which produces a classification function based on \textbf{training dataset}. This is described more in Section \ref{sec:bow-text-classification}.
 
 \subsection{BOW Text Classification}
+\label{sec:bow-text-classification}
 
-TODO: how BOW is  used for text classification at a high level overview
+\begin{tabular}{p{7cm}p{10cm}}
+\textbf{Supervised Machine Learning} \\
+\textbf{Definition} \\
+\textbf{Given} & a (test) document $d$ \\
+	& a fixed set of \textbf{classes} $C = \lbrace c_1, c_2, ..., c_j \rbrace$ \\
+	& a training set $D$ of documents, each with a label in $C$. That is, $D = \lbrace (d_1, c_1), (d2, c_2), ..., (d_m,c c_m) \rbrace$ \\
+\textbf{Determine} & a \textbf{learning method} which will enable use to learn a classifier $\gamma$ \\
+	& assign $d$ a class in $C$, or $\gamma(d) \in C$
+\end{tabular}
+
+The \textbf{bag of words (BOW)} representation of a document which discards all positioning, ordering and structure from a text document. It is simply a list of words which appear in the document and the number of times (frequency) they occur.
+
+For topic classification, a document $d$ will use a BOW representation by being a word frequency table, with the frequency of each word type in the overall \textbf{vocabulary}.
 
 \subsection{Naive Bayes}
 
-TODO: intro to Naive Bayes
+\textbf{Naive Bayes} is a type of \textbf{probabilistic} classifier that uses Bayes' theorem (Equation \ref{eq:bayes-theorem}. This classifier used widely for topic classification.
+
+\begin{equation}
+	P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+	\label{eq:bayes-theorem}
+\end{equation}
+
+For a document $d$ that uses a BOW representation, we assign it \textbf{most likely class} $c \in C$. We can compute the probability of $d$ being a class $c_i$ using \textbf{Bayes' theorem/rule}. Two types of classifier will be considered -- multinomial and binomial
 
 \subsubsection{Multinomial Naive Bayes}
 
-TODO: smoothing
+\textbf{Multinomial Naive Bayes} takes the frequencies of words in the document into consideration (but not position. Equation \ref{eq:multinomial-naive-bayes-base} shows how this, combined with Bayes' rule and BOW, can be used to find the most likely class for a document $d$.
+ 
+\begin{equation}
+\begin{aligned}[b]
+	C_{d} &= max_{c \in C} \; P(c|D) \\
+	&= max_{c \in C} \; \frac{P(d|c)P(c)}{P(d)} 
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{by Bayes' rule} \\
+	&= max_{c \in C} \; P(d|c)P(c) 
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{we \textit{know} we have document }d\text{, so } P(d) = 1 \\
+	&= max_{c \in C} \; P(w_1,w_2,...,w_{n_d}| c)P(c)
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{expanding }P(d|c) \\	
+	&= max_{c \in C} \; P(X_1 = w_1, X_2 = w_2, ..., x_{n_d} = w_{n_d} | c)P(c)
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{adding position probabilities} \\
+\end{aligned}
+\label{eq:multinomial-naive-bayes-base}
+\end{equation}
 
-TODO: summary
+So the probability document $d$ is in class $c$ is given by $P(X_1 = w_1, X_2 = w_2, ..., x_{n_d} = w_{n_d} | c)P(c)$. Naive Bayes makes two assumptions that makes computing this formula easier -- conditional independence and a Bag of Words assumption.
+
+\textbf{Conditional independence} assumes that the words are conditionally \textbf{independent} of the given class $c$.  This means the likelihood of a sequence of words (document) being a document of class $c$ can simply be the \textbf{product} of all of the individual word probabilities, as shown in Equation \ref{eq:conditional-independence}.
+
+\paragraph{\textbf{NOTE}}: $P(X_i = w_j)$ means the probability of word$w_j$ being at position $i$ in the document, so $P(X_i = w_j|c)$ means the probability of word $w_j$ being at position $i$ \textbf{given} that the class is $c$.
+
+\begin{equation}
+	P(X_1 = w_1, X_2 = w_2, ..., x_{n_d} = w_{n_d} | c) = P(X_1 = w_1|c) \cdot P(X_2 = w_2 | c) \cdot ... \cdot P(x_{n_d} = w_{n_d}|c)
+	\label{eq:conditional-independence}
+\end{equation}
+
+The \textbf{Bag of Words} assumption assumes the position of words \textbf{does not matter}. Equation \ref{eq:bow-assumption} shows that this means the probabilities of a word occurring at \textbf{any position is the same}.
+
+\begin{equation}
+	P(X_j = w | c) = P(X_l = w| c)  \;\;\;\;\;
+	\forall \; c,j,l,w
+	\label{eq:bow-assumption}
+\end{equation}
+
+This means we only need to compute \textbf{two kinds of probabilities}:
+\begin{itemize}
+	\item probability of class $P(c)$
+	\item probability of word $i$ occurring, \textit{given} the document is class $c$ $P(w_i|c)$
+\end{itemize}
+$P(c)$ is computed using Equation \ref{eq:naive-bayes-class-prob}. Concatenate all training documents of class $c$ into one \textbf{large document}, call it $L_c$. $P(w_i|c)$ is computed using Equation \ref{eq:naive-bayes-word-prob}, where $n_i^c$ is the frequency of word $w_i$ in $L_c$ and $n^c$ is the \textbf{length of the large document} $|L_c|$.
+
+\begin{equation}
+	P(c) = \frac{numDocsOfClassC}{totalNumDocsInTraining}
+	\label{eq:naive-bayes-class-prob}
+\end{equation}
+
+\begin{equation}
+	P(w_i|c) = \frac{n_i^c}{n^c}
+	\label{eq:naive-bayes-word-prob}
+\end{equation}
+
+Since the probability of a document being a given class is computed by multiplying individual word probabilities together, if a \textit{single} world probability is 0, then the probability of the document being that class is 0. This is not what we want; what if the word is just unseen and the rest of the document are words that are representative of the class in question? This skews the results too much.
+
+\textbf{Smoothing} is done on the individual word probabilities to ensure there are never 0 probabilities. Equation \ref{eq:naive-bayes-word-prob-smoothed} shows one way of smoothing, where $V$ is a vocabulary size (number of token types in training dataset). Now if a word has not occurred in any document of the class in question, then it will has a very low probability, but won't have 0 to corrupt the final document probability.
+
+\begin{equation}
+	P(w_i|c) = \frac{n_i^c + 1}{n^c + |V|}
+	\label{eq:naive-bayes-word-prob-smoothed}
+\end{equation}
+
+Finally, using \textbf{multinomial Naive Bayes}, the class of a document $d$ is computed using Equation \ref{eq:multinomial-bayes}, where $P(c)$ and $P(w_i|c)$ are computed as described in this section.
+\begin{equation}
+	C_{d} = \left( max_{c \in C} \;\; P(c) \cdot \prod_{i \in positions} P(w_i|c) \right)
+	\label{eq:multinomial-bayes}
+\end{equation}
+
+To summarise, multinomial Naive Bayes:
+\begin{itemize}
+	\item uses conditional independance assumptions
+	\item uses BoW model, ignoring position of words when estimating probabilities 
+	\item sees all training documents of one class as \textbf{one long document}
+	\item cares about the \textbf{frequencies} of word occurrences.
+	\item \textbf{ignores} words in test document that \textbf{do not occur}. There is no \textit{negative} evidence to reduce probabilities, only \textit{positive} evidence to increase it
+\end{itemize}
+
+TODO: example from coursework
 
 \subsubsection{Binomial Naive Bayes}
 
-TODO: idea, maths
+\textbf{Binomial Naive Bayes} does not take the frequency of words in the document into consideration, it only cares if the word occurs in the document at all. Equation \ref{eq:binomial-naive-bayes-base} shows how this, combined with Bayes' rule and BOW, can be used to find the most likely class for a document $d$.
+ 
+\begin{equation}
+\begin{aligned}[b]
+	C_{d} &= max_{c \in C} \; P(c|D) \\
+	&= max_{c \in C} \; \frac{P(d|c)P(c)}{P(d)} 
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{by Bayes' rule} \\
+	&= max_{c \in C} \; P(d|c)P(c) 
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{we \textit{know} we have document }d\text{, so } P(d) = 1 \\
+	&= max_{c \in C} \; P(e_1,e_2,...,e_{|V|}| c) P(c)
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{expanding }P(d|c) \\	
+	&= max_{c \in C} \; P(c) \prod_{w_i \in V} P(e_i|c}
+	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{rearranging} \\
+\end{aligned}
+\label{eq:binomial-naive-bayes-base}
+\end{equation}
 
 TODO: summary
 
@@ -672,6 +914,7 @@ TODO: evaluation of clustering approaches
 \section{Evaluation Measures}
 
 \subsection{Information Retrieval}
+\label{sec:ir-evaluation}
 
 TODO: recall, precision, f-measure
 
