@@ -984,27 +984,77 @@ Therefore, a Bernoulli, binomial Naive Bayes classifier would label document 5 w
 
 \subsubsection{Multinomial vs. Binomial}
 
-TODO
+Table \ref{tab:mult-bi-comparison} compares different aspects of the multinomial and binomial Naive Bayes classifiers. The key different between the two models is the fact that binomial Naive Bayes \textbf{ignores the frequency of words}. This means that it struggles with longer documents, because as documents get larger the probability of \textit{any} word existing (even once) drastically increases. This means larger documents start looking the same as they all have at least one occurrence of particular words (especially very common function words such as "the" and "it"). That means irrelevant features (e.g. ocurrence of "the") get much greater weightings.
+
+If \textbf{frequencies} were taken into consideration, then larger documents would still appear more distinct and the classifier would be more  \textbf{robust to irrelevant features}. Therefore, multinomial Naive Bayes is \textbf{scalable} to large documents and a greater variety of words (larger vocabulary), whereas Binomial will struggle. Binomial does have smaller storage requirements however, as each document only needs to be presented as a bit string (instead of having a 4-byte integer for each word for each document).
+
+\begin{table}
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& \textbf{Multinomial} & \textbf{Binomial} \\
+		\hline
+		\textbf{Random Variable} & $X = w$ if $w$ occurs at position $X$ & $e_w = 1$ if $w$ occurs in document \\
+		\textbf{Document Representation} & sequence of word counts/frequencies & sequence of zeros and ones \\
+		\textbf{Multiple Occurrences} & considered & ignored \\
+		\textbf{Length of Documents} & good for longer & only good for shorter \\
+		\textbf{Size of Vocabulary} & can handle more word types & best for fewer word types \\
+		\textbf{Possible Estimate for \textit{the}} & $P(X = the|c) = 0.05$ & $P(e_{the} = 1|c) = 1.0$ \\
+		\hline
+	\end{tabular}
+	\caption{Comparison of Multinomial and Binomial Naive Bayes Classifiers}
+	\label{tab:mult-bi-comparison}
+\end{table}
 
 \subsubsection{Advantages/Disadvantages}
 
-TODO: of Naive Bayes
+Naive Bayes:
+\begin{itemize}
+	\item is \textbf{very fast}
+	\item has \textbf{low storage requirements} due to concise document representation
+	\item is good for domains where there are many \textbf{equally important features}, as there are no different weightings for different words. If certain words are more important, then they may need greater weighting (which the standard Naive Bayes model does not do)
+	\item is a dependable \textbf{baseline} for text classification
+\end{itemize}
 
 \subsection{Feature Selection}
 
-TODO: why feature selection
+A \textbf{feature} is a property of a data item that should be classified.	A \textbf{feature set} is the set of all features that the classifier considers when classifying a data item. Until now, only the \textbf{frequency/existence of words} have been used as features for the topic classifier. Additionally, \textit{all} words in the training dataset's vocabulary have been used as features.
+
+However, Naive Bayes treats all features \textbf{equally}. Many words are \textbf{irrelevant} to the determining if a document is a particular topic or not (especially function words such as "the"). These 
+
+\textbf{Feature selection} is the process of selecting "good" features for a classifier. Ones which help distinguish between different classes, are not redundant (add information other features have already added) and are not irrelevant (just noise that doesn't mean anything to the topic classes). So why feature selection for topic classification? Because:
+\begin{itemize}
+	\item text collections have a \textbf{large number of features}. Vocabulary sizes of up to one million words is frequent (one million features)
+	\item using large numbers of features has a significant impact on the accuracy and performance of a classifier. Many classifiers can't handle large amounts of features (Naive Bayes, for the most part, can)
+\end{itemize}
+Having less features typically provides the following \textbf{benefits}:
+\begin{itemize}
+	\item reduced \textbf{training time and runtime} classification
+	\item improves \textbf{generalisation} (by eliminating noise features irrelevant to topic and preventing \textbf{overfitting})
+\end{itemize}
+\textbf{Bernoulli binomial} Naive Bayes classifier is especially sensitive to irrelevant, noisy features, so feature selection is definitely recommended for that. A simple example of feature selection is \textbf{removing all stop words} from vocabulary, as those words are typically irrelevant features that do not tell you anything useful about a document.
+
+Feature selection for text classification is defined as a \textbf{utility measure} $A(w, c)$ that gives a numerical value to a word $w$-class $c$ pair. This numerical value determines how \textbf{useful} word $w$ is in classifying a document as being class $c$. The \textbf{top} $k$ words with the \textbf{highest utility measure} $A(w, c)$ are then selected to be used for classification.
+
+Selecting the highest $k$ elements with respect to $A(w, c)$ is known as \textbf{feature cut-off}. Two cutoff techniques will be described here.
 
 \subsubsection{Frequency Cutoff}
 
-TODO
+\textbf{Frequency cutoff} means that you just use the $k$ most common words, throughout the entire training corpus. However, doing this will include stop words (common in all documents so will be common in entire corpora) and \textbf{exclude informative words} that are not very common (e.g. super-entertaining). However, using this method in practice has shown to work well at increasing classification accuracy. Why?
+
+There are three major types of words. \textbf{Extremely rare ones} are unlikely to occur but good at determining the class of a document. \textbf{Extremely common ones} are very likely to occur, but are not very informative. Then there are the words which are \textit{reasonable} likely to occur and provide a decent amount of information on what class a document is. Frequency cut-off tends to \textbf{select these "middle ground" word features}, which tends to give good classification performance. This is illustrated in Figure \ref{fig:frequency-cutoff}.
+
+TODO: frequency cut-off plot that I drew on the slides
 
 \subsubsection{Mutual Information Cutoff}
 
-TODO: definition of MU mathematically and what it means
+\textbf{Mutual information} (see Section \ref{sec:mutual-information}) can be used to select good features. To select $k$ good" features, compute the mutual information of each word in the training corpus, order them from highest to lowest with respect to MU and choose the first $k$. Figure \ref{fig:example-mu} shows the words with the highest mutual information for different classes of documents in the \textbf{Reuters corpus}. Notice how there are no stop words, and all the words are clearly relevant to the associated class.
 
-TODO: example!
+TODO: Figure showing the three classes from the slides
 
-TODO: its effect on performance
+This can \textbf{greatly increase classification accuracy}, much more so than frequency cutoff. This is shown in Figure \ref{fig:mu-acc-impact}, which shows the accuracy of classifiers with different values for $k$. Too high a value for $k$ hurts the classification, as irrelevant features start to be used. Too low a value and not enough features are used to accurately distinguish between the different classes.
+
+TODO: impact on performance figure
 
 \subsection{Multi-class Text Classification}
 
@@ -1061,6 +1111,8 @@ TODO: recall, precision, f-measure
 
 (slightly different perspective to IR)
 TODO: recall, precision, f-measure
+
+TODO: text classification II
 
 
 \section{$n$-Gram Modelling}
@@ -1145,7 +1197,7 @@ TODO: definition
 
 TODO: example
 
-\subsection{Entroy Rate of Language}
+\subsection{Entropy Rate of Language}
 
 TODO: language definitions
 
@@ -1154,8 +1206,79 @@ TODO: cross-entropy
 TODO: entropy of English
 
 \subsection{Mutual Information}
+\label{sec:mutual-information}
 
-TODO: have the other mutual information section refer to this??
+If $X$ and $Y$ are discrete random variables and $P(x, y)$ is value of their \textbf{joint probability distribution} at $(x, y)$, and $P(x)$ and $P(y)$ are the margin distributions of elements in $X$ and $Y$ respectively, then the \textbf{mutual information} of $X$ and $Y$ can be computed using Equation \ref{eq:mutual-information}. This equation loops over all the different \textbf{combinations} of value pairs of possible values $X$ and $Y$ and uses their joint probabilities to measure this.
+
+The mutual information between two random variables means how much of the \textbf{same information} do they provide? It can be used a good measure to see how similar the the two values are and how often they occur together.
+
+\begin{equation}
+	I(X;Y) = \sum_{x \in X} { \sum_{y \in Y} {
+		p(x, y) \cdot \log{\frac{p(x,y)}{p(x)p(y)}}
+	} }
+	\label{eq:mutual-information}
+\end{equation}
+
+Applying this to \textbf{text classification}, one can compute the mutual information between a \textbf{word and a class}. Higher mutual information means that the presence of that word is a good indication that the document is that class. Computing class-word mutual information requires the following steps:
+\begin{enumerate}
+	\item Create a $2 \times 2$ frequency table recording times the word $W$ occurs and does not occur in documents that are class $c$ and are not class $c$ (structure shown in Table \ref{tab:mu-freq-table})
+	\item Plug the values from this frequency table into the formula given in Equation \ref{eq:text-classification-mu-info}, where $T$ is the total of all frequencies
+\end{enumerate}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& class $=c$ & class $\neq c$ \\
+		\hline
+		$e_i = 1$ & $N_{11}$ & $N_{10}$ \\
+		$e_i = 0$ & $N_{01}$ & $N_{00}$ \\
+		\hline
+		$T$ & \multicolumn{2}{l|}{$N_{11} + N_{01} + N_{10} + N_{00}$}  \\
+		\hline
+	\end{tabular}
+	\caption{Example Word-Class Frequency Table for Computing Mutual Information for Word $w_i$ and class $c$}
+	\label{tab:mu-freq-table}
+\end{table}
+
+\begin{equation}
+\begin{aligned}[b]
+	MU(w, c) &= \frac{N_{11}}{T} \cdot \log \frac{T \cdot N_{11} }{(N_{11} + N_{10}) \cdot (N_{11} + N_{01})} \\
+	&+ \frac{N_{01}}{T} \cdot \log \frac{T \cdot N_{01} }{(N_{01} + N_{00}) \cdot (N_{11} + N_{01})} \\
+	&+ \frac{N_{10}}{T} \cdot \log \frac{T \cdot N_{01} }{(N_{11} + N_{10}) \cdot (N_{10} + N_{00})} \\
+	&+ \frac{N_{00}}{T} \cdot \log \frac{T \cdot N_{00} }{(N_{01} + N_{00}) \cdot (N_{10} + N_{00})}
+	\label{eq:text-classification-mu-info}
+\end{aligned}
+\end{equation}
+
+Using the \textbf{Reuters} training corpora, computing the mutual information between the word \textbf{export} and the topic \textbf{poultry} is done by creating the frequency table shown in Table \ref{tab:example-mu-freq-table} and plugging the resulting values into Equation \ref{eq:text-classification-mu-info} (see Equation \ref{eq:text-classification-mu-info-example}. If the frequencies of a word are \textbf{evenly distributed throughout all the classes}, then the MU of a word and a class is zero. If a word \textbf{only occurs in documents of one class}, then MU is maximum.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|r|l|l|}
+		\hline
+		& class = \textit{poultry} & class $\neq$ \textit{poultry} \\
+		\hline
+		$e_{export} = 1$ & $N_{11} = 49$ & $N_{10} = 27,652$ \\
+		$e_{export} = 0$ & $N_{01} = 141$ & $N_{00} = 774,106$ \\
+		\hline
+		$T$ & \multicolumn{2}{l|}{$49 + 141 + 27,652 + 774,106 = \mathbf{801,948}$}  \\
+		\hline
+	\end{tabular}
+	\caption{Word-Class Frequency Table for Computing Mutual Information for Word "Export" and class "Poultry"}
+	\label{tab:example-mu-freq-table}
+\end{table}
+
+\begin{equation}
+\begin{aligned}[b]
+	MU(w, c) &= \frac{49}{801,948} \cdot \log \frac{801,948 \cdot 49 }{(49 + 27,652) \cdot (49 + 141)} \\
+	&+ \frac{141}{801,948} \cdot \log \frac{801,948 \cdot 141 }{(141 + 774,106) \cdot (49 + 141)} \\
+	&+ \frac{27,652}{801,948} \cdot \log \frac{801,948 \cdot 141 }{(49 + 27,652) \cdot (27,652 + 774,106)} \\
+	&+ \frac{774,106}{801,948} \cdot \log \frac{801,948 \cdot 774,106 }{(141 + 774,106) \cdot (27,652 + 774,106)}
+	&= 0.0001105
+	\label{eq:text-classification-mu-info-example}
+\end{aligned}
+\end{equation}
 
 TODO: pointwise mutual information
 
