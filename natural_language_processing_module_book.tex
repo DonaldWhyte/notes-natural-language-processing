@@ -1954,7 +1954,19 @@ Note that some words/tokens \textbf{always} have the same tag, so the probabilit
 
 \subsubsection{Advantages/Disadvantages}
 
-TODO
+\textbf{Advantages}:
+\begin{itemize}
+	\item $k$-best tagging is possible, which is powerful tagging technique often necessary for parsing decisions
+	\item Based purely on statistics, so \textbf{prior linguistic knowledge} does not need to be encoded, making the technique \textbf{language-agnostic}
+\end{itemize}
+
+\textbf{Disdvantages}:
+\begin{itemize}
+	\item It makes crude assumptions, so it may not model the real language accurately enough
+	\item Only deals with \textbf{very short distance dependencies} between words (due to the fact that the $n$-gram model is being used)
+	\item Tags are never conditioned on words 
+	\item \textbf{Unintuitive}, can be hard to understand
+\end{itemize}
 
 \subsection{Transformation-Based Tagging}
 
@@ -1977,7 +1989,6 @@ TODO: how to evaluate, current accuracies
 \subsection{Caveats}
 
 TODO: caveats of tagging
-
 
 TODO: something on required reading for transformed-based tagging????????????????????????????????
 
