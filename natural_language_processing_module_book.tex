@@ -1813,7 +1813,7 @@ Table \ref{tab:common-word-classes} lists common word classes that tend to occur
 		Noun Plural & women, books & NN & NN \\
 		Noun Proper Singular & London & NP & NNP \\
 		Noun Proper Plural & Australians & NPS & NNPS \\
-		Personal Pronoun & he, her, she, they & -- & PP \\
+		Preposition (PP) & on, beneath, beside, over & -- & -- \\
 		\hline 
 	\end{tabular}
 	\caption{Common Word Classes}
@@ -2114,17 +2114,41 @@ TODO: something on required reading for transformed-based tagging?
 
 \section{Grammar and Parsing}
 
+In order to get even more information on text, we can make use of grammar and parsing to group words into a hierarchy that describes the true meaning of the text. 
+
 \subsection{Constituents}
 
-TODO: what they are and properties
+A \textbf{constituent} is a group of words that \textbf{behave as a single unit}. They can be thought of as \textbf{phrases}, which can be nested within each other. These are different \textbf{types} of constituents/phrases, each of which are composed of different things. Below is an example o fa sentence broken down into its constituents, with each constituent labelled with its type:
+\begin{quote}
+	$[_{NP}$She] saw $[_{NP}$him] $[_{PP}$on Friday]
+\end{quote}
+"on Friday" is an individual constituent/phrase. This particular one is a \textbf{prepositional phrase}, as indicated by the $PP$. Constituents can also be \textbf{nested} within each other:
+\begin{quote}
+	$[_{NP}$old men $[_{PP}$with $[_{NP}$hats]]]
+\end{quote}
+This nesting expresses \textbf{attachment}, making one constituent related to another. When combined, constituents create a \textbf{whole new}, valid constituent that has a different meaning. The order/way constituents are composed does change the meaning of the final sentence.
+
+How do you know if a group of words are \textit{actually} a constituent? They are if they express \textbf{movability}. If you think a group of words is a constituent, try \textbf{breaking the constituent up}, by moving some of the words inside it to another place in the sentence. If the sentence \textit{or} the new constituent does not make sense, then it's likely they are \textbf{not} a constituent. Similarly, if you think you have one, try moving the \textit{entire} group of words \textbf{together}, to another place in the sentence. If both the constituent and sentence still makes sense, then you probably have a constituent. Consider the following example:
+\begin{quote}
+	$[_{NP}$She] saw $[_{NP}$him] $[_{PP}$on Friday seventeenth]. \textbf{VALID} \\
+	$[_{PP}$on Friday seventeenth], $[_{NP}$She] saw $[_{NP}$him]. \textbf{VALID} \\
+	$[_{PP}$on Friday], $[_{NP}$She] saw $[_{NP}$him] seventeenth \textbf{INVALID} \\
+\end{quote}
+The first line is the original sentence, the second is a sentence formed by moving the \textbf{entire} constituent "on Friday seventeenth". This is still a valid sentence. The third sentence was formed by moving \textbf{part} of "on Friday seventeenth" ("on Friday"). Notice how the third sentence is not grammatically correct and does not make sense. This is a strong indicator that "on Friday seventeenth"  is a valid constituent (they make sense together, but not on their own).
+
+How do you \textbf{determine} if two constituents, $A$ and $B$, are the \textbf{same type}? You check if they have the \textbf{substitution} property. If you can \textbf{swap} $A$'s and $B$'s position in the text, and the resulting sentence is grammatically correct, then you have the \textbf{same type of constituent}.
 
 \subsection{Limitations with $n$-grams and Regular Expressions}
 
-TODO: comparison with $n$-grams - why the latter are crap
+Constituents are \textbf{different} from $n$-grams. $n$-grams can stop \textit{within} a constituent, or \textit{cross} constituent boundaries to be inside more than one. Additionally, $n$-grams do not express \textbf{movability} or\textbf{long-distance dependencies}. Due to the nested nature of constituents, long distance dependencies can be found. This is also possible with $n$-grams if $n$ is large, but due to data sparseness and how computationally/memory intensive it would be, it's just not feasible.
 
-TODO: problems with regexes to parse sentences using POS tags
+Therefore, $n$-grams fail to express entities and dependencies \textit{between} entities \textbf{in full}.
 
-TODO: attachment means nested within each other, means hierarchy which regexes cannot express
+\textbf{Regular expressions} are able to parse \textbf{regular} languages. However, they cannot fully parse hierarchical languages. \textbf{Context-free grammars}, such as English, French and HTML, can be hierarchical.  Consider the following example:
+\begin{quote}
+	The cat and the dog with the hat love the cow
+\end{quote}
+Here, the cat loves the cow. However, since regular expressions cannot express \textbf{attachment} (nesting), it won't detect that "the dog with the hat" is nested with the cat and that \textit{both} the cat and the dog love the cow. Therefore, regular expressions \textbf{cannot} be used to fully express entities and their dependencies in natural languages either.
 
 \subsection{Grammar}
 
