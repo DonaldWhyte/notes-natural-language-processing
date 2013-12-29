@@ -1485,52 +1485,211 @@ This prevents us from assigning too much probability mass to unseens, providing 
 TODO: Good-Turing smoothing
 ????
 
-Smoothing methods typically try to "squeeze" more information out of the given data. But what about  \textbf{adding more data}? \textbf{Web-based smoothing} uses vast amounts of data automatically collected from the web. The web counts are used to compute $n$-gram probabilities if the original counts resulted in an textbf{unreliable prediction} (model broke down because of zero probabilities).
+Smoothing methods typically try to "squeeze" more information out of the given data. But what about  \textbf{adding more data}? \textbf{Web-based smoothing} uses vast amounts of data automatically collected from the web. The web counts are used to compute $n$-gram probabilities if the original counts resulted in an \textbf{unreliable prediction} (model broke down because of zero probabilities).
 
 \section{Information Theory}
 
-TODO: uses
+The best evaluation of a language model is using it for a task and then deriving accuracy/precision/recall. An alternative way is to think of evaluation as:
+\begin{quote}
+	How well does a language model \textbf{predict} some unseen text $T$?
+\end{quote}
+Additionally, how much \textbf{new} information is in $T$? How surprised is the model to see $T$?
+
+To measure these aspects, we need \textbf{information theory}. This is used for data compression and transmission, and involves the concept of entropy.
 
 \subsection{Information and Entropy}
 
-TODO: definition of information
+$X$ is a source of "messages", with a probability distribution $p(x)$. How much new \textbf{information} does a message $x$ contain? Let $I(x)$ be the amount of information a message $x$ contains. The \textbf{less probable} a message is, the \textbf{more information} it contains.
 
-TODO: definition of Entropy
-TODO: 2 examples of entropy
+If $x$ and $y$ are two \textbf{independent messages}, then the information gained from knowing both of them is $I(x, y) = I(x) + I(y)$.
 
-\subsection{Joint and Condtional Entropy} 
+$p(x)$  being similar to $p(y)$ \textbf{implies} $I(x)$ is similar to $I(y)$. That is, if two the probability of two messages is similar, then the information gained from individually knowing each will be similar.
 
-TODO: definitions
+\textbf{Entropy} measures the \textbf{average/expected} amount of information in \textit{any} random variable from a message source $X$. For\textit{discrete} probability distributions, it can be computed either formula in Equation \ref{eq:entropy}.
+\begin{equation}
+	\begin{aligned}[b]
+		H(X) = -\sum_{x \in X} { p(x) \log_2 p(x) } \\
+		H(X) = \sum_{x \in X} { p(x) \log_2 {\frac{1}{p(x)}} } \\
+		\text{where }0\log0 = 0
+	\end{aligned}
+	\label{eq:entropy}
+\end{equation}
 
-TODO: examples
+If you already know the \textbf{information gained} from each variable, then Equation \ref{eq:entropy-with-information} can be used.
+
+\begin{equation}
+	H(X) = \sum_{x \in X} { p(x)I(x) }
+	\label{eq:entropy-with-information}
+\end{equation}
+
+An output of 1 means we are completely \textbf{uncertain}, whereas an entropy of 0 means we are completely \textbf{certain} about the value (it is known -- no randomness). Entropy is measured in \textbf{bits}, so it represents the average length of a message to transmit the outcome (value) of a variable.
+
+\paragraph{\textbf{EXAMPLE: Coin}} What is the entropy of flipping each of the following three coins, given the likelihood of it landing heads or tails ($X = \lbrace Head, Tail \rbrace$)?
+\paragraph{}
+\begin{tabular}{ll}
+	Coin 1: & $p(Head) = p(Tail) = 0.5$ \\
+	Coin 2: & $p(Head) = 0 \; ; \; p(Tail) = 1$ \\
+	Coin 3: & $p(Head) = \frac{3}{4} \;\; ; \;\; p(Tail) = \frac{1}{4}$ \\
+\end{tabular}
+\paragraph{}
+
+Coin 1 (completely uncertain):
+\begin{equation}
+\begin{aligned}[b]
+	H(X) = \sum_{x \in \lbrace Head, Tail \rbrace} { p(x) \log_2 p(x) }
+	&= p(Head) \log_2 p(Head) + p(Tail) \log_2 p(Tail) \\
+	&= 0.5 \log_2 p(0.5) + 0.5 \log_2 p(0.5) \\
+	&= 0.5 \cdot -1 + 0.5 \cdot -1 = -(-0.5 + -0.5) = -(-1) = 1 \;  \text{bit}
+\end{aligned}
+\end{equation}
+Coin 2 (completely certain):
+\begin{equation}
+\begin{aligned}[b]
+	H(X) = \sum_{x \in \lbrace Head, Tail \rbrace} { p(x) \log_2 p(x) }
+	&= p(Head) \log_2 p(Head) + p(Tail) \log_2 p(Tail) \\
+	&= 0 \log_2 p(0) + 1 \log_2 p(1) \\
+	&= 0 \cdot 0 + 1 \cdot 0 = 0 + 0 = 0 \; \text{bits}
+\end{aligned}
+\end{equation}
+Coin 3: (slightly uncertain):
+\begin{equation}
+\begin{aligned}[b]
+	H(X) = -\sum_{x \in \lbrace Head, Tail \rbrace} { p(x) \log_2 p(x) }
+	&= p(Head) \log_2 p(Head) + p(Tail) \log_2 p(Tail) \\
+	&= 0.75 \log_2 p(0.75) + 0.25 \log_2 p(0.25) \\
+	&= 0.75 \cdot -0.415 + 0.25 \cdot -2 = -(-0.311 + -0.5) = -(-0.811) = 0.811 \; \text{bits}
+\end{aligned}
+\end{equation}
+
+\paragraph{\textbf{EXAMPLE: 8-Sided Die}} Suppose you are reporting t	he result of rolling a fair 8-sided die. Since there is an equal chance of each side coming up, the probabilities are $p(i) = \frac{1}{8}$ where $i = 1,...,8$. Therefore, the entropy is:
+\begin{equation}
+\begin{aligned}[b]
+H(X) &= -\sum_{i=1}^8 p(i) \log_2 p(i) \\
+	&= -\sum_{i=1}^8 \frac{1}{8} \log_2 \frac{1}{8} \\
+	&= -\log_2 \frac{1}{8} \\
+	&= \log_2 8
+	\;\;\;\;\;\;\; \text{by law of logorithms} \\
+	&= 3\text{ bits}
+	\;\;\;\;\;\; \text{because $2^3 = 8$} \\
+\end{aligned}
+\end{equation}
+And it requires 3 bits to encode the result of rolling a die!
+
+\subsection{Joint and Conditional Entropy} 
+
+\textbf{Joint entropy} is the amount of information needed, on average, to specify the value of \textbf{two} discrete random variables. It requires joint probabilities to compute, and is calculated using Equation \ref{eq:joint-entropy}.
+
+\begin{equation}
+	H(X, Y) = - \sum_{x \in X} { \sum_{y \in Y} {
+		p(x, y) \log_2 p(x, y)
+	} }
+	\label{eq:joint-entropy}
+\end{equation}
+
+\textbf{Conditional entropy} is how much extra information \textbf{you still need} to supply, on average, to communicate $Y$, given that the other party knows $X$. It requires conditional probabilities to compute, and is calculated using \ref{eq:conditional-entropy}.
+
+\begin{equation}
+	H(Y|X) = - \sum_{x \in X} { \sum_{y \in Y} {
+		p(x, y) \log_2 p(y|x)
+	} }
+	\label{eq:conditional-entropy}
+\end{equation}
+
+Simplified Polynesian is a language that consists of 3 consonants and 3 vowels. In this language, a consonant \textit{must} be paired with a vowel. Based on a large corpus, the \textbf{joint probability table} which describes the likelihood of consonants being paired with vowels (Table \ref{tab:joint-entropy-example}).
+
+\begin{table}
+	\centering
+	\begin{tabular}{c|c|c|c|c}
+		& p & t & k \\
+		\hline
+		a & $\frac{1}{16}$ & $\frac{3}{8}$ & $\frac{1}{16}$ & $\frac{1}{2}$ \\
+		i & $\frac{1}{16}$ & $\frac{3}{16}$ & 0 & $\frac{1}{4}$ \\
+		u & 0 & $\frac{3}{16}$ & $\frac{1}{36}$ & $\frac{1}{4}$ \\
+		\hline		
+		& $\frac{1}{8}$ & $\frac{3}{4}$ & $\frac{1}{8}$ & \\
+	\end{tabular}
+	\caption{Joint Probabilities of Vowels and Consonants in Simplified Polynesian}
+	\label{tab:joint-entropy-example}
+\end{table}
+
+Let $V = \lbrace a, i, u \rbrace$ be the vowels and $C = \lbrace p, t, k \rbrace$ be the consonants. Then the \textbf{conditional entropy} of a vowel, \textbf{given} that you know the consonant it's paired with is:
+\begin{equation}
+	H(V|C) = - \sum_{v \in V} { \sum_{c \in C} {
+		p(c, v) \log_2 p(v|c) } } = \frac{11}{8} = 1.475 bits
+\end{equation}
 
 \subsection{Chain Rule}
 
-TODO: definition
+The \textbf{chain rule for probability} is given in Equation \ref{eq:chain-rule-probability}. \textbf{Entropy has also a chain rule}, which is given in \ref{eq:chain-rule-entropy}.
 
-TODO: example
+\begin{equation}
+	P(A_1,A_2,...,A_n = P(A_1)P(A_2|A_1)P(A_3|A_1,A_2)...P(A_n|A_1,A_2,...,A_{n-1})
+	\label{eq:chain-rule-probability}
+\end{equation}
 
-\subsection{Entropy Rate of Language}
+\begin{equation}
+\begin{aligned}[l]
+	H(X,Y) = H(X) + H(Y|X) \\
+	X(X_1,X2,...,X_n) = H(X_1) + H(X_2|X_1) +  H(X_3|X_1,X_2) + ... + H(X_n|X_1,X_2,...,X_{n-1})
+	\end{aligned}
+	\label{eq:chain-rule-entropy}
+\end{equation}
 
-TODO: language definitions
+\subsection{Cross Entropy}
 
-TODO: cross-entropy
+We don't know the \textit{actual} probability distribution $t$ that generated $t$. We have a model $m$ (approximation) of $t$. We can measure how well our approximated probability distribution departs from \textbf{actual language use} by seeing how \textbf{surprised} our model is to see $T$. The \textbf{better} the model, the \textbf{lower} the cross-entropy. This is called \textbf{cross entropy}, and can be computed using Equation \ref{eq:cross-entropy}. $T$ is the text (with $n$ words) and $m$ is our model approximation.
 
-TODO: entropy of English
+\begin{equation}
+	H(t,m) = \lim_{n \rightarrow \infty} \frac{1}{n} \sum_{W \in T} t(w_1,...,w_n) \log m(w_1, ..., w_n)
+	\label{eq:cross-entropy}	
+\end{equation}
+
+Entropy can be used to determine how \textbf{uncertain} you are about the next character/word in a text. The entropy rate of a language can be computed using Equation \ref{eq:entropy-language}. $H(X_i)$ are the characters of the language, or every word you have uttered in your life ($26 \times 26$ joint probability table). From human experiments, Shannon estimated the entropy rate of English $H(English)$ to be between 1.25 and 1.35.
+
+\begin{equation}
+	H_{rate}(L) = \lim_{n \rightarrow \infty} \frac{1}{n}H(X_1,X_2,...,X_n)
+	\label{eq:entropy-language}
+\end{equation}
+
+These experiments given an \textbf{upper bound} on true entropy. Table \ref{tab:entropy-rates-of-english} shows the cross entropy of various model. Creating a language model which results in 1.34 entropy is the final goal.
+
+Note that when computing the cross-entropy of a model, be sure to compute it on a \textbf{separate, independent test set}. This is because the $n$-gram model is highly dependant on the training set (so it may \textbf{overfit} if tested on the same training data).
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Model} & \textbf{Cross Entropy} \\
+		\hline
+		Uniform & 4.76 \\
+		Unigram & 4.03 \\
+		Bigram & 2.8 \\
+		Shannon's Experiment & 1.34 \\
+		\hline
+	\end{tabular}
+	\caption{Cross Entropy of Different Models with English}
+	\label{tab:entropy-rates-of-english}
+\end{table}
 
 \subsection{Mutual Information}
 \label{sec:mutual-information}
 
 If $X$ and $Y$ are discrete random variables and $P(x, y)$ is value of their \textbf{joint probability distribution} at $(x, y)$, and $P(x)$ and $P(y)$ are the margin distributions of elements in $X$ and $Y$ respectively, then the \textbf{mutual information} of $X$ and $Y$ can be computed using Equation \ref{eq:mutual-information}. This equation loops over all the different \textbf{combinations} of value pairs of possible values $X$ and $Y$ and uses their joint probabilities to measure this.
 
-The mutual information between two random variables means how much of the \textbf{same information} do they provide? It can be used a good measure to see how similar the the two values are and how often they occur together.
-
-\begin{equation}
+\begin{equation}\begin{aligned}[b]
 	I(X;Y) = \sum_{x \in X} { \sum_{y \in Y} {
 		p(x, y) \cdot \log{\frac{p(x,y)}{p(x)p(y)}}
-	} }
+	} } \\
+	I(X;Y) = H(X) - H(X|Y)
+	\end{aligned}
 	\label{eq:mutual-information}
 \end{equation}
+
+$I(X;Y) >= 0$ and $I(X;Y) = I(Y;X)$, so mutual information is \textbf{symmetric}.
+
+The mutual information between two random variables measures how \textbf{dependant} they are on each other. $I(X;Y) = 0$ if and only if they are \textbf{independent}. It is a good measure to use to find out how similar the the two values are and how often they occur together. $I(X;Y)$ grows not only with the dependence of $X$ and $Y$, but also with their entropies $H(X)$ and $H(Y)$.
+
+\paragraph{\textbf{NOTE: }} $I(X;X)= H(X)$. The entropy is being described as "self-information" of $X$.
 
 Applying this to \textbf{text classification}, one can compute the mutual information between a \textbf{word and a class}. Higher mutual information means that the presence of that word is a good indication that the document is that class. Computing class-word mutual information requires the following steps:
 \begin{enumerate}
@@ -1593,7 +1752,24 @@ Using the \textbf{Reuters} training corpora, computing the mutual information be
 \end{aligned}
 \end{equation}
 
-TODO: pointwise mutual information (see slides on similarity measures too for this)
+\subsection{Pointwise Mutual Information}
+
+Suppose $X$ and $Y$ are discrete random variables with the joint distribution $P(x, y)$ and the marginal (individual) distributions $p(x)$ and $p(y)$. Given two values for the two random variables, $x \in X$ and $y \in Y$, then it possible to compute the mutual information between those two \textit{specific} values. This is \textbf{pointwise mutual information} and can be computed using Equation \ref{eq:pointwise-mutual-info}.
+
+\begin{equation}
+	I(X;Y) = \log \frac{p(x,y)}{p(x)p(y)}
+	\label{eq:pointwise-mutual-info}
+\end{equation}
+
+Consider the joint probability distribution of Simplified Polynesian given in Table \ref{tab:joint-entropy-example}. Computing the mutual information between vowel $a$ and consonant $p$ can be done like so:
+\begin{equation}
+	I(a;p) = \log \frac{p(a, p)}{p(a)p(p)} = \log \frac{\frac{1}{16}}{\frac{1}{2} \cdot \frac{1}{8}} = \log \frac{\frac{1}{16}}{\frac{1}{16}} = \log 1 = 0
+\end{equation}
+
+And for vowel $i$ and consonant $p$:
+\begin{equation}
+	I(i;p) = \log \frac{p(i, p)}{p(i)p(p)} = \log \frac{\frac{1}{16}}{\frac{1}{4} \cdot \frac{1}{8}} = \log \frac{\frac{1}{16}}{\frac{1}{32}} = \log 2 = 1
+\end{equation}
 
 \section{Part-of-Speech Tagging}
 
