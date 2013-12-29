@@ -2148,35 +2148,76 @@ Therefore, $n$-grams fail to express entities and dependencies \textit{between} 
 \begin{quote}
 	The cat and the dog with the hat love the cow
 \end{quote}
-Here, the cat loves the cow. However, since regular expressions cannot express \textbf{attachment} (nesting), it won't detect that "the dog with the hat" is nested with the cat and that \textit{both} the cat and the dog love the cow. Therefore, regular expressions \textbf{cannot} be used to fully express entities and their dependencies in natural languages either.
+Here, the cat loves the cow. However, since regular expressions cannot express \textbf{attachment} (nesting), it won't detect that "the dog with the hat" is nested with the cat and that \textit{both} the cat and the dog love the cow. Therefore, regular expressions \textbf{cannot} be used to fully express entities and their dependencies in natural languages either, as \textbf{recursion/nesting} accounts for a large chunk of the complexity in human language.
 
 \subsection{Grammar}
 
-TODO: definitions
+A \textbf{grammar} describes the \textbf{rules} of bracketing for a language, as well as the \textbf{regularities} of how the constituents are grouped together and attached to each other (what's nested in what).
 
-TODO: example grammar and using it to derive sentences (step-by-step and tree shown)
+A \textbf{rule} is defined by a left-hand side (LHS) and a right-hand side (RHS). The LHS contains a type of phrase/constituent and the RHS is what the constituent contains. For example:
+\begin{quote}
+	$NNS \rightarrow \lbrace$ women, men, tables $\rbrace$ \\
+	$NP \rightarrow AT\;NNS$
+\end{quote}
+defines a \textbf{lexicon} of words and their \textbf{parts of speech}. It states that the $NP$ constituent type can contain $AT$ and $NNS$ constituents/words, and that the words "women", "men" and "tables" have the POS tag $NNS$.
 
-TODO: labelled bracketing and examples
+A grammar consists of:
+\begin{itemize}
+	\item \textbf{Terminal Symbols} -- symbols that correspond to groups of words (e.g. "table", "apple", "laughing")
+	\item \textbf{Non-Terminal Symbols} -- symbols that \textbf{generalise} over words or other non-terminals (e.g. $NP$). This is how \textbf{recursion} and nesting are introduced
+	\item \textbf{Context-Free Grammar Rule} $A \rightarrow \alpha$ -- where $A$ is a \textbf{single non-terminal} and $\alpha$ is a \textbf{sequence} of terminals and/or non-terminals
+	\item \textbf{Start Symbol} $S$ -- Where the generation of string using the grammar starts
+	\item \textbf{Language} $L(G$ -- a set containing \text{all strings} that can be \textbf{derived} from the start symbol via the rules
+\end{itemize}
 
-TODO: mention of recursion
+An example grammar $G$ is shown in Figure \ref{fig:example-grammar}. The top half defines the \textbf{rules} of the grammar and the bottom half defines the \textbf{lexicon} (vocabulary).
 
-\subsubsection{Context-free Grammar vs. Regular Grammar}
+TODO: figure of example grammar
 
-TODO
+An example of deriving a sentence using the production rules of the grammar $G$ in Figure \ref{fig:example-grammar} is shown in Equation \ref{eq:example-sentence-derivation}. Both Equation \ref{eq:example-sentence-derivation-bracketing} and Figure \ref{fig:example-sentence-derivation} illustrate the \textbf{nested hierarchy} of terminals that produced the sentence (the former with \textbf{bracketing} and the latter with a \textbf{syntax tree}).
+
+\begin{equation}
+\begin{aligned}[b]
+	S &\rightarrow NP\; VP \\
+	&\rightarrow AT \; NNS \; VB \; NP \\
+	&\rightarrow AT \; NNS \; VB \; JJ \; NNS \\
+	&\rightarrow \text{The men see old women}
+	\label{eq:example-sentence-derivation}
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+	[_{S}[_{NP}[_{AT}the] [_{NNS}men]] [_{VP}[_{VB}see] [_{NP}[_{JJ}old] [_{NNS}women]]]]
+	\label{eq:example-sentence-derivation-bracketing}
+\end{equation}
+
+TODO: NESTED HIERARCHY FIGURE
+
+Consider the following sentences. Which are grammatical (valid) under grammar $G$?
+\begin{enumerate}
+	\item \textbf{(VALID)} -- The men with the hats with the feathers see old women
+	\item \textbf{(INVALID)} -- The children see old women
+	\item \textbf{(VALID)}  -- Old women sees old men
+	\item \textbf{(INVALID)} -- See old women!
+\end{enumerate}
+Sentence 2 is invalid because it contains a word \textbf{not specified in the grammar's lexicon} ("children").  Sentence 4 is invalid because there is \textbf{no rule} which states a verb can be at the start of sentence (see is part of the terminal class "VB")
 
 \subsubsection{Limitations}
 
-TODO: agreement
+\textbf{Agreement} is when  the number, case or gender of two constituents must agree, or match. For example, "the dogs sees the bone". "sees" is only used for singular nouns -- the correct word is "see". However, context-free grammars do not take this into consideration. There are two ways to solve this:
+\begin{itemize}
+	\item Use a context-sensitive language
+	\item Use \textbf{constraint-based formalism}. An example of a rule with constrains is "$S \rightarrow NP VP$, only if the number of $NP$ is equal to the number of $VP$".
+\end{itemize}
 
-TODO: semantics
+While defining the syntax and lexicon of a grammar (e.g. for English) is useful, what happens when you have a sentence that can be parsed in multiple different ways (i.e. \textbf{ambiguity})? The parse that makes sense depends on the words actually being used. In other words, the \textbf{semantics} of the words and the overall meaning of the sentence can affect parsing decisions.
+\begin{quote}
+	I eat the cake with a spoon. \\
+	I eat $[_{NP}$the cake with a spoon.]
+\end{quote}
+The above parse would mean that the person speaking is eating a cake, and that the cake owns/is holding a spoon. The highlights that syntax is \textbf{not clearly separated from semantics}.
 
-TODO: language dependency
-
-\subsubsection{Context-Free Languages Enough?}
-
-TODO
-
-TODO: summary of grammar too
+The big question in all this is: are human languages context-free? Are context-free grammars able to describe all language phenomena? Or do you only need rules like $A \rightarrow \alpha$? \textbf{English} seems to be context free, but others may not be. For example, \textbf{Swiss German} is \textit{not}, it is \textbf{context sensitive}. Whether or not a language is truly context-free must be considered before trying to construct a grammar to parse it.
 
 \subsection{Language Universals}
 
@@ -2186,28 +2227,51 @@ TODO
 
 \subsection{Parsing}
 
-TODO: definition of it
+\textbf{Parsing} assigns a \textbf{syntactic structure} to a sentence, such as a CFG tree. A \textbf{parse} is a tree (of constituents) constructed from a sentence. Parsing has many applications, such as:
+\begin{itemize}
+	\item Grammar checking (e.g. compiling programming languages)
+	\item Intermediate stage to full semantic analysis
+	\item Machine translation, information extraction, question asking (parsing gives groupings of words, which can be used to get semantics/information on text's content)
+\end{itemize}
 
-TODO: top-down parsing
+\textbf{Automatic parsing} searches through \textbf{all possible parse trees} to find the correct tree, in a brute-force manner. There are two major types of parsing:
+\begin{itemize}
+	\item \textbf{Top-Down Parsing} -- Search for a parse tree that fits the input text by trying to build \textbf{from the root} $S$ to the leaves (tokens in text)
+	\item \textbf{Bottom-Up Parsing} -- Build a parse tree \textbf{from the leaves} (tokens), moving upwards to the root
+\end{itemize}
+Parsers are often a combination of the two approaches.
 
-TODO: bottom-up parsing
+Figure \ref{fig:top-down-parsing} shows an example of using the standard \textbf{brute force top-down search algorithm} to find the correct parse tree for the sentence \textit{"See the women"}. It also shows what the final parse tree looks like.
 
-TODO: example of top-down
+TODO: figure with step-by-step parse trees and annotations from the slides
 
-TODO: properties such parsing approaches (essentially DFS)
+\paragraph{\textbf{NOTE: }} Typically, these search algorithms choose \textbf{production rules} to apply in the \textbf{same order they are specified in the grammar}. Additionally, children of a parse tree are evaluated from left-to-right (left-most node of search tree is expanded first). 
+\paragraph{}
+
+This search algorithm is essentially \textbf{depth-first search (DFS)}. DFS systemically explores the search space by concentrating on one state at a time. When there is an \textbf{inconsistency} between the current tree and the sentence, the algorithm \textbf{backtracks} to the \textbf{most recently generated unexplored} tree (most recent unexplored node).
 
 \subsubsection{Limitations}
 
 TODO: can combine with bottom-up filtering to prevent rules with illegal POS taggings
+The top-down DFS search algorithm uses rules that we \textit{know} are invalid due to POS (part-of-speech) tagging constraints. For example, "the" is \textit{always} a determiner, but the brute force search will even consider it to be other tags (e.g. nouns or verbs). This causes lots of backtracking and drastically slows down parsing times.
 
-TODO: infinite recursion!
+One solution to this is to \textbf{combine} the top-down approach with \textbf{bottom-up filtering}. You start the top-down and bottom-up parses \textbf{at the same time}. Any trees/subtrees found to be invalid on the bottom-up search will be \textbf{filtered} from the top-down approach, so it won't even consider them.
 
-TODO: effort duplication w/ example
-TODO: chart parsing and how it can be used to store already seen parts of tree in table (saves effort)
+Another problem with parsing is \textbf{infinte recursion}. If there is even one recursive production rule in the grammar, then DFS could get stuck in an infinite loop, where it is constantly applying the same production rule over and over. This is shown in Figure \ref{fig:infinite-recursion} for the grammar:
+\begin{equation}
+\begin{aligned}[b]
+S \rightarrow NP
+NP \rightarrow NP PP
+\end{aligned}
+\end{equation}
 
-\subsubsection{Summary}
+TODO: figure of trees with "..." saying how it goes on infinitely
 
-TODO: summary slide augmented w/ extra details
+Top-down DFS recomputes the same parse trees many times. Consider the two parse trees the search generated at different states in Figure \ref{fig:effort-duplication}. Notice how the tree A is a subtree of a node in tree B? DFS will compute the entire sub-tree \textbf{again}, which results in a \textbf{duplication of effort}.
+
+TODO: effort duplication tree with duplicated sub-tree highlighted
+
+\textbf{Chart parsing} reduces the overall computation time by storing constituents or trees in a \textbf{table/chart}. When expanding a node, the table can be looked up to see if a tree already exists for that expansion from a previous expansion (worse case complexity for this is $n^3$).
 
 \subsection{Global Ambiguity}
 
