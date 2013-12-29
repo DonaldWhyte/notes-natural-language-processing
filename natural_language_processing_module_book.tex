@@ -1970,13 +1970,114 @@ Note that some words/tokens \textbf{always} have the same tag, so the probabilit
 
 \subsection{Transformation-Based Tagging}
 
-TODO: general idea
+Markov models only identifies a \textbf{small range} of regularities present in natural language. \textbf{Transformation-based tagging} encodes more \textbf{complex} interdependencies between words and tags. It does this by learning \textbf{intuitive} rules from a training corpus. Unlike Markov model tagging, this \textbf{exploits prior linguistic knowledge} of a language, through the use of templates (described later). 
 
-TODO: templates
+Transformation-based learnings takes \textbf{two inputs}:
+\begin{enumerate}
+	\item tagged training corpus and word-tag dictionary
+	\item \textbf{templates} that encode \textit{specifications} for admissible transformations (e.g. \texttt{Change Tag1 to Tag2 if the preceding word is tagged Tag3})
+\end{enumerate}
+After receiving these, a learning algorithm learns \textbf{transformation instantiations} from the tagged training corpus. These are instantiations of the transformation templates given to it. The \textbf{output} of the learning algorithm is a \textbf{ranked list of transformation instantiations} that can be applied (in order of rank) to another unseen, untagged corpus. The idea is that this ranked list of transformations produces accurate taggings in unseen texts.
 
-TODO: learning algorithm
+\textbf{Templates} specify general, admissible transformations. These transformations must always be legal and never break down the tagf sequence. There are three major types of templates -- \textbf{tag-driven}, \textbf{word-driven} and \textbf{morphology-driven}.
 
-TODO: examples
+Examples of tag-driven templates include: \texttt{Change Tag1 to Tag2 if}
+\begin{itemize}
+	\item \texttt{The preceding/following word is tagged Tag3}
+	\item \texttt{The word two before/after is tagged Tag3}
+	\item \texttt{One of the $n$ preceding/following words is tagged Tag 3}
+	\item \texttt{The preceding word is tagged Tag3 and the following word is tagged Tag4}
+	\item \texttt{The preceding/following word is tagged Tag3 and the word two before (after) is tagged Tag4}
+\end{itemize}
+
+Example of a word-drive template: \texttt{Change Tag1 to Tag2 if the previous word is W3}
+
+Example of a morphology-drive template: \texttt{Change Tag1 to Tag2 if the word ends with Suffix1}
+
+How does the algorithm \textbf{learn} which transformation rules work best? Given a training corpus $T$, the following \textbf{learning algorithm} is applied:
+\begin{enumerate}
+	\item \textbf{Assume you don't know} the correct tagging sequence for $T$
+	\item Tag each word in $T$  with its \textbf{most frequent tag} (learnt from training corpus). For example, $move \implies VB$.
+	\item Consider \text{all} possible transformations and apply the one that improves tagging accuracy the most (accuracy measure derived from $T$). This is a form of \textbf{greedy search}, which selects a single template instantiation every iteration (e.g. \texttt{Change VB tp NN if the precediing word is tagged DT}).
+	\item Retag $T$ applying that rule
+	\item Go back to 3 and repeat (baseline corpus accuracy $T$ is now the retagged one from step 4). This is done \textbf{until significant improvements are reached} (could use threshold as stopping criterion).
+	\item Return all learnt rules \textbf{in order}
+\end{enumerate}
+This greedy algorithm is iterative and will continuously run until terminated by its stopping criteria (e.g. converges to best accuracy it can find -- maxima). Figure \ref{fig:transformed-based-tagging} illustrates the iterative process. Notice how it builds upon the previous rules at each iteration, and how the initial tagging is performed by a \textbf{baseline tagger} (e.g. unigram tagger).
+
+TODO: figure from the transformation-based tagging paper showing process
+
+Consider the example corpus in Table \ref{transformation-tagger-example1}, whose approximated tags have been initialised with the \textbf{most frequent tag}. The entries in \textbf{bold} have not been tagged correctly in the approximation. The first iteration of the algorithm finds \texttt{Change VB to NN if previous tag is DT} to be the rule which results in the best accuracy, so it saves that rule and retags the corpus. This is shown in  Table \ref{transformation-tagger-example2}.
+
+A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be the best trasformation next. The rule is saved and the corpus is retagged to achieve the approximation in Table TODO. Note how we have achieved 100\% accuracy now, so the algorithm terminates and returns the ordered list of rules that were found:
+\begin{enumerate}
+	\item \texttt{Change VB to NN if previous tag is DT}
+	\item \texttt{Change NN to VB if previous tag is TO}
+\end{enumerate}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Training Corpus} & \textbf{Approximation \#0} \\
+		\hline
+		The/DT & The/DT \\
+		bear/NN & \textbf{bear/VB} \\
+		is/VBZ & is/VBZ \\
+		on/IN & on/IN \\
+		the/DT & the/DT \\
+		move/NN & \textbf{move/VB} \\
+		to/TO & to/TO \\
+		race/VB & \textbf{race/NN} \\
+		there/RB & there/RB \\
+		\hline
+	\end{tabular}
+	\caption{Approximation using initial most frequent tagger}
+	\label{transformation-tagger-example1}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Training Corpus} & \textbf{Approximation \#1} \\
+		\hline
+		The/DT & The/DT \\
+		bear/NN & bear/NN \\
+		is/VBZ & is/VBZ \\
+		on/IN & on/IN \\
+		the/DT & the/DT \\
+		move/NN & move/NN \\
+		to/TO & to/TO \\
+		race/VB & \textbf{race/NN} \\
+		there/RB & there/RB \\
+		\hline
+	\end{tabular}
+	\caption{Approximation using one found rule}
+	\label{transformation-tagger-example2}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Training Corpus} & \textbf{Approximation \#1} \\
+		\hline
+		The/DT & The/DT \\
+		bear/NN & bear/NN \\
+		is/VBZ & is/VBZ \\
+		on/IN & on/IN \\
+		the/DT & the/DT \\
+		move/NN & move/NN \\
+		to/TO & to/TO \\
+		race/VB & race/VB \\
+		there/RB & there/RB \\
+		\hline
+	\end{tabular}
+	\caption{Final approximation using first and second found rules}
+	\label{transformation-tagger-example3}
+\end{table}
+
 
 \subsubsection{Advantages/Disadvantages}
 
