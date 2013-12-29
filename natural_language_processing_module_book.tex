@@ -1060,7 +1060,9 @@ Suppose you want to group words according to how similar they are. For example, 
 
 The \textbf{Vector Space Model} can be used to determine the similarity of two words, just like how it was used for IR. It makes the assumption that word meaning $\approx$ context; that is, words mean similar things if they are \textbf{used in similar contexts}. The model represent words as vectors in multidimensional space. Words whose vectors are \textbf{closer in space} are more similar to each other.
 
-Figure \ref{fig:vsm-similar} shows a collection of words represented in vector space.Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
+Figure \ref{fig:vsm-similar} shows a collection of words represented in vector space. Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
+
+TODO: vector space
 
 Let $W$ be all the words in the vocabulary and $n = |W|$ be the number of words. Each word is represented by an $m$-dimensional vector, where $m$ is the number of context words, or features. \textbf{Context words} are words specifically chosen to be used for extracting semantics.  Each \textbf{component} of the $m$-dimensional vector is an \textbf{association measure} of the word the vector is representing and the context word that component refers to. 
 
@@ -1071,7 +1073,7 @@ Here, a \textbf{co-occurrence vector} is used to represent a word. This vector c
 
 To construct an association measure between a word and context word, a \textbf{predefined window} of words is often considered for the context. Let $d$ be the size of the window. This means that, for each occurrence of word, look $\frac{d}{2}$ words before it and $\frac{d}{2}$ after. Then, count the \textbf{number of times each context word appears in those windows}, and use that frequency as the association measure.
 
-Suppose we have a vocabulary of three \textbf{words} -- "first", "learning" and "discovering". We have five \textbf{context words} -- "these", "meaning", "the", "practical", "come". Suppose we are using a window size of 6 ($d = 3$) and examining the text elow. We look for each occurrence of a word in the vocabulary and count the number of times context words appear in that window. After doing this, we're left with Table \ref{tab:vsm-co-occurrence-vectors}, which represents each of the three words as 5-dimensional \textbf{co-occurrence} vector.
+Suppose we have a vocabulary of three \textbf{words} -- "first", "learning" and "discovering". We have five \textbf{context words} -- "these", "meaning", "the", "practical", "come". Suppose we are using a window size of 6 ($d = 3$) and examining the text below. We look for each occurrence of a word in the vocabulary and count the number of times context words appear in that window. After doing this, we're left with Table \ref{tab:vsm-co-occurrence-vectors}, which represents each of the three words as 5-dimensional \textbf{co-occurrence} vector.
 
 \begin{quote}
 "And this is the last thing the anthropologist who tries to understand symbols can afford to do. He must start with the explanations and commentaries which his informants themselves offer about their \textit{"symbols. These must \textbf{first} be examined in"} the contexts in which they are usually employed, where they occur naturally, although subsequent generalizing discussion helps the anthropologist to improve his very \textit{"superficial initial standing. \textbf{Learning} the meaning of"} symbols is part of the \textit{"anthropologist's practical semantics: \textbf{discovering} the meaning of"} words, noticing when their use is appropriate and when it is not. all this requires imagination, patience, considerable linguistic skill, but above all a rigorous respect for the facts. \textit{"These must come \textbf{first}; fantasy can come"} later"
@@ -1144,9 +1146,7 @@ There many different association measures that could be used to link words to co
 
 Each word is represented as a vector of $m$ values -- $\vec{x} = (x_1, x_2, ..., x_m)$. $\vec{x}$'s components contain association measures of the word represent by $\vec{x}$ to all $m$ context words. Therefore, to determine the similarity between two words we perform some operation on the two words' vectors. This is the \textbf{similarity measure} $s(\vec{x}, \vec{y})$.
 
-The \textbf{Euclidean distance} between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:euclidean-distance-sim}. The \textbf{cosine} of the angle between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:cosine-similarity-duplicate}. The former measures how close/far apart two vectors are and the latter measures the angle between two two vectors.
-
-Both of the these are commonly used as the similarity measure. \textbf{Cosine similarity} tends to be used more however, because TODO.
+The \textbf{Euclidean distance} between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:euclidean-distance-sim}. The \textbf{cosine} of the angle between two vectors $\vec{x}$ and $\vec{y}$ is given in Equation \ref{eq:cosine-similarity-duplicate}. The former measures how close/far apart two vectors are and the latter measures the angle between two two vectors. Both of the these are commonly used as the similarity measure. \textbf{Cosine similarity} tends to be used more however.
 
 \begin{equation}
 	|\vec{x} - \vec{y}| = \sqrt{ \sum_{i=1}^n {x_i - y_i}^2 }
@@ -1446,8 +1446,8 @@ The probabilities of each word/sequence is the \textbf{relative frequency}. Equa
 
 Figure \ref{fig:brown-bigram-model} shows part of a bigram model generated from the \textbf{Brown} corpus, which has one million words. Figure \ref{fig:bnc-bigram-model} shows part of a bigram generated from the \textbf{BNC} corpus, with 100 million tokens. Notice how these models are being represented by \textbf{frequency tables}, where the entry at row $i$ and column $j$ is the number of times the bigram $w_i w_j$ occurred in the corpus.
 
-TODO: Brown bigram model
-TODO: BNC bigram model
+TODO: Brown bigram model (caption mentions row word is first word)
+TODO: BNC bigram model (caption mentions row word is first word)
 
 \subsection{Smoothing}
 
@@ -2007,9 +2007,9 @@ This greedy algorithm is iterative and will continuously run until terminated by
 
 TODO: figure from the transformation-based tagging paper showing process
 
-Consider the example corpus in Table \ref{transformation-tagger-example1}, whose approximated tags have been initialised with the \textbf{most frequent tag}. The entries in \textbf{bold} have not been tagged correctly in the approximation. The first iteration of the algorithm finds \texttt{Change VB to NN if previous tag is DT} to be the rule which results in the best accuracy, so it saves that rule and retags the corpus. This is shown in  Table \ref{transformation-tagger-example2}.
+Consider the example corpus in Table \ref{tab:transformation-tagger-example1}, whose approximated tags have been initialised with the \textbf{most frequent tag}. The entries in \textbf{bold} have not been tagged correctly in the approximation. The first iteration of the algorithm finds \texttt{Change VB to NN if previous tag is DT} to be the rule which results in the best accuracy, so it saves that rule and retags the corpus. This is shown in  Table \ref{tab:transformation-tagger-example2}.
 
-A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be the best trasformation next. The rule is saved and the corpus is retagged to achieve the approximation in Table TODO. Note how we have achieved 100\% accuracy now, so the algorithm terminates and returns the ordered list of rules that were found:
+A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be the best trasformation next. The rule is saved and the corpus is retagged to achieve the approximation in Table \ref{tab:transformation-tagger-example3}. Note how we have achieved 100\% accuracy now, so the algorithm terminates and returns the ordered list of rules that were found:
 \begin{enumerate}
 	\item \texttt{Change VB to NN if previous tag is DT}
 	\item \texttt{Change NN to VB if previous tag is TO}
@@ -2033,7 +2033,7 @@ A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be th
 		\hline
 	\end{tabular}
 	\caption{Approximation using initial most frequent tagger}
-	\label{transformation-tagger-example1}
+	\label{tab:transformation-tagger-example1}
 \end{table}
 
 \begin{table}[H]
@@ -2054,7 +2054,7 @@ A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be th
 		\hline
 	\end{tabular}
 	\caption{Approximation using one found rule}
-	\label{transformation-tagger-example2}
+	\label{tab:transformation-tagger-example2}
 \end{table}
 
 \begin{table}[H]
@@ -2075,7 +2075,7 @@ A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be th
 		\hline
 	\end{tabular}
 	\caption{Final approximation using first and second found rules}
-	\label{transformation-tagger-example3}
+	\label{tab:transformation-tagger-example3}
 \end{table}
 
 
@@ -2108,9 +2108,6 @@ The \textbf{upper bound} can be decided by having humans tag corpora and measuri
 	\item mistakes in pre-tagged training corpora (or mistakes in the actual \textit{text} which result in incorrect grammar)
 	\item number of unknown words in text (taggers often struggle with unknown words)
 \end{itemize}
-
-TODO: something on required reading for transformed-based tagging?
-???
 
 \section{Grammar and Parsing}
 
@@ -2252,7 +2249,6 @@ This search algorithm is essentially \textbf{depth-first search (DFS)}. DFS syst
 
 \subsubsection{Limitations}
 
-TODO: can combine with bottom-up filtering to prevent rules with illegal POS taggings
 The top-down DFS search algorithm uses rules that we \textit{know} are invalid due to POS (part-of-speech) tagging constraints. For example, "the" is \textit{always} a determiner, but the brute force search will even consider it to be other tags (e.g. nouns or verbs). This causes lots of backtracking and drastically slows down parsing times.
 
 One solution to this is to \textbf{combine} the top-down approach with \textbf{bottom-up filtering}. You start the top-down and bottom-up parses \textbf{at the same time}. Any trees/subtrees found to be invalid on the bottom-up search will be \textbf{filtered} from the top-down approach, so it won't even consider them.
