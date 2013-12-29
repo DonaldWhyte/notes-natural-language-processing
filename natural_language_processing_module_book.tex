@@ -2081,17 +2081,36 @@ A second iteration finds \texttt{Chnage NN to VB if previous tag is TO} to be th
 
 \subsubsection{Advantages/Disadvantages}
 
-TODO
+\textbf{Advantages:}
+\begin{itemize}
+	\item Uses wider context and \textbf{following} context (not just previous), enabling it to learn more complex patterns
+	\item Can be expanded to word-driven templates for greater detail
+	\item Can be expanded to morphology-drive templates, which is \textbf{great for unknown words}
+	\item Learn rules are \textbf{easy to understand} by humans, they're \textbf{intuitive}
+\end{itemize}
 
-\subsection{Evaluation}
+\textbf{Disadvantages:}
+\begin{itemize}
+	\item Hard to use for $k$-best tagging, which is important for parsing grammar
+	\item Uses pre-encoded linguistic knowledge, meaning that for each language youneed to specify new templates
+\end{itemize}
 
-TODO: how to evaluate, current accuracies
+\subsection{Evaluation and Performance Issues}
 
-\subsection{Caveats}
+Taggers can be \textbf{evaluated} by simply measuring the \textbf{accuracy} (\%) of the tagger when used on (unseen) test corpora. 11,5\% of \textbf{word types} have more than one tag, which makes tagging seem like an easy problem. However, 40\% of \textbf{tokens} have more than one tag; that is, almost the tags of almost half of all text is ambiguous. Therefore, tagging is no easy task.
 
-TODO: caveats of tagging
+The \textbf{upper bound} can be decided by having humans tag corpora and measuring their accuracy. Currently, there exist taggers which can achieve \textbf{95\% to 97\% accuracy}. A sensible \textbf{lower bound} is \textbf{90\%}, since that's the accuracy some unigram "most frequent" taggers have achieved.
 
-TODO: something on required reading for transformed-based tagging????????????????????????????????
+\textbf{Tagging performance} (accuracy) depends on many variables, such as:
+\begin{itemize}
+	\item corpus size (amount of training data)
+	\item genre and formality of training and test data (do they differ?)
+	\item mistakes in pre-tagged training corpora (or mistakes in the actual \textit{text} which result in incorrect grammar)
+	\item number of unknown words in text (taggers often struggle with unknown words)
+\end{itemize}
+
+TODO: something on required reading for transformed-based tagging?
+???
 
 \section{Grammar and Parsing}
 
