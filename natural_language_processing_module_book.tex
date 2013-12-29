@@ -1381,6 +1381,7 @@ Notice how these are measures are \textbf{significantly different}. The microave
 If you only choose one measure to evaluate the performance of your multi-class classifier, then be sure to think it through carefully. If classifying common classes accurately is more important to use, then use microaveraging. If you don't care about that and you care about all classes equally (e.g. you just didn't have that much of one class in a test dataset, but you still care about it as much), then use macroaveraging. Alternatively, you can always just compute both and use the results from both to determine the effectiveness of the classifier.
 
 \section{$n$-Gram Modelling}
+\label{sec:ngram-modelling}
 
 Up to now, all the techniques that have been covered involved counting individual words, which also used the Bags of Words model. The probabilities of word \textit{sequences} (i.e. sentences) can be computed, which creates a \textbf{probabilistic language model}. This model can be applied to various tasks, such as:
 \begin{itemize}
@@ -1773,49 +1774,183 @@ And for vowel $i$ and consonant $p$:
 
 \section{Part-of-Speech Tagging}
 
-TODO: what is is roughlyand applications
+Currently, this document has only considered occurrences of individual words or word sequences (co-occurrence). While some grammatical information may be derived by co-occurrences, it is not detailed enough to perform more powerful analysis on text. \textbf{Part-of-speech (POS) tagging} is a first step in assigning grammatical structure to the words in a text.
+
+Tagging has many applications and can be used to empower the following:
+\begin{itemize}
+	\item Speech synthesis (determining content)
+	\item Matching chunks of text in information extraction (e.g. "\textbf{The Uranian government} declared more on \textbf{Beloria})
+	\item Question answering
+	\item Disambiguating words
+	\item Pre-processor to parsing step
+\end{itemize}
 
 \subsection{Word Classes}
 
-TODO: CLASS TYPES
+\textbf{Word classes}, or parts of speech, are sets of words which share the same grammatical properties (i.e. are used in the same part of a sentence). There are two kinds of classes:
+\begin{itemize}
+	\item \textbf{Closed Class Types} -- classes with \textbf{fixed} and few members (e.g. function words -- when do you really see a new word such as "the" pop up?)
+	\item \textbf{Open Class Types} -- classes with large amounts of words in them, where many new words are being added all the time (e.g. nouns, verbs, etc. \textit{Every} new name is a new noun!)
+\end{itemize}
 
-TODO: example class nouns + hierarchy
+\textbf{Nouns} are an example of a high-level word class. They most often refer to people, places and things. They can occur with determiners, possessives and adjectives. Additionally, most nouns can also appear in plural form. Nouns have \textbf{subclasses} (Figure \ref{fig:noun-class-hierarchy}), such as proper and common nouns. Mass nouns and count nouns.
 
-TODO: table showing all COMMON WORD CLASSES THAT MAY HAVE TO BE USED IN THE EXAME!!!!!!!!! SEE LAST REVISION LECTURE NOTES FOR SOME EXAMPLES OF THESE AS WELL AS SLIDES/WORKSHEETS
+TODO: noun class hierarchy
+
+Table \ref{tab:common-word-classes} lists common word classes that tend to occur in taggers' tagsets, with examples of words.
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{Category} & \textbf{Example} & \textbf{Brown} & \textbf{Penn} \\
+		\hline
+		Adjective & happy & JJ & JJ \\
+		Adverb & often, badly, fast & CD & CD \\
+		Determiner & this, each, the & DT & DT \\
+		Noun & aircraft & NN & NN \\
+		Noun Singular & woman, book & NN & NN \\
+		Noun Plural & women, books & NN & NN \\
+		Noun Proper Singular & London & NP & NNP \\
+		Noun Proper Plural & Australians & NPS & NNPS \\
+		Personal Pronoun & he, her, she, they & -- & PP \\
+		\hline 
+	\end{tabular}
+	\caption{Common Word Classes}
+	\label{tab:common-word-classes} 
+\end{table}
 
 \subsection{Tagsets and Dictionaries}
 
-TODO: tagset
+A \textbf{tagset} is a list of all the possible POS tags in a language. It often encodes morphological categories, like person, number, gender,  case and so on. As an example, the Penn Treebank has 42 tags, while the Brown tag set has 87.
 
-TODO: dictionary
+A \textbf{dictionary} maps a \textbf{word} to \textbf{one or more tags}. It is not a one-to-one mapping because words can often have more than tag (as they can used for different grammatical purposes).
 
-TODO: example sentence taggings
-
-TODO: ambiguity
+Since words can be assigned more than one tag, this means there can be \textbf{ambiguity} in the POS tags. Below is a tagged sentence. "Bush" could be assigned NNP or NN, "fights" could be assigned VBZ or NNS and "press" could be assigned NN or VBD. Since there are \textbf{three} words than can be tagged in \textbf{two} different ways, there are $2^3 = 8$ possible taggings of the sentence.
+\begin{quote}
+\textit{"Bush fights press"}
+\end{quote}
+So how do \textbf{resolve} this ambiguity? How do we know which tagging is the right one? We can treat POS tagging as a \textbf{classification task}.
 
 \subsection{POS Tagging as Classification}
 
-TODO: definition of classification problem
+Classification tasks are frequent in NLP. Given an observation $o$ and a set of target classes the observation can belong to, determine which target class $o$ belongs to. An an example of this is \textbf{text classification}.
 
-\subsubsection{Information Sources for Tagging}
+POS tagging as a classification task has the following properties:
+\paragraph{}
+\begin{tabular}{ll}
+	\textbf{Observation:} & a sentence with $n$ words \\
+	\textbf{Target Classes:} & all possible tag sequences \\
+	\textbf{Restriction on Classes:} & dictionary restricting tags allowed for particular words and sequence must be of length $n$ \\
+	\textbf{Knowledge Sources:} & grammatical rules, probabilities from corpora, etc. \\
+	\textbf{Knowledge Used:} & lexical (individual word tokens) and syntagmatic (context/surrounding words) \\			
+\end{tabular}
+\paragraph{}
 
-TODO: two information sources in tagging
+Two information sources are used in tagging. \textbf{Lexical} information considers the frequencies a particular word is assigned the different tags. For example, \textit{flour/NN vs. flour/VB}. Which is more likely? Perhaps it's the tag that word has been assigned more (based on historical data, like a corpus).
+
+\textbf{Syntagmatic} properties considers sequences of tags surrounding a word. The most likely\textbf{sequence} of tags is chosen. For example, \textit{DD JJ NN vs. DT JJ VB}. Which \textbf{trigram} is more frequent in the training corpus?
+
+A \textbf{unigram tagger} only considers each word by itself, only taking advantage of lexical information. This means it always assigns the word the tag that is most likely, based on the frequency the word has been assigned that tag in a training corpus. Other than that, all taggers use a combination of these two information sources.
 
 \subsection{Markov Model Tagging}
 
-TODO: definition of Markov model and how it's derived
+\textbf{Markov models} can be used for POS tag classification, in a similar way $n$-grams can be used for text classification. A Markov model tagger finds the \textbf{most probable tag sequence} $\hat{t_{1,n}}$ for a sequence of words $w_1,...,w_n$ (the sequence could be a sentence, for example). Using Bayes rule, the formula for computing the most probably tag sequence is given in Equation \ref{eq:mm-tag-classification}.
 
-TODO: example picture (state probabilities)
+\begin{equation}
+\begin{aligned}[b]
+	\hat{t_{1,n}} &= max_{t_{1,n}} p(t_{1,n}|w_{1,n}) \\
+	&= max_{t_{1,n}} \frac{p(w_{1,n}|t_{1,n})p(t_{1,n})}{p(w_{1,n})} \\
+	&= max_{t_{1,n}} p(w_{1,n}|t_{1,n})p(t_{1,n})
+\end{aligned}
+\label{eq:mm-tag-classification}
+\end{equation}
 
-TODO: tag-tag model
+However, this is too difficult to compute, as it requires knowledge of the probabilities of \textit{every single possible} tag and word sequence. Four assumptions are made to simplify this computation:
+\begin{enumerate}
+	\item \textbf{Markov assumption} (see Section \ref{sec:ngram-modelling}) -- $p(t_i|t_{1,i-1})$
+	\item Words are \textbf{independent of each other} --
+	$p(w_{1,n}|t_{1,n}) = \prod_{i-1}^n { p(w_i|t_i) }$
+	\item Word depends \textbf{only on its tag}, not previous tags -- $p(w_i|t_{1,n}) = p(w_i|ti)$
+	\item Time invariance -- $p(t_i|t_{i-1}) = p(t_2|t_1)$
+\end{enumerate}
 
-TODO: word-tag model
+Using these assumptions to simplify the computation gives us the final formula shown in Equation \ref{eq:mm-tag-probability-simplified}. 
 
-TODO: examples of two models
+\begin{equation}
+\begin{aligned}[b]
+	p(w_{1,n}|t_{1,n})p(t_{1,n}) &=
+	\prod_{i=1}^n { p(w_i|t_{1,n}) p(t_{1,n}) }
+	\;\;\;\;\;\;\;\;\;\;\; \text{by assumption (2)} \\
+	&= \prod_{i=1}^n { p(w_i|t_{1,n}) \times p(t_n|t_{1,n-1}) \times p(t_{n-1}|t_{1,n-2}) \times ... \times p(t_2|t_1) }
+	\;\;\;\;\;\;\;\;\;\;\; \text{by chain rule} \\
+	&= \prod_{i=1}^n { p(w_i|t_i) \times p(t_n|t_{n-1}) \times p(t_{n-1}|t_{n-2}) \times ... \times p(t_2|t_1) }
+	\;\;\;\;\;\;\;\;\;\;\; \text{by assumption (1) and (3)} \\
+	&= \prod_{i=1}^n { \left( p(w_i|t_i) \times p(t_i|t_{i-1}) \right) }
+	\;\;\;\;\;\;\;\;\;\;\; \text{rearranging} \\
+\end{aligned}
+\label{eq:mm-tag-probability-simplified}
+\end{equation}
+Now the final classification formula, to find the most likely POS tag sequence for a sequence of words, is:
+\begin{equation}
+	\hat{t_{1,n}} = \max_{t_{1,n}} \prod_{i=1}^n { \left( p(w_i|t_i) \times p(t_i|t_{i-1}) \right) }
+\end{equation}
 
-\subsubsection{Variations}
+Figure \ref{fig:mm_model} illustrates this simplified Markov model. Some of the probabilities present in the model have been discarded for ease of computation. Only the \textbf{tag-tag bigram probabilities} and \textbf{word-tag unigram probabilities} are considered now.
 
-TODO
+TODO: figure showing simplified MM model with labels from slides
+
+This means we need to built \textbf{two probability models}:
+\begin{itemize}
+	\item \textbf{Tag-Tag (Bigram) Model} -- A joint probability table which contains the probability of tag $t_i$ following $t_j$, for $i,j \in \lbrace 1, ..., m \rbrace$, where $m$ is the numbers of tags
+	\item \textbf{Word-Tag Model} -- Probability of tag $t_i$ being the correct tag for word $w_j$, where $i \in \lbrace 1, ..., m \rbrace$, $j \in \lbrace 1, ..., n \rbrace$, $n$ is the vocabulary size and $m$ is the number of tags
+\end{itemize}
+
+Tables \ref{tab:tag-tag-bigram-model} and \ref{tab:word-tag-unigram-model} are examples of tag-tag bigram and word-tag models respectively. These are frequency tables which can be used to compute the probabilities. For example, to compute the probability of a \textbf{noun (NN) following a determiner (DT)}, we do:
+\begin{equation}
+p(NN|DT) = \frac{f(DT, NN)}{f(DT)} = \frac{48636}{48636 + 19}
+\end{equation}
+To compute the probability of the word "move" being a noun, we do:
+\begin{equation}
+p(move|NN) = \frac{f(NN,move}{f(NN)}) = \frac{36}{81036}
+\end{equation}
+Note that some words/tokens \textbf{always} have the same tag, so the probability is 1. This is the case with "." and "is", which always have the PERIOD and VBZ tags respectively.
+
+\paragraph{\textbf{NOTE: }} To compute these probabilities, the joint probabilities are not the only thing required. The \textbf{singular probabilities for tags} (e.g. $p(DT)$) must be computed. This is done by filling in the "Total" row and column in Table \ref{tab:tag-tag-bigram-model}.
+\paragraph{}
+
+\begin{table}
+	\centering
+	\begin{tabular}{r|lllllll}
+		\textbf{First Tag $\lor$} & DT & VBZ & IN & NN & VB & PERIOD & \textbf{Total} \\
+		\hline
+		DT & 0 & 0 & 0 & 48636 & 0 & 19 & - \\
+		VBZ & 1973 & 0 & 426 & 187 & 0 & 38 & - \\
+		IN & 43322 & 0 & 1325 & 17314 & 0 & 185 & - \\
+		NN & 1067 & 3720 & 42470 & 11773 & 614 & 21392 & - \\
+		VB & 6072 & 42 & 2758 & 1476 & 129 & 1522 & - \\
+		PERIOD & 8016 & 75 & 4656 & 1329 & 954 & 0 & - \\
+		\textbf{Total} & - & - & - & - & - & - & - \\
+	\end{tabular}
+	\caption{Tag-Tag Bigram Model from a Tagged Training Corpus}
+	\label{tab:tag-tag-bigram-model}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{r|llllll}
+		\textbf{Words $\lor$} & DT & VBZ & IN & NN & VB & PERIOD \\
+		\hline
+		bear & 0 & 0 & 0 & 10 & 43 & 0 \\
+		is & 0 & 10065 & 0 & 0 & 0 & 0 \\
+		move & 0 & 0 & 0 & 36 & 133 & 0 \\
+		on & 0 & 0 & 5484 & 0 & 0 & 0 \\
+		the & 69016 & 0 & 0 & 0 & 0 & 0 \\
+		. & 0 & 0 & 0 & 0 & 0 & 48809 \\
+	\end{tabular}
+	\caption{Word-Tag Unigram Model from a Tagged Training Corpus}
+	\label{tab:word-tag-unigram-model}
+\end{table}
 
 \subsubsection{Advantages/Disadvantages}
 
