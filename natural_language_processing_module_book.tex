@@ -186,7 +186,14 @@ While the results are ugly, it might not matter. Bad stemming is not necessarily
 
 WordNet's morphy() is a slightly more sophisticated rule-based stemmer. It uses different rules based on the part-of-speech tag of a word and has an exception list for irregular words. Some of the rules are listed in Figure\ref{fig:morphy-rules}
 
-One approach is to "cheat" and not use rules at all. Instead,, all variants of a stem are stored in a \textbf{dictionary}. Stepping a word is simply a matter of looking up that word in a dictionary and retrieving the associated stem.
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/morphy-rules.png}
+	\caption{Portion of Rules the Stemmer Morphy Uses}
+	\label{fig:morphy-rules}
+\end{figure}
+
+One approach is to "cheat" and not use rules at all. Instead, all variants of a stem are stored in a \textbf{dictionary}. Stepping a word is simply a matter of looking up that word in a dictionary and retrieving the associated stem.
 
 \textbf{Categorical Variation Database (CatVar)} is a "database of clusters of uninflected words and their categorical (i.e. part-of-speech) variants".
 
@@ -235,7 +242,6 @@ The frequencies of all word \textit{types} can be counted and put in a \textbf{f
 	\caption{Example Frequency Distribution Table (ordered from most-frequent to least)}
 	\label{fig:freqdist}
 \end{figure}
-
 
 \subsection{Zipf's Law}
 
@@ -490,14 +496,14 @@ $R =  \lbrace d_1 \rbrace$, so only one relevant document is returned ($d_1$).
 	\centering
 	\includegraphics[scale=0.3]{figures/ir-set-theoric-venn1.png}
 	\caption{Venn Diagram Illustrating what a Set Theoretic Search Query Does}
-	\label{fig:inverted-file-structure}
+	\label{fig:ir-set-theoric-venn1}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.4]{figures/ir-set-theoric-venn2.png}
 	\caption{Venn Diagram Illustrating what a Set Theoretic Search Query Does}
-	\label{fig:inverted-file-structure}
+	\label{fig:ir-set-theoric-venn2}
 \end{figure}
 
 \subsubsection{Summary}
@@ -560,6 +566,8 @@ A \textbf{similarity measure} $sim(\vec{d}, \vec{q})$, which compares the simila
 \end{equation}
 
 Figure \ref{fig:cosine-similarity-example} illustrates how this similarity measure \textbf{relates to} the spatial representation of the documents and query. Table \ref{tab:cosine-similarity-example} and Equation \ref{eq:cosine-similarity-example} show the cosine similarity function applied to two documents, given a query $q$.
+
+TODO: cosine similarity figure
 
 \begin{table}[H]
 	\centering
@@ -686,6 +694,10 @@ So what stops us from simply using a \textbf{DBMS (Database Management System)} 
 \end{table}
 
 \subsection{Query Broadening}
+
+\begin{quote}
+	\textbf{CURRENTLY NOT GOING TO FILL IN THIS ENTIRE SUB-SECTION!!!}
+\end{quote}
 
 TODO: main idea???
 
@@ -934,7 +946,7 @@ Therefore, a multinomial Naive Bayes classifier would label document 5 with the 
 	&= max_{c \in C} \; P(C) \cdot \prod_{w_i \in V} {P(e_i|c)}
 	\;\;\;\;\;\;\;\;\;\;\;\;\; \text{rearranging} \\
 \end{aligned}
-\label{eq:biomial-naive-bayes-derivation}
+\label{eq:binomial-naive-bayes-derivation}
 \end{equation}
 
 \begin{equation}
@@ -1113,13 +1125,13 @@ Suppose you want to group words according to how similar they are. For example, 
 
 The \textbf{Vector Space Model} can be used to determine the similarity of two words, just like how it was used for IR. It makes the assumption that word meaning $\approx$ context; that is, words mean similar things if they are \textbf{used in similar contexts}. The model represent words as vectors in multidimensional space. Words whose vectors are \textbf{closer in space} are more similar to each other.
 
-Figure \ref{fig:vsm-similar} shows a collection of words represented in vector space. Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
+Figure \ref{fig:vector-space-model} shows a collection of words represented in vector space. Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
 
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.6]{figures/vector-space-model.png}
 	\caption{Documents Represented as Vectors in Multidimensional Space}
-	\label{fig:vsm-similar}
+	\label{fig:vector-space-model}
 \end{figure}
 
 Let $W$ be all the words in the vocabulary and $n = |W|$ be the number of words. Each word is represented by an $m$-dimensional vector, where $m$ is the number of context words, or features. \textbf{Context words} are words specifically chosen to be used for extracting semantics.  Each \textbf{component} of the $m$-dimensional vector is an \textbf{association measure} of the word the vector is representing and the context word that component refers to. 
@@ -1576,13 +1588,13 @@ This prevents us from assigning too much probability mass to unseens, providing 
 
 How do you compute the likelihood of encountering a \textbf{new, unseen word type} in the future? You could simply assign a probability of 0, or add one, but we can do more. Let $N_r$ be the number of $n$-grams with frequency $r$, so $N_0$ is the number of $n$-grams with frequency 0, $N_1$ is the number of $n$-grams with frequency 1 and so on. This makes $N = \sum_{r} {N_r}$ the total number of $n$-grams.
 
-\textbf{Good-Turing smoothing} uses the \textbf{proportion of singletons} ($n-$-grams $\in N_1$) to estimate the \textbf{proportion of unseen words} ($n-$-grams $\in N_0$). It does this by \textbf{not using standard relative frequency}. Instead, it uses Equation {eq:good-turing-smoothing} to estimate the probability of an $n$-gram in $N_r$, for all $r$. Notice how unseen $n$-grams are \textbf{special cases} that use a different formula (proportion of $n$-grams seen once to all $n$-grams).
+\textbf{Good-Turing smoothing} uses the \textbf{proportion of singletons} ($n-$-grams $\in N_1$) to estimate the \textbf{proportion of unseen words} ($n-$-grams $\in N_0$). It does this by \textbf{not using standard relative frequency}. Instead, it uses Equation \ref{eq:good-turing-smoothing} to estimate the probability of an $n$-gram in $N_r$, for all $r$. Notice how unseen $n$-grams are \textbf{special cases} that use a different formula (proportion of $n$-grams seen once to all $n$-grams).
 
 \begin{equation}
-	r^{\ast}) = \begin{cases}
+	r^{\ast} = \begin{cases}
 		\frac{N_1}{N},& \text{if }r=0 \\
 		(r + 1)\frac{N_{r+1}}{N_r} ,& \text{if }r>0
-	\end{cases}
+	\end{cases} \;\;\;\; \forall \; r
 	\label{eq:good-turing-smoothing}
 \end{equation}
 
@@ -2312,7 +2324,7 @@ An example of deriving a sentence using the production rules of the grammar $G$ 
 	\centering
 	\includegraphics[scale=0.4]{figures/example-grammar.png}
 	\caption{Parse Tree for Sentence \textit{"The men see old women"}}
-	\label{fig:sentence-parse-tree}
+	\label{fig:example-sentence-derivation}
 \end{figure}
 
 Consider the following sentences. Which are grammatical (valid) under grammar $G$?
@@ -2341,12 +2353,6 @@ The above parse would mean that the person speaking is eating a cake, and that t
 
 The big question in all this is: are human languages context-free? Are context-free grammars able to describe all language phenomena? Or do you only need rules like $A \rightarrow \alpha$? \textbf{English} seems to be context free, but others may not be. For example, \textbf{Swiss German} is \textit{not}, it is \textbf{context sensitive}. Whether or not a language is truly context-free must be considered before trying to construct a grammar to parse it.
 
-\subsection{Language Universals}
-
-TODO
-
-???
-
 \subsection{Parsing}
 
 \textbf{Parsing} assigns a \textbf{syntactic structure} to a sentence, such as a CFG tree. A \textbf{parse} is a tree (of constituents) constructed from a sentence. Parsing has many applications, such as:
@@ -2363,9 +2369,14 @@ TODO
 \end{itemize}
 Parsers are often a combination of the two approaches.
 
-Figure \ref{fig:top-down-parsing} shows an example of using the standard \textbf{brute force top-down search algorithm} to find the correct parse tree for the sentence \textit{"See the women"}. It also shows what the final parse tree looks like.
+Figure \ref{fig:top-down-parsing} shows an example of using the standard \textbf{brute force top-down search algorithm} to find the correct parse tree for the sentence \textit{"See the women"}. It also shows what the final parse tree looks like. Notice how the parser may have to backtrack one or more times it finds invalid parse trees.
 
-TODO: figure with step-by-step parse trees and annotations from the slides
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/top-down-parsing-example.png}
+	\caption{Example of Top-Down DFS Parsing to Find Valid Parse for Sentence \textit{"see the women"}}
+	\label{fig:top-down-parsing}
+\end{figure}
 
 \paragraph{\textbf{NOTE: }} Typically, these search algorithms choose \textbf{production rules} to apply in the \textbf{same order they are specified in the grammar}. Additionally, children of a parse tree are evaluated from left-to-right (left-most node of search tree is expanded first). 
 \paragraph{}
@@ -2381,12 +2392,17 @@ One solution to this is to \textbf{combine} the top-down approach with \textbf{b
 Another problem with parsing is \textbf{infinte recursion}. If there is even one recursive production rule in the grammar, then DFS could get stuck in an infinite loop, where it is constantly applying the same production rule over and over. This is shown in Figure \ref{fig:infinite-recursion} for the grammar:
 \begin{equation}
 \begin{aligned}[b]
-S \rightarrow NP
+S \rightarrow NP \\
 NP \rightarrow NP PP
 \end{aligned}
 \end{equation}
 
-TODO: figure of trees with "..." saying how it goes on infinitely
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/infinite-recursion.png}
+	\caption{Example of Infinite Recursion Caused by Production Rule NP -> NP PP}
+	\label{fig:infinite-recursion}
+\end{figure}
 
 Top-down DFS recomputes the same parse trees many times. Consider the two parse trees the search generated at different states in Figure \ref{fig:effort-duplication}. Notice how the tree A is a subtree of a node in tree B? DFS will compute the entire sub-tree \textbf{again}, which results in a \textbf{duplication of effort}.
 
@@ -2405,11 +2421,15 @@ Consider the sentence:
 \begin{quote}
 	\textit{The students see old men with the binoculars}
 \end{quote}
-Figur \ref{eq:global-ambiguity} shows how there are \textbf{multiple ways} to\textit{correctly} parse the sentence. That is, multiple valid bracketings or trees can be produced. This is \textbf{syntactic ambiguity}, where a sentence/constituent has more than one parse because of ambiguity after how \textbf{syntactic constituents combine}. This is not ambiguity causes by words; it's caused by how the words are syntactically built up into a sentence using the grammar's rules.
+Figure \ref{fig:global-ambiguity} shows how there are \textbf{multiple ways} to \textit{correctly} parse the sentence. That is, multiple valid bracketings or trees can be produced. This is \textbf{syntactic ambiguity}, where a sentence/constituent has more than one parse because of ambiguity after how \textbf{syntactic constituents combine}. This is not ambiguity causes by words; it's caused by how the words are syntactically built up into a sentence using the grammar's rules.
 
-TODO: figure with two alternative parses
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.6]{figures/multiple-parses-example.png}
+	\caption{Two Valid Parses for Same Sentence \textit{"the students see old men with the binoculars"}}
+	\label{fig:global-ambiguity}
+\end{figure}
 
-TODO: mention 3 types of ambiguity
 The main types of ambiguity are:
 \begin{itemize}
 	\item \textbf{Categorical/POS Ambiguity} -- One word can have several different parts of speech tagging. For example, "throw" can be a verb or a noun (to "throw" something, or a light cover for furniture)
@@ -2418,7 +2438,7 @@ The main types of ambiguity are:
 \end{itemize}
 Categorical ambiguity often leads to syntactic ambiguity.
 
-Syntactic ambiguity results in \textbf{exponential explosion} (it follows the Catalan numbers), which means the number of possible different parses increases exponentially. This can cause serious issues for parsing -- if there's an exponential number of different parses, how can evaluatre all the different parses to find the right ne?
+Syntactic ambiguity results in \textbf{exponential explosion} (it follows the Catalan numbers), which means the number of possible different parses increases exponentially. This can cause serious issues for parsing -- if there's an exponential number of different parses, how can evaluate all the different parses to find the right ne?
 
 \textbf{Global ambiguity} refers to this situation where there is more than one parse for the \textbf{whole sentence}. How can you compute the correct parsing for a sentence when there is such ambiguity? There are are two ways:
 \begin{itemize}
@@ -2428,11 +2448,16 @@ Syntactic ambiguity results in \textbf{exponential explosion} (it follows the Ca
 
 \subsubsection{Probabilistic Context Free Grammars}
 
-So how do you make a decision and select a preferred parse to handle global ambiguity? One way is \textbf{probabilistic context free grammars (PCFG)}. These grammars contain context-free rules that are \textbf{annotated with probabilities}. Probabilities of all rules with the \textbf{same left hand side} sum to one. The \textbf{probability of a parse} is then the \textbf{product} of the probabilities of all rules applied in the parse. Figure \ref{fig:probabilistic-grammar} shows an example of a probabilistic context-free grammar, which is a list of production rules and their probabilities. The probabilities of $VP \rightarrow VB NP$ and $VP \rightarrow VP PP$ sum to one, as they are the only two production rules with $VP$ as the left hand side.
+So how do you make a decision and select a preferred parse to handle global ambiguity? One way is \textbf{probabilistic context free grammars (PCFG)}. These grammars contain context-free rules that are \textbf{annotated with probabilities}. Probabilities of all rules with the \textbf{same left hand side} sum to one. The \textbf{probability of a parse} is then the \textbf{product} of the probabilities of all rules applied in the parse. Figure \ref{fig:probabilistic-grammar} shows an example of a probabilistic context-free grammar, which is a list of production rules and their probabilities. The probabilities of $VP \rightarrow VB\;NP$ and $VP \rightarrow VP\;PP$ sum to one, as they are the only two production rules with $VP$ as the left hand side.
 
-\paragraph{\textbf{NOTE: }} Notice how the POS tags that words can have (terminals) have probabilities too, such as $IN \rightarrow with$ having a probability of 1.
+\paragraph{\textbf{NOTE: }} Notice how the POS tags that words can have (terminals) have probabilities too, such as $IN \rightarrow \text{with}$ having a probability of 1.
 
-TODO: probabilistic  context free grammar example, with annotation
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.7]{figures/probabilistic-grammar-example.png}
+	\caption{Example Probabilistic Context-Free Grammar}
+	\label{fig:probabilistic-grammar}
+\end{figure}
 
 Let $t_1$ and $t_2$ be two different (valid) parses for the sentence \textit{"astronomers like women with telescopes"}, using the probabilistic grammar from Figure \ref{fig:probabilistic-grammar}. Figure \ref{fig:example-probabilistic-parses} shows the parse trees for $t_1$ and $t_2$. The probabilities of both parses being the correct parsing for the sentence is computing by multiplying all the individual parses , like so:
 \begin{equation}
@@ -2451,7 +2476,12 @@ Let $t_1$ and $t_2$ be two different (valid) parses for the sentence \textit{"as
 \end{equation}
 $P(t_1) > P(t_2)$, so we choose $t_1$ as the parse for the sentence \textit{"astronomers like women with telescopes"}.
 
-TODO: two parses of example sentence
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.55]{figures/example-probabilistic-parses.png}
+	\caption{Probabilistic Parsing of Sentence \textit{"astronomers like women with telescopes"} to Find a Single Preferred Parse}
+	\label{fig:example-probabilistic-parses}
+\end{figure}
 
 This approach expresses preferences for \textbf{local attachment}, which means \textbf{larger groupings of words}. Another way of thinking about it is that it expresses preference for \textbf{wide, shallow} trees. This is because every non-terminal's probability is multiplied with the final probability, which will \textit{reduce} the overall probability of the parse. More non-terminals (smaller groupings and a deeper tree) typically mean more probabilities.
 
@@ -2520,9 +2550,14 @@ Therefore, the preferred parse is $t_2$. The dogs are the entity that are on the
 	\label{tab:frame-example-construction-probabilities}
 \end{table}
 
-TODO: in-place figure of two discuss trees
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{figures/discuss-frame-preference-example.png}
+	\caption{Probabilistic Parsing with Frame Preferences to Find Single Preferred Parse of Sentence \textit{"discuss the dogs on the beach"}}
+	\label{fig:discuss-frame-probability-example}
+\end{figure}
 
-Figure \ref{fig:discuss-frame-probability-example} shows two potential parses, $t_1$ and $t_2$ for the sentence \textit{"keep the dogs on the beach"}. Notice how the only difference between this sentence and the last is the verb "keep" (replaces "discuss"). Using the same construction and frame probabilities, the probabilities of each parse are:
+Figure \ref{fig:keep-frame-probability-example} shows two potential parses, $t_1$ and $t_2$ for the sentence \textit{"keep the dogs on the beach"}. Notice how the only difference between this sentence and the last is the verb "keep" (replaces "discuss"). Using the same construction and frame probabilities, the probabilities of each parse are:
 \begin{equation}
 \begin{aligned}[b]
 	P(t_1) = 0.15 \times 0.81 = 0.12 \\
@@ -2531,7 +2566,12 @@ Figure \ref{fig:discuss-frame-probability-example} shows two potential parses, $
 \end{equation}
 Therefore, the preferred parse is $t_1$. The dogs themselves are being kept on the beach. It is not the dogs that are \textit{currently} on the beach that are being kept by some other party.
 
-TODO: in-place figure of two keep trees
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{figures/keep-frame-preference-example.png}
+	\caption{Probabilistic Parsing with Frame Preferences to Find Single Preferred Parse of Sentence \textit{"keep the dogs on the beach"}}
+	\label{fig:keep-frame-probability-example}
+\end{figure}
 
 \subsection{Local Ambiguity}
 
