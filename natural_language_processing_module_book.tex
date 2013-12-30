@@ -2404,33 +2404,133 @@ Consider the sentence:
 \begin{quote}
 	\textit{The students see old men with the binoculars}
 \end{quote}
-Equation \ref{eq:global-ambiguity} shows how there are \textbf{multiple ways to correctly parse} the sentence. That is, multiple valid bracketings or trees can be produced. This is \textbf{syntactic ambiguity}, where a sentence/constituent has more than one parse because of ambiguity after how \textbf{syntactic constituents combine}. This is not ambiguity causes by words; it's caused by how the words are syntactically built up into a sentence using the grammar's rules.
+Figur \ref{eq:global-ambiguity} shows how there are \textbf{multiple ways} to\textit{correctly} parse the sentence. That is, multiple valid bracketings or trees can be produced. This is \textbf{syntactic ambiguity}, where a sentence/constituent has more than one parse because of ambiguity after how \textbf{syntactic constituents combine}. This is not ambiguity causes by words; it's caused by how the words are syntactically built up into a sentence using the grammar's rules.
 
-\begin{equation}
-\begin{aligned}[b]
-s
-\end{aligned}
-\end{equation}
+TODO: figure with two alternative parses
 
 TODO: mention 3 types of ambiguity
+The main types of ambiguity are:
+\begin{itemize}
+	\item \textbf{Categorical/POS Ambiguity} -- One word can have several different parts of speech tagging. For example, "throw" can be a verb or a noun (to "throw" something, or a light cover for furniture)
+	\item \textbf{Lexical/Sense Ambiguity} -- When a word has a single syntactic category (same POS tag), but has \textbf{at least two different meanings}. For example, "port" can mean a place for ships to dock or the alcoholic drink.
+	\item \textbf{Syntactic Ambiguity} -- A sentence/constituent having \textbf{more than one parse because} of ambiguity about how syntactic constituents combine
+\end{itemize}
+Categorical ambiguity often leads to syntactic ambiguity.
 
-TODO: syntactic ambiguity, catalan numbers and exponential explosion
+Syntactic ambiguity results in \textbf{exponential explosion} (it follows the Catalan numbers), which means the number of possible different parses increases exponentially. This can cause serious issues for parsing -- if there's an exponential number of different parses, how can evaluatre all the different parses to find the right ne?
 
-TODO: global ambiguity, issues with this and how it can be resolved in TWO WAYS
+\textbf{Global ambiguity} refers to this situation where there is more than one parse for the \textbf{whole sentence}. How can you compute the correct parsing for a sentence when there is such ambiguity? There are are two ways:
+\begin{itemize}
+	\item return all parse
+	\item \textbf{make a decision} and return a single preferred parse (like humans do)
+\end{itemize}
 
 \subsubsection{Probabilistic Context Free Grammars}
 
-TODO: probabilistic conext free grammars + example
+So how do you make a decision and select a preferred parse to handle global ambiguity? One way is \textbf{probabilistic context free grammars (PCFG)}. These grammars contain context-free rules that are \textbf{annotated with probabilities}. Probabilities of all rules with the \textbf{same left hand side} sum to one. The \textbf{probability of a parse} is then the \textbf{product} of the probabilities of all rules applied in the parse. Figure \ref{fig:probabilistic-grammar} shows an example of a probabilistic context-free grammar, which is a list of production rules and their probabilities. The probabilities of $VP \rightarrow VB NP$ and $VP \rightarrow VP PP$ sum to one, as they are the only two production rules with $VP$ as the left hand side.
 
-TODO: example that shows problem
+\paragraph{\textbf{NOTE: }} Notice how the POS tags that words can have (terminals) have probabilities too, such as $IN \rightarrow with$ having a probability of 1.
+
+TODO: probabilistic  context free grammar example, with annotation
+
+Let $t_1$ and $t_2$ be two different (valid) parses for the sentence \textit{"astronomers like women with telescopes"}, using the probabilistic grammar from Figure \ref{fig:probabilistic-grammar}. Figure \ref{fig:example-probabilistic-parses} shows the parse trees for $t_1$ and $t_2$. The probabilities of both parses being the correct parsing for the sentence is computing by multiplying all the individual parses , like so:
+\begin{equation}
+\begin{aligned}[b]
+	P(t_1) &= P(S \rightarrow NP VP) \times P(NP \rightarrow \text{astronomers}) \times ... \times P(NP \rightarrow \text{telescopes})  \\
+	 &= 1.0 \times 0.2 \times 0.7 \times 1.0 \times 0.4 \times 0.2 \times 1.0 \times 1.0 \times 0.2 \\
+	&= 0.0024 \\
+\end{aligned}
+\end{equation}
+\begin{equation}
+\begin{aligned}[b]
+	P(t_2) &= P(S \rightarrow NP VP) \times P(NP \rightarrow \text{astronomers}) \times ... \times P(NP \rightarrow \text{telescopes})  \\
+	 &= 1.0 \times 0.2 \times 0.3 \times 0.7 \times 1.0 \times 1.0 \times 0.2 \times 1.0 \times 0.2 \\
+	&= 0.00168 \\
+\end{aligned}
+\end{equation}
+$P(t_1) > P(t_2)$, so we choose $t_1$ as the parse for the sentence \textit{"astronomers like women with telescopes"}.
+
+TODO: two parses of example sentence
+
+This approach expresses preferences for \textbf{local attachment}, which means \textbf{larger groupings of words}. Another way of thinking about it is that it expresses preference for \textbf{wide, shallow} trees. This is because every non-terminal's probability is multiplied with the final probability, which will \textit{reduce} the overall probability of the parse. More non-terminals (smaller groupings and a deeper tree) typically mean more probabilities.
 
 \subsubsection{Frame Preferences}
 
-TODO: what this is
+$t_1$ states that the women have the telescopes, whereas $t_2$ states that the men have the teleschopes. Suppose "like" was replaced with "observe", to make the sentence \textit{"astronomers observe women with telescopes"}. The correct parse is clearly $t_2$, as telescopes are used to observe things . However, using the described approach to determine the most likely parse would still prefer $t_1$. The method does not take the \textbf{semantics}, or meaning, carried by a word.
 
-TODO: frame probabilities and how to compute them
+PCFG does not account for \textbf{lexical preferences}. Verbs can have several \textbf{subcategorisation frames} (phrases it selects for), are are the non-terminals/terminals that appear after the word. Some frames are preferred (i.e. are more likely) over others. Table \ref{tab:frame-examples} shows the subcategorisation frames of the verb \textit{keep}. \textbf{Frame probabilities} tells us how likely each of these frames (for that particular verb) is. This information can be combined with \textbf{construction probabilities} generated by a PCFG (probabilities discussed earlier).
 
-TODO: using frame preferences to compute likelihood of parse tree
+How can frame probabilities be computed? One method is to use a corpus that's annotated with \textbf{parse tree structures} (e.g. Penn Treebank) to estimate frame probabilities of each verb from the corpus. For a \textbf{usable and accurate} probability model, \textbf{very large corpora} are required. Due to the complexity of having humans manually parse sentences, this is very difficult to obtain. Table \ref{tab:frame-probabilities} shows some examples of frame probabilities for verbs.
+
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Frame} & \textbf{Example} \\
+		\hline
+		NP AP & keep the prices reasonable \\
+		NP VP & keep his foes guessing \\
+		NP VP & keep their eyes closed \\
+		NP PRT & keep the people in \\
+		NP PP & keep his nerves from jangling \\
+		\hline
+	\end{tabular}
+	\caption{Subcategorisation Frames of the Verb \textit{"keep"}}
+	\label{tab:frame-examples}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Verb} & \textbf{Frame} & \textbf{Probability} \\
+		\hline
+		discuss & NP PP & 0.24 \\
+		& NP & 0.76 \\
+		keep & NP PP & 0.81 \\
+		& NP & 0.19 \\
+		\hline
+	\end{tabular}
+	\caption{Frames Probabilities of Two Verbs (note how frame probabilities for a verb \textbf{add up to one})}
+	\label{tab:frame-probabilities}
+\end{table}
+
+Figure \ref{fig:discuss-frame-probability-example} shows two potential parses, $t_1$ and $t_2$ for the sentence \textit{"discuss the dogs on the beach"}. If we use the frame probabilities in Table \ref{tab:frame-probabilities} and the PCFG construction probabilities in Table \ref{tab:frame-example-construction-probabilities}, the probabilities of each parse are:
+\begin{equation}
+\begin{aligned}[b]
+	P(t_1) = 0.15 \times 0.24 = 0.036 \\
+	P(t_2) = 0.76 \times 0.39 \times 0.14 = 0.041 \\
+\end{aligned}
+\end{equation}
+Therefore, the preferred parse is $t_2$. The dogs are the entity that are on the beach, the discussion might not be taking part on the beach (as $t_1$$ states).
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Production Rule} & \textbf{Frame} \\
+		\hline
+		VP $\rightarrow$ NP PP & 0.15 \\
+		VP $\rightarrow$ V PP & 0.39 \\
+		NP $\rightarrow$ NP PP & 0.14 \\
+		\hline
+	\end{tabular}
+	\caption{Example PCFG Construction Probabilities}
+	\label{tab:frame-example-construction-probabilities}
+\end{table}
+
+TODO: in-place figure of two discuss trees
+
+Figure \ref{fig:discuss-frame-probability-example} shows two potential parses, $t_1$ and $t_2$ for the sentence \textit{"keep the dogs on the beach"}. Notice how the only difference between this sentence and the last is the verb "keep" (replaces "discuss"). Using the same construction and frame probabilities, the probabilities of each parse are:
+\begin{equation}
+\begin{aligned}[b]
+	P(t_1) = 0.15 \times 0.81 = 0.12 \\
+	P(t_2) = 0.19 \times 0.39 \times 0.14 = 0.01 \\
+\end{aligned}
+\end{equation}
+Therefore, the preferred parse is $t_1$. The dogs themselves are being kept on the beach. It is not the dogs that are \textit{currently} on the beach that are being kept by some other party.
+
+TODO: in-place figure of two keep trees
 
 \subsection{Local Ambiguity}
 
