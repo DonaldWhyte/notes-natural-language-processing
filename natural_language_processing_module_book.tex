@@ -565,9 +565,16 @@ A \textbf{similarity measure} $sim(\vec{d}, \vec{q})$, which compares the simila
 	\label{eq:cosine-similarity}
 \end{equation}
 
-Figure \ref{fig:cosine-similarity-example} illustrates how this similarity measure \textbf{relates to} the spatial representation of the documents and query. Table \ref{tab:cosine-similarity-example} and Equation \ref{eq:cosine-similarity-example} show the cosine similarity function applied to two documents, given a query $q$.
+Figure \ref{fig:cosine-similarity} illustrates how this similarity measure \textbf{relates to} the spatial representation of the documents and query. Let $\vec{d_1}$ and $\vec{d_2}$ be two documents and $\vec{q}$ be a query. The angles between vectors $\vec{d_1},\vec{q}$ and $\vec{d_2},\vec{q}$ are measured. Whichever vector has the \textbf{smaller angle} is more similar to the query and is thus, a \textbf{better match}. In Figure \ref{fig:cosine-similarity}, it appears as if the angle between $\vec{d_1},\vec{q}$ is smaller, therefore $\vec{d_1}$ is a better match to the query $\vec{q}$ than $\vec{d_2}$.
 
-TODO: cosine similarity figure
+Table \ref{tab:cosine-similarity-example} and Equation \ref{eq:cosine-similarity-example} show the cosine similarity function applied to two documents, given a query $q$.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.3]{figures/cosine-similarity.png}
+	\caption{Cosine Similarity of Vectors}
+	\label{fig:cosine-similarity}
+\end{figure}
 
 \begin{table}[H]
 	\centering
