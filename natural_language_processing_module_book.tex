@@ -1255,14 +1255,6 @@ Using the cosine of the angle between vectors as the similarity measure, the sim
 
 Therefore, because the similarity measure for "cosmonaut" and "truck" is \textbf{smaller} than "cosmonaut" and "moon", "cosmonaut" and "moon" are more similar to each other than "cosmonaut" and "truck". 
 
-\subsection{Clustering}
-
-???
-
-TODO: clustering approaches
-
-TODO: evaluation of clustering approaches
-
 \section{Evaluation Measures}
 
 \subsection{Information Retrieval}
@@ -1582,8 +1574,17 @@ What happens if $N$ or $V$ is very large? Then you start \textbf{assigning too h
 
 This prevents us from assigning too much probability mass to unseens, providing we find a good estimate for $\lambda$ (which requires trial and error).
 
-TODO: Good-Turing smoothing
-????
+How do you compute the likelihood of encountering a \textbf{new, unseen word type} in the future? You could simply assign a probability of 0, or add one, but we can do more. Let $N_r$ be the number of $n$-grams with frequency $r$, so $N_0$ is the number of $n$-grams with frequency 0, $N_1$ is the number of $n$-grams with frequency 1 and so on. This makes $N = \sum_{r} {N_r}$ the total number of $n$-grams.
+
+\textbf{Good-Turing smoothing} uses the \textbf{proportion of singletons} ($n-$-grams $\in N_1$) to estimate the \textbf{proportion of unseen words} ($n-$-grams $\in N_0$). It does this by \textbf{not using standard relative frequency}. Instead, it uses Equation {eq:good-turing-smoothing} to estimate the probability of an $n$-gram in $N_r$, for all $r$. Notice how unseen $n$-grams are \textbf{special cases} that use a different formula (proportion of $n$-grams seen once to all $n$-grams).
+
+\begin{equation}
+	r^{\ast}) = \begin{cases}
+		\frac{N_1}{N},& \text{if }r=0 \\
+		(r + 1)\frac{N_{r+1}}{N_r} ,& \text{if }r>0
+	\end{cases}
+	\label{eq:good-turing-smoothing}
+\end{equation}
 
 Smoothing methods typically try to "squeeze" more information out of the given data. But what about  \textbf{adding more data}? \textbf{Web-based smoothing} uses vast amounts of data automatically collected from the web. The web counts are used to compute $n$-gram probabilities if the original counts resulted in an \textbf{unreliable prediction} (model broke down because of zero probabilities).
 
@@ -2502,7 +2503,7 @@ Figure \ref{fig:discuss-frame-probability-example} shows two potential parses, $
 	P(t_2) = 0.76 \times 0.39 \times 0.14 = 0.041 \\
 \end{aligned}
 \end{equation}
-Therefore, the preferred parse is $t_2$. The dogs are the entity that are on the beach, the discussion might not be taking part on the beach (as $t_1$$ states).
+Therefore, the preferred parse is $t_2$. The dogs are the entity that are on the beach, the discussion might not be taking part on the beach (as $t_1$ states).
 
 \begin{table}[H]
 	\centering
@@ -2534,23 +2535,70 @@ TODO: in-place figure of two keep trees
 
 \subsection{Local Ambiguity}
 
-TODO: what it is
+\textbf{Local ambiguity} is when only a \textit{part} of a sentence is ambiguous, and the whole sentence is not. An example:
+\begin{quote}
+	The old train ... the young. \\
+	The old train ... left the station.
+\end{quote}
+The ambiguous part is "old train". Does this mean a train is old, or whether old people are training something? Local ambiguity makes automatic parsing \textbf{inefficient} , because it means the parser performs a lot of backtracking.
 
-TODO: serial and parallel parsers
+\textbf{Serial parsers} build trees through successive rule selection (e.g. DFS). If more than one rule applies (\textbf{choice point}), one of the rules are chosen based on a selection rule (e.g. "first in first out"). If the resultant tree turns out to be impossible, return to the choice point (\textbf{backtracking}) and reparse from there. 
 
-\subsubsection{Garden Path}
+\paragraph{\textbf{NOTE: }} An example of a selection method for rules is \textbf{local attachment}, which chooses the rule with the most symbols (either terminal or non-terminal).
+\paragraph{}
 
-TODO: Garden Paths definition w/ ALL EXAMPLES W/ EXPLANATION!
-	(each different type of ambiguity)
+\textbf{Parallel parsers}, like serial parsers, build parse trees through successive rule selection. If more than one rule applies, \textbf{create a new tree for each rule}. All the different trees/possibilities are pursued in \textbf{parallel}. If one of the trees turns out to be impossible, drop it. One issue with parallel parsing is that the number of parse trees can \textbf{grow exponentially}, which means an exponential number of processes are required (not feasible).
 
-TODO: WHICH PARSER IS A HUMAN AND WHAT SHOULD WE USE??? THE "SO?" slide
+\subsubsection{Garden Paths}
 
-\subsubsection{Pruning Unlikely Trees}
+A \textbf{garden path} is a sentence where the \textbf{initial part of the sentence is locally ambiguous} and one of the parses of that initial part is preferable to humans (i.e. more likely). However, the dispreferred parse is actually the correct one for the sentence (so the human/parser has to backtrack).
 
-TODO: briefly mention Jurafsky's model
+Examples of Garden Paths include:
+\begin{quote}
+	\textit{"The old man the boats."} \\
+	\textit{"Ross baked the cake in the freezer."} \\
+	\textit{"The teachers taught by the Berlitz method passed the test."} \\
+	\textit{"The complex houses married and single students and their families.."} \\
+\end{quote}
 
-TODO: show garden path example
+If you always only keep one interpretation (the most likely) of a sentence in your mind at a time at a time (i.e. serial parsing), then garden paths will \textit{always} cause you to backtrack. If you always keep every possible interpretation in your mind at the same time (i.e. parallel parsing), then no backtracking is \textit{ever} required. Fully parallelising parsing is not feasible however, so \textbf{bounded parallelism} can be used as a middle ground.
 
-TODO: define beam width, state how it can used to prune trees by assuming they're garden paths IF PROBABILITY RATIO IS HIGHER THAN BEAM WIDTH!
+\subsubsection{Jurafsky's Cognitive Model (Parse Tree Pruning)}
+
+\textbf{Jurafsky's probabilistic model} of lexical and syntactic access and disambiguation can be used to consider multiple parses of a sentence in \textbf{parallel}. It:
+\begin{itemize}
+	\item computes interpretations/parses in parallel
+	\item each interpretation is assigned a probability via PCFGs, frame probabilities (techniques already covered here) and Bayesian modelling 
+	\item prunes a certain number of unlikely interpretations/trees to \textbf{bound the number of processes running in parallel} and combat memory limitations
+\end{itemize}
+The fact it bounds the number of parses being considered in parallel makes the model \textbf{computationally feasible} to run even on the most complex of sentences with many, many different parses. This is known as \textbf{bounded parallelism}.
+
+Jurafsky's model makes a crucial assumption: if the relative probability of a tree falls below a certain value, then it will be \textbf{pruned}. We assume a garden path occurs if the \textbf{probability ratio} is higher than 5:1. This ratio is known as the \textbf{beam width}.
+
+Table \ref{tab:beam-width} shows the probability ratio of various garden path sentences. "the complex houses ..." and "the horse raced ... " are considered to be garden path sentences; the likely parses for these are pruned!
+
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Sentence} & \textbf{Probability Ratio} \\
+		\hline
+		the complex houses ... & 267:1 \\
+		the horse raced ... & 82:1 \\
+		\hline
+		the warehouse fires ... & 3.8:1 \\
+		the bird found ... & 3.7:1 \\
+		\hline
+	\end{tabular}
+	\caption{Probability Ratio of Different Sentences. The first two are considered to be garden path sentences as their probability ratios are higher than the beam width.}
+	\label{tab:beam-width}
+\end{table}
+
+Open issues issues with the Jurafsky model include:
+\begin{itemize}
+	\item \textbf{Coverage of Garden Paths} -- Jurafsky used \textbf{hand-crafted} examples of Garden Paths. Can we use a probabilistic parser that is trained on a real corpus to find more garden paths (and new, unseen ones)?
+	\item \textbf{Memory Limitations} -- how can the model be augmented to take memory limitations into account more?
+	\item \textbf{Crosslinguistics} -- does the model work for languages \textbf{other than English}?
+\end{itemize}
 
 \end{document}
