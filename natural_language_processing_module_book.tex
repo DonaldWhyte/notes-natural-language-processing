@@ -225,11 +225,17 @@ The frequencies of all word \textit{types} can be counted and put in a \textbf{f
 		donald & 1 \\
 		\hline
 	\end{tabular}
-	\caption{Example Frequency Distribution Table (ordered from most-frequent to least}
+	\caption{Example Frequency Distribution Table (ordered from most-frequent to least)}
 	\label{tab:freqdist}
 \end{table}
 
-TODO: frequency distribution example plot
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/frequency-distribution.png}
+	\caption{Example Frequency Distribution Table (ordered from most-frequent to least)}
+	\label{fig:freqdist}
+\end{figure}
+
 
 \subsection{Zipf's Law}
 
@@ -244,9 +250,21 @@ Alternative, $f$ is proportional to $r$ like so:
 	f \propto \frac{1}{r}
 \end{equation}
 
-Figure \ref{fig:log-zipf} is a logorithmic plot showing this relation. Figure \ref{fig:zipf-corpus} plots the frequency distribution of a one million word corpus (rank/freq, not word itself) against Zipf's law. As evident by these plots, Zipf's law does apply to real, natural text.
+The plot on the right of Figure \ref{fig:zipf} is a logarithmic plot that this relation, as the plot is roughly a straight line. Figure \ref{fig:zipf-corpus} plots the frequency distribution of a one million word corpus (rank/freq, not word itself) against Zipf's law. As evident by these plots, Zipf's law does apply to real, natural text.
 
-TODO: two Zipf plots
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/zipfs-law.png}
+	\caption{Zipf's Law: Plots of rank against frequency, shows exponential relationship. With logarithmic plot, relationship is linear.}
+	\label{fig:zipf}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/brown-zipfs-law.png}
+	\caption{Brown Corpus Logarithmic Plot Against Zipf's Law}
+	\label{fig:zipf-corpus}
+\end{figure}
 
 So what does this mean?
 \begin{itemize}
@@ -304,7 +322,12 @@ An example sequence of events is:
 	\item \textbf{Learning Component} uses this feedback to learn/alter itself to reduce the chances of the documents marked irrelevant show up the next time someone types "red trousers". This may involve updating documents' descriptions in the \textbf{Object Base}.
 \end{enumerate}
 
-TODO: architecture diagram from slide 6
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/ir-system-architecture.png}
+	\caption{Architecture of Information Retrieval Systems}
+	\label{fig:ir-architecture}
+\end{figure}
 
 \subsection{Indexing}
 
@@ -384,7 +407,12 @@ More sophisticated inverted file structures can be created, which can track the 
 	\label{tab:word-doc-sophisticated}
 \end{table}
 
-TODO: FIGURE FROM slide 3 of Eric
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/inverted-file-structure.png}
+	\caption{Inverted File Structure}
+	\label{fig:inverted-file-structure}
+\end{figure}
 
 Indexing as many documents as possible sounds like a good way to provide a \textbf{more comprehensive search}, but it may not be the thing to do.  There are \textbf{disadvantages}:
 \begin{itemize}
@@ -458,9 +486,19 @@ The \textbf{set theoretic} model uses set theory to find documents which uses \t
 \end{enumerate}
 $R =  \lbrace d_1 \rbrace$, so only one relevant document is returned ($d_1$).
 
-TODO: in-place figure showing the venn diagram from Eric's slides (second venn)
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.3]{figures/ir-set-theoric-venn1.png}
+	\caption{Venn Diagram Illustrating what a Set Theoretic Search Query Does}
+	\label{fig:inverted-file-structure}
+\end{figure}
 
-TODO: put Katja's venn diagram here too
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{figures/ir-set-theoric-venn2.png}
+	\caption{Venn Diagram Illustrating what a Set Theoretic Search Query Does}
+	\label{fig:inverted-file-structure}
+\end{figure}
 
 \subsubsection{Summary}
 
@@ -1030,17 +1068,32 @@ Selecting the highest $k$ elements with respect to $A(w, c)$ is known as \textbf
 
 There are three major types of words. \textbf{Extremely rare ones} are unlikely to occur but good at determining the class of a document. \textbf{Extremely common ones} are very likely to occur, but are not very informative. Then there are the words which are \textit{reasonable} likely to occur and provide a decent amount of information on what class a document is. Frequency cut-off tends to \textbf{select these "middle ground" word features}, which tends to give good classification performance. This is illustrated in Figure \ref{fig:frequency-cutoff}.
 
-TODO: frequency cut-off plot that I drew on the slides
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.3]{figures/frequency-cutoff.png}
+	\caption{Space of features which are both informative and relatively frequent (very useful!). Typical result of applying stoplist and using frequency cut-off.}
+	\label{fig:frequency-cutoff}
+\end{figure}
 
 \subsubsection{Mutual Information Cutoff}
 
 \textbf{Mutual information} (see Section \ref{sec:mutual-information}) can be used to select good features. To select $k$ good" features, compute the mutual information of each word in the training corpus, order them from highest to lowest with respect to MU and choose the first $k$. Figure \ref{fig:example-mu} shows the words with the highest mutual information for different classes of documents in the \textbf{Reuters corpus}. Notice how there are no stop words, and all the words are clearly relevant to the associated class.
 
-TODO: Figure showing the three classes from the slides
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{figures/mutual-information-cutoff.png}
+	\caption{Three Classes in Reuters Corpus and the Words with Highest Mutual Information}
+	\label{fig:example-mu}
+\end{figure}
 
 This can \textbf{greatly increase classification accuracy}, much more so than frequency cutoff. This is shown in Figure \ref{fig:mu-acc-impact}, which shows the accuracy of classifiers with different values for $k$. Too high a value for $k$ hurts the classification, as irrelevant features start to be used. Too low a value and not enough features are used to accurately distinguish between the different classes.
 
-TODO: impact on performance figure
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{figures/feature-amount-performance.png}
+	\caption{Impact of Number of Features on Accuracy}
+	\label{fig:mu-acc-impact}
+\end{figure}
 
 \subsection{Multi-class Text Classification}
 
@@ -1062,7 +1115,12 @@ The \textbf{Vector Space Model} can be used to determine the similarity of two w
 
 Figure \ref{fig:vsm-similar} shows a collection of words represented in vector space. Here, "storage" is more similar to "disk" than "shuttle", because the vector that represents "storage" is \textit{closer} to the vector that represents "disk" than "shuttle"'s disk. This model raises an important question -- \textbf{how are these vectors constructed?}
 
-TODO: vector space
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.6]{figures/vector-space-model.png}
+	\caption{Documents Represented as Vectors in Multidimensional Space}
+	\label{fig:vsm-similar}
+\end{figure}
 
 Let $W$ be all the words in the vocabulary and $n = |W|$ be the number of words. Each word is represented by an $m$-dimensional vector, where $m$ is the number of context words, or features. \textbf{Context words} are words specifically chosen to be used for extracting semantics.  Each \textbf{component} of the $m$-dimensional vector is an \textbf{association measure} of the word the vector is representing and the context word that component refers to. 
 
@@ -1112,7 +1170,12 @@ The steps of constructing a vector space model to measure word similarity are as
 
 The \textbf{size of the context} (window size) has a big impact on how words are associated to one another. Small windows (e.g. 2) result in \textbf{paradigmatic} associations, which means words are seen as similar if they are the same type/category of word (e.g. words are both vehicles, fruit, pets, etc.). Large windows (e.g. 30) result in \textbf{syntagmatic} associations which relate worlds that are part of the same high-level topic. This is shown in Figure \ref{fig:size-of-context-effect}, where "car" is similar to "van", "truck", etc. with a 2-word window but is related to more broader concepts with a 30-word window, such as "drive" and "park".
 
-TODO: figure with two sizes
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.55]{figures/size-of-window.png}
+	\caption{Effect of Different Sizes for Context Window}
+	\label{fig:size-of-context-effect}
+\end{figure}
 
 \subsection{Association Measures}
 \label{sec:association-measures}
@@ -1207,7 +1270,12 @@ TODO: evaluation of clustering approaches
 
 \textbf{Evaluation} of information retrieval systems is typically done using two main measurements -- precision and recall. \textbf{Recall} is the proportion of \textit{relevant} documents returned out of all the relevant documents that exist. \textbf{Precision} refers to the proportion of returned documents that are actually relevant (how \textit{precise} is the result). These values range from 0 to 1, where 1 is maximum recall/precision and 0 is none. Figure \ref{fig:recall-precision-vis} illustrates what recall and precision mean.
 
-TODO: figure showing recall/precision from slides, the labelled version at end!!!
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.45]{figures/precision-recall.png}
+	\caption{Illustration of Precision and Recall for a Particular System}
+	\label{fig:recall-precision-vis}
+\end{figure}
 
 To compute these values, a \textbf{contingency table} must first be computed. This records the number of times the IR system:
 \begin{itemize}
@@ -1261,11 +1329,21 @@ Take the example in Figure \ref{fig:precision-cutoff}. The precision for the fir
 
 \textbf{Precision cut-off} is when you only return a pre-defined \textbf{maximum} of documents. This may improve precision, but recall is reduced (as less documents are returned). Therefore, it is important to \textbf{tweak} the point at which you stop counting to optimise recall and precision to where you want them. Too short a cut-off and precision may appear \textit{low}, as it hasn't had a chance to sample enough returned documents. Too long and there will be many irrelevant documents, which will also result in low precision.
 
-TODO: precision cutoff figure
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{figures/precision-cutoff.png}
+	\caption{Illustration of how decision on where to cut-off results has an effect on the evaluation of the IR system}
+	\label{fig:precision-cutoff}
+\end{figure}
 
-\textbf{Average precision} is another way of measuring precision, which \textbf{averages} the precision measurements from using different cut-off values.An example of this is shown in Figure \ref{fig:average-precision-figure}.
+\textbf{Average precision} is another way of measuring precision, which \textbf{averages} the precision measurements from using different cut-off values.An example of this is shown in Figure \ref{fig:average-precision}.
 
-TODO: average precision figure
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{figures/average-precision.png}
+	\caption{Computing average precision by taking slices of results}
+	\label{fig:average-precision}
+\end{figure}
 
 \subsection{Binary Classification}
 
@@ -1403,7 +1481,12 @@ An $n$-gram is a continuous sequence of $n$ words. Building a language model usi
 
 Equation \ref{eq:ngram-for-sentences} shows how you can \textbf{compute the probability of a sentence} using a \textbf{bigram language model}. Note that the first word just uses its own probability as there is no previous word. Figure \ref{fig:bigram-model} shows a graphical representation of the model. Each word is a node, which the word itself in the centre of it. Moving from $w_1$ to $w_2$ adds a multiplier to the final sequence probability; each time you move to the next node $w_j$ from $w_i$ a new multiplier is applied. These multipliers are determined by the probability of the bigram composed by the words $w_i$ and $w_j$, until we reach the end the sentence.
 
-TODO: bi-gram diagram
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{figures/bigram-chain.png}
+	\caption{Markov model for word sequence probabilities using bigrams}
+	\label{fig:bigram-model}
+\end{figure}
 
 \begin{multline}\\
 	P(\text{He often wears tight trousers}) \approx \\
@@ -1413,7 +1496,12 @@ TODO: bi-gram diagram
 
 Bigram models have been tremendously successful, even though they only look one token back. This is because \textbf{long-distance dependencies} between words, like the one in Figure \ref{fig:long-distance-dependency} are rare. 74\% of all dependencies in the Penn Treebank are with an \textbf{adjacent} word, which can be captured by bigrams. This is not always the case however. The 26\% of other dependencies are still lost with bigrams, as evident by the example Figure \ref{fig:long-distance-dependency}. Depending on the text being processed, higher order models (e.g. trigrams) may be required.
 
-TODO: figure showing example text highlighting dependant words
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{figures/long-distance-dependency.png}
+	\caption{Long Distance Dependency Between Two Words}
+	\label{fig:long-distance-dependency}
+\end{figure}
 
 \subsection{Deriving Language Model}
 
@@ -1446,8 +1534,19 @@ The probabilities of each word/sequence is the \textbf{relative frequency}. Equa
 
 Figure \ref{fig:brown-bigram-model} shows part of a bigram model generated from the \textbf{Brown} corpus, which has one million words. Figure \ref{fig:bnc-bigram-model} shows part of a bigram generated from the \textbf{BNC} corpus, with 100 million tokens. Notice how these models are being represented by \textbf{frequency tables}, where the entry at row $i$ and column $j$ is the number of times the bigram $w_i w_j$ occurred in the corpus.
 
-TODO: Brown bigram model (caption mentions row word is first word)
-TODO: BNC bigram model (caption mentions row word is first word)
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{figures/brown-bigram-model.png}
+	\caption{Bigram Probability Model Derived from Brown Corpus (rows are first word in bigram)}
+	\label{fig:brown-bigram-model}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.5]{figures/bnc-bigram-model.png}
+	\caption{BNC Probability Model Derived from BNC (rows are first word in bigram)}
+	\label{fig:bnc-bigram-model}
+\end{figure}
 
 \subsection{Smoothing}
 
@@ -1795,7 +1894,12 @@ Tagging has many applications and can be used to empower the following:
 
 \textbf{Nouns} are an example of a high-level word class. They most often refer to people, places and things. They can occur with determiners, possessives and adjectives. Additionally, most nouns can also appear in plural form. Nouns have \textbf{subclasses} (Figure \ref{fig:noun-class-hierarchy}), such as proper and common nouns. Mass nouns and count nouns.
 
-TODO: noun class hierarchy
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.65]{figures/noun-class-hierarchy.png}
+	\caption{BNC Probability Model Derived from BNC (rows are first word in bigram)}
+	\label{fig:noun-class-hierarchy}
+\end{figure}
 
 Table \ref{tab:common-word-classes} lists common word classes that tend to occur in taggers' tagsets, with examples of words.
 
@@ -1898,7 +2002,12 @@ Now the final classification formula, to find the most likely POS tag sequence f
 
 Figure \ref{fig:mm_model} illustrates this simplified Markov model. Some of the probabilities present in the model have been discarded for ease of computation. Only the \textbf{tag-tag bigram probabilities} and \textbf{word-tag unigram probabilities} are considered now.
 
-TODO: figure showing simplified MM model with labels from slides
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{figures/pos-tagging-markov-model.png}
+	\caption{Simplified Markov Model for Tag Sequence Prediction}
+	\label{fig:mm_model}
+\end{figure}
 
 This means we need to built \textbf{two probability models}:
 \begin{itemize}
@@ -2005,7 +2114,12 @@ How does the algorithm \textbf{learn} which transformation rules work best? Give
 \end{enumerate}
 This greedy algorithm is iterative and will continuously run until terminated by its stopping criteria (e.g. converges to best accuracy it can find -- maxima). Figure \ref{fig:transformed-based-tagging} illustrates the iterative process. Notice how it builds upon the previous rules at each iteration, and how the initial tagging is performed by a \textbf{baseline tagger} (e.g. unigram tagger).
 
-TODO: figure from the transformation-based tagging paper showing process
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/transformed-based-tagger.png}
+	\caption{Transformation-Based Tagging Learnign Algorithm}
+	\label{fig:transformed-based-tagging}
+\end{figure}
 
 Consider the example corpus in Table \ref{tab:transformation-tagger-example1}, whose approximated tags have been initialised with the \textbf{most frequent tag}. The entries in \textbf{bold} have not been tagged correctly in the approximation. The first iteration of the algorithm finds \texttt{Change VB to NN if previous tag is DT} to be the rule which results in the best accuracy, so it saves that rule and retags the corpus. This is shown in  Table \ref{tab:transformation-tagger-example2}.
 
@@ -2169,7 +2283,12 @@ A grammar consists of:
 
 An example grammar $G$ is shown in Figure \ref{fig:example-grammar}. The top half defines the \textbf{rules} of the grammar and the bottom half defines the \textbf{lexicon} (vocabulary).
 
-TODO: figure of example grammar
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/example-grammar.png}
+	\caption{Example Context Free Grammar $G$}
+	\label{fig:example-grammar}
+\end{figure}
 
 An example of deriving a sentence using the production rules of the grammar $G$ in Figure \ref{fig:example-grammar} is shown in Equation \ref{eq:example-sentence-derivation}. Both Equation \ref{eq:example-sentence-derivation-bracketing} and Figure \ref{fig:example-sentence-derivation} illustrate the \textbf{nested hierarchy} of terminals that produced the sentence (the former with \textbf{bracketing} and the latter with a \textbf{syntax tree}).
 
@@ -2188,7 +2307,12 @@ An example of deriving a sentence using the production rules of the grammar $G$ 
 	\label{eq:example-sentence-derivation-bracketing}
 \end{equation}
 
-TODO: NESTED HIERARCHY FIGURE
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.4]{figures/example-grammar.png}
+	\caption{Parse Tree for Sentence \textit{"The men see old women"}}
+	\label{fig:sentence-parse-tree}
+\end{figure}
 
 Consider the following sentences. Which are grammatical (valid) under grammar $G$?
 \begin{enumerate}
@@ -2265,13 +2389,28 @@ TODO: figure of trees with "..." saying how it goes on infinitely
 
 Top-down DFS recomputes the same parse trees many times. Consider the two parse trees the search generated at different states in Figure \ref{fig:effort-duplication}. Notice how the tree A is a subtree of a node in tree B? DFS will compute the entire sub-tree \textbf{again}, which results in a \textbf{duplication of effort}.
 
-TODO: effort duplication tree with duplicated sub-tree highlighted
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.3]{figures/parsing-effort-duplication.png}
+	\caption{Effort Duplication Using Top-Down DFS Parser}
+	\label{fig:effort-duplication}
+\end{figure}
 
 \textbf{Chart parsing} reduces the overall computation time by storing constituents or trees in a \textbf{table/chart}. When expanding a node, the table can be looked up to see if a tree already exists for that expansion from a previous expansion (worse case complexity for this is $n^3$).
 
 \subsection{Global Ambiguity}
 
-TODO: example of ambiguity
+Consider the sentence:
+\begin{quote}
+	\textit{The students see old men with the binoculars}
+\end{quote}
+Equation \ref{eq:global-ambiguity} shows how there are \textbf{multiple ways to correctly parse} the sentence. That is, multiple valid bracketings or trees can be produced. This is \textbf{syntactic ambiguity}, where a sentence/constituent has more than one parse because of ambiguity after how \textbf{syntactic constituents combine}. This is not ambiguity causes by words; it's caused by how the words are syntactically built up into a sentence using the grammar's rules.
+
+\begin{equation}
+\begin{aligned}[b]
+s
+\end{aligned}
+\end{equation}
 
 TODO: mention 3 types of ambiguity
 
