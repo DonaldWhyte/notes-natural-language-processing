@@ -1,0 +1,325 @@
+import sys
+import random
+import time
+
+from nltk import FreqDist
+from nltk import bigrams
+from nltk.corpus import brown, reuters, abc
+from nltk.corpus import wordnet
+
+# Constants which determine branching assignment of compound
+BRANCH_LABEL_NONE = "-"
+BRANCH_LABEL_LEFT = "L"
+BRANCH_LABEL_RIGHT = "R"
+# Determines the size of the n-grams which are taken compound files
+NGRAM_SIZE = 3
+
+class RandomClassifier:
+
+	"""Unsupervised baseline classifier which randomly assigns ."""
+
+	def classify(self, compound):
+		# Generate random number and use it determine branch to use for compound
+		# There's a 50% chance of the compoiunt being assigned left and right
+		if random.random() < 0.5:
+			return BRANCH_LABEL_LEFT
+		else:
+			return BRANCH_LABEL_RIGHT
+
+class MostFrequentBranchClassifier:
+
+	"""Supervised baseline classifier which assigns all compounds
+	the branching which is most frequently correct in the ."""
+
+	def __init__(self, labelledDataset):
+		"""Construct new most frequent classifier and train it with given dataset."""
+		self.train(labelledDataset)
+
+	def train(self, labelledDataset):
+		"""Train classifier with given labelled dataset."""
+		# Count frequency of left and right labels
+		left = 0
+		right = 0
+		for compound, label in labelledDataset.compounds:
+		    # NOTE: We ignore unlabelled compounds
+		    if label == BRANCH_LABEL_LEFT:
+		        left += 1
+		    elif label == BRANCH_LABEL_RIGHT:
+		        right += 1
+		if left > right:
+			self.mostFrequentLabel = BRANCH_LABEL_LEFT
+		else:
+			self.mostFrequentLabel = BRANCH_LABEL_RIGHT
+
+	def classify(self, compound):
+		"""Return predicted branching for given trigram compound."""
+		# Just return the most frequently occurring label
+		return self.mostFrequentLabel
+
+def getBranches(compound):
+	"""Return two possible branches of trigram compound."""
+	return ( compound[0:2], compound[1:3] )	
+
+class CorpusBigramClassifier:
+
+	"""Classifier which assigns a compound trigram the branch which
+	results in the bigram more frequent in a training corpus."""
+
+	def __init__(self, corpusWords):
+		"""Construct new corpus bigram frequency classifier and train it using all words from corpus."""
+		self.train(corpusWords)
+
+	def train(self, corpusWords):
+		"""Train classifier using list of words from a corpus."""
+		# Collect all bigrams from the corpus
+		corpusBigrams = bigrams(corpusWords)
+		# Construct frequency distribution of all bigrams present
+		self.bigramFreqDist = FreqDist(corpusBigrams)
+
+	def classify(self, compound):
+		"""Return predicted branching for given trigram compound."""
+		# Get left and right branching of compound
+		branches = getBranches(compound)
+		# Retrieve frequency of each branch as a bigram in the training corpus
+		leftFreq = self.bigramFreqDist[branches[0][0], branches[0][1]]
+		rightFreq = self.bigramFreqDist[branches[1][0], branches[1][1]]
+		# Use most frequency 
+		if leftFreq >= rightFreq: # bias to the left
+			return BRANCH_LABEL_LEFT
+		else:
+			return BRANCH_LABEL_RIGHT
+			
+
+class CorpusBigramWordProportionClassifier:
+
+	"""Classifier which assigns a compound triagram the branch which
+	results in a bigram whose frequency RELATIVE to the frequency of
+	the words contained in the bigram is higher."""
+	
+	def __init__(self, corpusWords):
+		"""Construct new corpus bigram proportion classifier and train it using all words from corpus."""	
+		self.train(corpusWords)
+		
+	def train(self, corpusWords):
+		"""Train classifier using list of words from a corpus."""
+		# Get frequency distribition for both invividual words AND bigrams
+		self.unigramFreqDist = FreqDist(corpusWords)
+		self.bigramFreqDist = FreqDist( bigrams(corpusWords) )
+		
+	def getRelFreq(self, bigram):
+		"""Return maximum frequency of bigram RELATIVE to the frequency of
+		the two words it contains."""
+		# Return maximum of biagram frequency RELATIVE to frequency of each word in bigram
+		f1 = float(self.bigramFreqDist[bigram[0], bigram[1]]) / max(1, self.unigramFreqDist[bigram[0]])
+		f2 = float(self.bigramFreqDist[bigram[0], bigram[1]]) / max(1, self.unigramFreqDist[bigram[1]])
+		return max(f1, f2)
+		
+	def classify(self, compound):
+		"""Return predicted branching for given trigram compound."""
+		branches = getBranches(compound)
+		leftFreq = self.getRelFreq(branches[0])
+		rightFreq = self.getRelFreq(branches[1])
+		if leftFreq >= rightFreq: # bias to the left
+			return BRANCH_LABEL_LEFT
+		else:
+			return BRANCH_LABEL_RIGHT
+		
+class CorpusSynonymBigramClassifier(CorpusBigramClassifier):
+
+	def __init__(self, corpusWords, useBothSynonyms):
+		"""Construct new corpus bigram frequency classifier and train it using all words from corpus."""
+		CorpusBigramClassifier.__init__(self, corpusWords)
+		self.useBothSynonyms = useBothSynonyms
+		
+	def classify(self, compound):
+		"""Return predicted branching for given trigram compound."""
+		# Collect all synonyms for each word
+		synonyms = [ self.getAllSynonyms(word) for word in compound ]
+		# Get left and right branching of compound
+		branches = getBranches(compound)
+		
+		# Retrieve frequency of each branch as a bigram in the training corpus
+		# Here we consider the MAXIMUM FREQUENCY for all word synonym combinations
+		leftFreq = self.getMaxFrequency(branches[0], synonyms[0:2])
+		rightFreq = self.getMaxFrequency(branches[1], synonyms[1:3])
+		# Use most frequency 
+		if leftFreq >= rightFreq: # bias to the left
+			return BRANCH_LABEL_LEFT
+		else:
+			return BRANCH_LABEL_RIGHT
+			
+	def getMaxFrequency(self, bigram, synonyms):
+		maxFreq = 0
+		# First find maximum frequency when using word 1's synonyms
+		posOneWords = set()
+		posOneWords.add(bigram[0])
+		posOneWords = posOneWords.union(synonyms[0])
+		for syn in posOneWords: # (be sure to include actual word as well!
+			freq =  self.bigramFreqDist[syn, bigram[1]]
+			if freq > maxFreq:
+				maxFreq = freq
+		# Now do the same for word 2's synonyms
+		posTwoWords = set()
+		posTwoWords.add(bigram[1])
+		posTwoWords = posTwoWords.union(synonyms[1])
+		for syn in posTwoWords: # (be sure to include actual word as well!
+			freq =  self.bigramFreqDist[bigram[0], syn]
+			if freq > maxFreq:
+				maxFreq = freq
+		# Check if there's any max frequency when using pairs of just synonyms
+		if self.useBothSynonyms:
+			for synA in synonyms[0]:
+				for synB in synonyms[1]:
+					freq =  self.bigramFreqDist[synA, synB]
+					if freq > maxFreq:
+						maxFreq = freq
+		return maxFreq
+			
+	def getAllSynonyms(self, word):
+		synoynms = set()
+		for synSet in wordnet.synsets(word):
+			for syn in synSet.lemma_names:
+				synoynms.add(syn)
+		return synoynms
+
+
+class CompoundSet:
+
+	def __init__(self, compounds):
+		"""Construct dataset of compound nouns."""
+		# Construct nested 2-lists to store label for compounds 
+		self.compounds = [ [compound, BRANCH_LABEL_NONE] for compound in compounds ]
+
+	@classmethod
+	def fromFile(cls, filename, compoundSize):
+		"""Load compound dataset from a file."""
+		compounds = [] # list of compounds (lists of words)
+		labels = {} # key = index of compound, value = compound's label
+		with open(filename, "r") as f:
+			for line in f.readlines():
+				# Remove trailing newline and split on whitespace to get compound words
+				words = line[:-1].split()
+				if len(words) >= compoundSize:
+					# If there's one more token, treat it as the branch label
+					if len(words) >= compoundSize + 1:
+						labels[len(compounds)] = words[compoundSize]			
+					# Only take the first N tokens
+					compounds.append( words[:compoundSize] )
+		# Construct compound set
+		compoundSet = CompoundSet(compounds)
+		# Manually label all compounds with labels found (if any)
+		for index, label in labels.items():
+			compoundSet.setLabel(index, label)
+		return compoundSet
+		
+	def toFile(self, filename):
+		"""Write compound set (and its labels) to a file."""
+		with open(filename, "w") as f:
+			for compound, label in self.compounds:
+				f.write(" ".join(compound))
+				if label != BRANCH_LABEL_NONE:
+					f.write(" " + label)
+				f.write("\n")
+
+	def getLabel(self, index):
+		"""Get label of compound at given index."""
+		return self.compounds[index][1]
+
+	def setLabel(self, index, newLabel):
+		"""Assign label to compound at given index."""
+		self.compounds[index][1] = newLabel
+
+	def labelAll(self, classifier):
+		"""Use a classifier to label all of the compunds.
+		
+		NOTE: 'classifier' must be an object with a classify(compound) method.
+		
+		"""
+		# Go through all compounds in set and label them using the
+		# given classifier object
+		for compound in self.compounds:
+			compound[1] = classifier.classify(compound[0])
+
+	def test(self, labelledSet):
+		"""Test this compound set against an equivalent labelled compount set.
+		
+		A tuple (correct, incorrect, accuracy) is returned which
+		contains results of the tests.
+		
+		"""
+		if len(self.compounds) != len(labelledSet.compounds):
+			raise ValueError("Cannot test component set, given labelled set is not the same size")
+		# Count the number of correct labels
+
+		# Construct confusion matrix to store correct/incorrct classifications
+		confusionMatrix = [ [ 0, 0 ], [ 0, 0 ] ] # row 1 = true/false positive, row 2 = true/false negative
+		total = len(self.compounds) 
+		for i in range(total):
+			predictedLabel = self.compounds[i][1] 
+			actualLabel = labelledSet.compounds[i][1]
+			if predictedLabel == actualLabel:
+				if predictedLabel == BRANCH_LABEL_LEFT:
+					confusionMatrix[0][0] += 1
+				elif predictedLabel == BRANCH_LABEL_RIGHT:
+					confusionMatrix[1][1] += 1
+			else:
+				if predictedLabel == BRANCH_LABEL_LEFT:
+					confusionMatrix[0][1] += 1
+				elif predictedLabel == BRANCH_LABEL_RIGHT:
+					confusionMatrix[1][0] += 1			
+		# Compute accuracy
+		correct = confusionMatrix[0][0] + confusionMatrix[1][1]		
+		incorrect = total - correct
+		accuracy = float(correct) / float(total)
+		# Return test results
+		return (correct, incorrect, accuracy, confusionMatrix)
+
+def positivePrecision(confusionMatrix):
+	return float(confusionMatrix[0][0]) / max(1, (confusionMatrix[0][0] + confusionMatrix[0][1]))
+	
+def positiveRecall(confusionMatrix):
+	return float(confusionMatrix[0][0]) / max(1, (confusionMatrix[0][0] + confusionMatrix[1][0]))
+
+def negativePrecision(confusionMatrix):
+	return float(confusionMatrix[1][1]) / max(1, (confusionMatrix[1][1] + confusionMatrix[1][0]))
+	
+def negativeRecall(confusionMatrix):
+	return float(confusionMatrix[1][1]) / max(1, (confusionMatrix[1][1] + confusionMatrix[0][1]))
+	
+USAGE_STRING = "python {0} <unlabelledDataset> <labelledDataset> <outputFilename>"
+	
+if __name__ == "__main__":
+	# Be sure to seed the random number generator with system time
+	random.seed(time.time())
+
+	# Parse command line arguments
+	if len(sys.argv) < 4:
+		sys.exit(USAGE_STRING.format(sys.argv[0]))
+	unlabelledDatasetFilename = sys.argv[1]
+	labelledDatasetFilename = sys.argv[2]
+	outputFilename = sys.argv[3]
+	# Load both the unlabelled and labelled datasets
+	compoundSet = CompoundSet.fromFile(unlabelledDatasetFilename, NGRAM_SIZE)
+	labelledSet = CompoundSet.fromFile(labelledDatasetFilename, NGRAM_SIZE)
+	# Train unsupervised labeller/classifier
+	start = time.time()
+	classifier = CorpusBigramWordProportionClassifier(brown.words())
+	trainingTime = time.time() - start	
+	# Label dataset to test classifier
+	start = time.time()
+	compoundSet.labelAll(classifier)
+	testTime = time.time() - start
+	# Compare labels with the 'correct' labels in the labelled dataset
+	correct, incorrect, accuracy, confusionMatrix = compoundSet.test(labelledSet)
+	# Output test results
+	print "{0}/{1} compounds correctly labelled".format(correct, (correct + incorrect))
+	print "Accuracy {0:.2f}%".format(accuracy * 100)
+	print "L-Precision = {0:.2f}".format( positivePrecision(confusionMatrix) ) 
+	print "L-Recall = {0:.2f}".format( positiveRecall(confusionMatrix) )
+	print "R-Precision = {0:.2f}".format( negativePrecision(confusionMatrix) ) 
+	print "R-Recall = {0:.2f}".format( negativeRecall(confusionMatrix) )	
+	
+	print "Training time: {0:.2f} seconds".format(trainingTime)
+	print "Testing time: {0:.2f} seconds".format(testTime)
+	# Output produced labels to a text file
+	compoundSet.toFile(outputFilename)

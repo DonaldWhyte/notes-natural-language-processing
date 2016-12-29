@@ -1,0 +1,237 @@
+%
+% Name: Natural Language Processing Coursework 2
+% Author: Donald Whyte (sc10dw@leeds.ac.uk)
+%
+
+\documentclass{article}
+
+% Make subsections use alphabet indices and not numeric indices
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+\usepackage[margin=3cm]{geometry} % easy page formatting
+	
+\usepackage{datetime} % up-to-date, automatically generated times
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{pdflscape}
+
+\title{Natural Language Processing \\ COMP3310 \\ Coursework Two}
+\author{Donald Whyte (sc10dw@leeds.ac.uk)}
+\date{\today}
+
+\begin{document}
+\lstset{language=Python}
+\lstset{basicstyle=\ttfamily}
+
+\maketitle
+
+\section{Introduction}
+
+This report details research I undertook to develop an unsupervised classification algorithm which accurately determines the correct branching (left or right) to use for trigram compound nouns. An evaluation of the resultant classifiers is performed, discussing the limitations of the approaches and potential improvements.
+
+Recall and precision are being used for the evaluation, along with accuracy. As described in \cite{classification-evaluation}, \textbf{precision} is \textit{"a measure of the accuracy of predicting a specific class"}. In the context of the problem being dealt with here, this means how accurate the classifiers are at identifying just the left or right branches. \textbf{Recall} is \textit{"a measure of the ability of a prediction model to select instances of a certain class from a data set"}. In this context, it means how often does the classifier pick a particular class overall, with respect to the number of data items with said class in the test dataset.
+
+Because these two measurements are for a \textit{single} class, there are two precision/recall pairs -- one for left branching and one for right branching. This results in five evaluation measures:
+\begin{itemize}
+	\item accuracy
+	\item precision with left branching
+	\item recall with left branching
+	\item precision with right branching
+	\item recall with right branching	
+\end{itemize}
+
+The baseline being used here will be the unsupervised baseline, meaning the \textbf{lower bound} on accuracy is $50.37\%$. The reason for this is that the other baseline is a \textit{supervised} approach, whereas the developed classifiers discussed in this report are all \textit{unsupervised}.
+
+\paragraph{\textbf{NOTE}:} All accuracy, precision and recall measurements used throughout the evaluation are given in Table \ref{tab:classifier_performances}.
+
+\section{Evaluation Baselines}
+
+In order to evaluate the effectiveness of the developed classifiers, it is useful to have a \textbf{baseline} solution to compare with. This baseline acts as a \textit{lower bound} on acceptable accuracy. Two classifiers were developed to act as baseline, one being unsupervised and the other supervised. These are described in the rest of this section.
+
+\subsubsection{Unsupervised Random Branching}
+\label{sec:unsupervised_baseline} 
+
+\textbf{Unsupervised Random Branching} simply decides which branch to use for a compound trigram randomly. There's an equal (50\%) chance for a compound to be assigned the left branch as the right branch. This was run on lauer.gold 12 times and resulted in an average accuracy of $50.37\%$.
+
+Being random with an equal likelihood of selecting any branch, the recall for both left and right branches were roughly 0.5. Since there are more left branches in \texttt{lauer.gold} and there's an equal chance of the classifier picking the left or right branch, the precision is higher for left branching than right.
+
+\subsubsection{Supervised Most Frequent Branching}
+\label{sec:supervised_baseline} 
+
+\textbf{Supervised Most Frequent Branching} uses a training dataset (compound trigrams labelled with correct branching) to determine what branching should be used for new compound trigrams. It checks which branching is the correct one more frequently and then assigns \textit{any} compound that branch.
+
+Left branches are more frequently correct in \texttt{lauer.gold}, which meant that this classifier assigns all given compound trigrams the left branch. An accuracy of $66.80\%$ was achieved on \texttt{lauer.test}.
+
+Since only left branches are chosen, this means the precision and recall for right branches is 0. For left branches, recall is 1 and precision us now equivalent to the accuracy measurement (0.6680).
+
+\section{Unsupervised Classification Approaches}
+
+\subsection{Initial Design -- Bigram Frequency}
+
+Since the classifier must be unsupervised, it cannot use \texttt{lauer.gold} or any labelled compound dataset for training. So what data can be used to train the classifier? The first thought was large corpora of English text.
+
+During training, this classifier computes the frequency of all \textbf{bigrams} in the given training corpus and stores them in a frequency distribution. Then when it comes deciding whether left or right branching is correct for a given compound, it does the following:
+\begin{enumerate}
+	\item compute bigrams produced by using left and right branching
+	\item look-up frequencies of left and right branch bigrams in frequency distribution
+	\item use left branch if the frequency of the left branch's bigram is greater than the right branch's
+	\item otherwise, use the right branch
+\end{enumerate}
+
+The classifier handles the case where both bigrams have the same frequency by choosing one at random.
+
+The reasoning behind this approach is that it's more likely the correct branching results in a bigram that is more frequently used in the training corpora. That is, the two words used more often together indicates that it may be the correct branching.
+
+Suppose we have the compound trigram "cool hat you". If "cool hat" appears 50 times in a training corpus but "hat you" only occurs 6 times, then the classifier thinks "cool hat" is more likely to be the correct branch meaning we assign that compound the left branch.
+
+Compared to the unsupervised baseline, there is roughly a 6\% increase in accuracy, with an increase in precision for both left and right branches. One big limitation with this approach are the cases where the left and right branch bigram frequencies are equal, which is often caused by unseen bigrams (both frequencies being 0). Modifications made to the bigram frequency to combat unseen bigrams are discussed in later sections.
+
+\subsection{Taking Advantage of Bias}
+
+Handling equal frequencies by choosing a branch randomly is not satisfactory. It will result in unpredictable and often inaccurate classifications. Instead, the classifier can take advantage of some prior knowledge retrieved from the training compound dataset (so one could argue that this is a \textit{semi-supervised/hybrid} approach).
+
+In \texttt{lauer.gold}, the correct branching is left more frequently than right. If the frequency of the left and right branch bigrams are equal, then the classifier is undecided and falls back to choosing the most frequently occurring label (left for this dataset). That is, it has a \textit{bias} towards selecting left branches.
+
+This results in a much higher classification accuracy, with roughly a 5\% increase in accuracy from randomly selecting equally frequent branches and a 12.29\% increase from biasing towards right branches. This highlights two things:
+\begin{enumerate}
+	\item there are a significant number of times the classifier is undecided
+	\item taking advantage of the fact that one branching type is more frequent is an effective way of increasing accuracy
+\end{enumerate}
+
+The high number of undecided instances is due to the fact that many bigrams are unseen in the training corpus, so they simply have a frequency of 0. Recall for left branches is 0.29 when biasing towards right and 0.67 when biasing towards left. Therefore, we have an indication that a large proportion of the bigrams are unseen since such a drastic change could only occur if there were \textit{many} times the classifier was undecided.  This can be combated by simply using a much larger corpus (see Section \ref{sec:diff_corpora}. An attempt to solve this problem, which uses synonyms, is described in section \ref{sec:wordnet_synonyms}
+
+\subsection{Different Training Corpora}
+\label{sec:diff_corpora}
+
+It may be possible to increase accuracy further by simply using better training corpora. All unsupervised classifiers were trained with different combinations of three corpora:
+\begin{itemize}
+	\item Brown
+	\item Reuters
+	\item Australian Broadcasting Commission 2006 (ABC)
+\end{itemize}
+
+All combinations except for Reuters resulted in lower accuracy than Brown. Reuters increase classification accuracy by $0.41\%$, resulting in higher L-Precision and R-Precision. This may be due to the fact that Reuters is simply a larger corpus than Brown, but "more information is always better" doesn't always seem to apply here. Combining Brown and Reuters results in worse accuracy than just using Reuters.
+
+To increase accuracy using a training corpus, the corpus not only needs to be larger, but it also needs to contain text representative of the kind of text that the classifier will be used on. Otherwise the problem of having a high number of unseen bigrams will not be reduced.
+
+\subsection{WordNet Synonyms}
+\label{sec:wordnet_synonyms}
+
+Data sparseness is typically an issue when using $n$-grams and it crops up again here. There will be many bigrams that the classifier has not seen in the training corpus, as there are an extremely large number of possible bigrams. While an unseen bigram may indicate incorrect branching, it could be a perfectly valid branch that just wasn't seen in training.
+
+Perhaps this can be dealt with by taking the \textit{semantics} of words into account. \textbf{WordNet} contains lists of synonyms for most English words, allowing it to be used as a digital thesaurus. This was used to handle unseen bigrams by taking the frequency of a bigram's word's synonyms into account.
+
+Let $f(x, y)$ be the frequency of bigram $(x, y)$ and $S_x$ and $S_y$ be sets containing all synonyms of words $x$ and $y$ respectively. Let $X = \lbrace (x, s) | s \in S_y \rbrace$ and $Y = \lbrace (s, y) | s \in S_x \rbrace$ be all bigram combinations which replace one of the original words with one of its synonyms. Instead of directly using a bigram's frequency when determining which branching to choose, a new function $f'(x, y) = \max(\lbrace f(x, y) | (x, y) \in X \cup Y \rbrace)$ is used.
+
+The idea behind this is that even if the bigram has been unseen, we try to use the semantics of the word to find \textit{seen} bigrams and use the frequencies of those to identify the correct branch. However, this resulted in a consistent drop in performance compared to the bigram frequency classifier (with left branch bias) by approximately $0.72\%$ (with less recall for both the left and right branch classes).
+
+This is due to the fact that it operates on the assumption that words which are semantically similar are used in the same context, which may not always be true. In fact, the combination of two words might give one of the words a completely different semantic meaning.
+
+Going back to the "cool hats" example, possible synonyms of "cool"  include "refrigerated" and "algid" (according to \texttt{thesaurus.com}). "refrigerated hats" is a very uncommon phrase as those two words are never really used in the same context. Therefore, using just synonyms to find seen "semantically" similar bigrams to get non-zero frequecies does not end up doing what was initially intended. Perhaps some other mechanism of using of synonyms will provide better classification accuracy.
+
+\subsection{Bigram and Unigram Frequency Combination}
+\label{sec:rel_freq_classifier}
+
+Naive use of synonyms gave no performance increase, so attention was returned to bigram frequency. Specifically, a way of combining the frequency of bigrams with \textbf{unigrams} was devised.
+
+Rather than using the frequency of a bigram, the frequency of a bigram  \textit{relative} to the frequency of one of the words contained in the bigram, $rf(x, y)$, is used. Which unigram should the bigram frequency be relative to? Word $x$ or word $y$? What this approach does is take the \textbf{maximum} of the two relative frequencies.
+
+For example, suppose $f(x) = 6$, $f(y) = 3$ and $f(x, y) = 2$. This results in two relative frequencies, $\frac{1}{3}$ and $\frac{2}{3}$, meaning $rt(x, y) = \frac{2}{3}$ as the maximum is taken. Formally, this is defined as:
+
+\begin{equation}
+	rt(x, y) = \max(\frac{f(x, y)}{f(x)}, \frac{f(x, y)}{f(y)})
+\end{equation}
+
+Using $rt(x, y)$ as the frequency to compare instead of $f(x, y)$ gives the highest unsupervised accuracy found in this research, with $65.56\%$ accuracy. This is achieved when the classifier is trained using the Brown corpus and is biased towards left branches. This is a $0.72\%$ increase from just using $f(x, y)$. The precision of left and right branches has increased roughly equally.
+
+\section{Potential Improvements}
+\label{sec:improvements}
+
+\subsection{Mutual Information}
+
+Instead of using the frequency of bigram $(x, y)$ to decide which branch is correct, the \textbf{mutual information} between $x$ and $y$ might be a better indicator. Mutual information \textit{"compares the probability of a group of words occurring together (joint probability) to their probabilities of occurring independently"}\cite{wu-su-93}. It has proven to be a good measure for compound retrieval\cite{wu-su-93}, so it's possible mutual information is useful in identify branches in existing compound trigrams.
+
+\subsection{Explicit Exclusion Rules}
+
+Including a pre-processing step which filters branches based on explicit rules allows a classifier to exclude clearly incorrect branches from consideration easily. 
+
+Let $L = (x, y)$ and $R = (y, z)$ be the branches for a compound trigram $T = (x, y, z)$ and $r(X)$ be some exclusion rule which outputs 0 if the branch should be excluded and 1 if it should be kept. If $r(L) = r(R)$, then we fall back to the standard classification approach (e.g. using bigram frequencies or mutual information). If $r(L) \neq r(R)$, then choose the branch where $r(X) = 1$.
+
+One example of an exclusion rule is checking the \textbf{part-of-speech tags} of each word in the trigram. Typically, a bigram compound will either have the form [noun, noun] or [adjective, noun]. If a branch's bigram violates such syntactic constraints, then the branch is excluded.\cite{su-wu-chang-96} This has been known to \textbf{increase precision} in identifying compounds\cite{su-wu-chang-96}, so once again it may work for identifying correct branches in compound trigrams.
+
+Using such a rule requires the text to be run through a POS tagger to compute all the POS tags. For \texttt{lauer.test}, this approach is \textbf{not useful} since all the compounds are already split up into trigrams and are not stored in a whole document. Additionally, all the words in the dataset are nouns (they all have the same tag) so no exclusions would be performed. However, for more general datasets, using POS tagging to exclude potential branches could increase branch classification accuracy.
+
+\section{Summary}
+
+Different unsupervised classification approaches were explored for identifying correct branching in compound trigrams. None of the unsupervised methods developed performed better than the supervised baseline, but a $15\%$ increase in accuracy was observed when compared to the lower bound produced by the random unsupervised baseline.
+
+Unseen bigrams is one of the core problems negatively affecting accuracy. The effect of this was reduced by some of the approaches discussed here, but it is still a big problem. Larger and more representative training corpora is key in reducing this problem.
+
+An entirely different approach that doesn't use bigram frequencies may provide better performance. Two examples of this, which have already been explored in academia, include using mutual information and having explicit branch exclusion mechanisms (such as checking for legal POS tags).
+
+\section{Usage of \texttt{compound.ext}}
+
+The file \texttt{compound.ext} trains and executes an unsupervised classifier that uses bigram frequency relative to unigram frequency to perform classification, as described in section \ref{sec:rel_freq_classifier}.
+
+\texttt{python compound.ext <unlabelledDataset> <labelledDataset> <outputFilename>}
+\paragraph{where:}
+\begin{itemize}
+	\item \texttt{<unlabelledDataset>} = filename of unlabelled set of compound trigrams to classify
+	\item \texttt{<labelledDataset>} = filename of corresponding labelled set used to test classifier
+	\item \texttt{<outputFilename>} = name of file which contains   the compound trigrams with their labels produced by the classifier. This file can be directly compared to the labelled compound set
+\end{itemize}
+
+\begin{thebibliography}{1}
+
+% From http://www.aclclp.org.tw/rocling/1993/M09.pdf %
+\bibitem{wu-su-93} K. Su, M. Wu (1993) {\em Corpus-based Automatic Compound Extraction with Mutual Information and Relative Frequency}
+
+% From http://acl.ldc.upenn.edu/P/P94/P94-1033.pdf %
+\bibitem{su-wu-chang-96} K. Su, M. Wu, J. Chang (1996) {\em A Corpus-based Approach to Automatic Compound Extraction}
+
+\bibitem{classification-evaluation} {\em Evaluating a classification model - What does precision and recall tell me?} Accessed 30/11/2013 at \texttt{http://www.cs.odu.edu/\textasciitilde mukka/cs795sum13dm/Lecturenotes/Day4/recallprecision.pdf} 
+
+\end{thebibliography}
+
+\begin{landscape}
+\begin{table}
+	\centering
+	\begin{tabular}{|l|l|l|l|l|l|l|}
+		\hline
+		\textbf{Classifier} & \textbf{Training Corpora}
+		& \textbf{Accuracy} & \textbf{L-Precision} & \textbf{L-Recall} & \textbf{R-Precision} & \textbf{R-Recall} \\
+		\hline
+		Unsupervised Baseline & -- & 50.37\% & 0.68 & 0.49 & 0.33 & 0.53 \\
+		Supervised Baseline & Brown & 66.80\% & 0.67 & 1.00 & 0.00 & 0.00 \\
+		\hline
+		Bigram Frequency (random selection when uncertain) & Brown & 59.32\% & 0.77 & 0.55 & 0.41 & 0.64\\
+		Bigram Frequency (bias to left branches) & Brown & 64.75\% & 0.67 & 0.79 & 0.38 & 0.10 \\
+		Bigram Frequency (bias to right branches) & Brown & 52.46\% & 0.98 & 0.29 & 0.41 & 0.99 \\
+		Bigram Frequency (bias to left branches) & Reuters & 65.16\% & 0.68 & 0.91 & 0.42 & 0.12 \\
+		Bigram Frequency (bias to left branches) & Brown, Reuters & 64.75\% & 0.68 & 0.88 & 0.43 & 0.19 \\
+		Bigram Frequency (bias to left branches) & Brown, Reuters, ABC & 63.93\% & 0.68 & 0.85 & 0.41 & 0.21 \\
+		\hline
+		Bigram Frequency and Synonym Combinations & Brown & 63.93\% & 0.67 & 0.91 & 0.35 & 0.10 \\
+		Bigram Frequency and Synonym Pair Combinations & Brown & 63.93\% & 0.67 & 0.90 & 0.36 & 0.11 \\
+		\hline
+		\begin{tabular}{c}
+		\textbf{Bigram Freq Relative to Unigram Freq} \\
+		\textbf{(bias to left branches)} 
+		\end{tabular}
+		& \textbf{Brown} & \textbf{65.57\%} & \textbf{0.68} & \textbf{0.93} & \textbf{0.42} & \textbf{0.10} \\
+		\begin{tabular}{c}
+		Bigram Freq Relative to Unigram Freq \\
+		(bias to left branches)
+		\end{tabular} & Reuters & 65.16\% & 0.68 & 0.91 & 0.42 & 0.12 \\
+		\hline
+	\end{tabular}
+	\caption{Evaluation measures for all branch classification algorithms discussed in this report. }
+	\label{tab:classifier_performances}
+\end{table}
+\end{landscape}
+
+\end{document}
