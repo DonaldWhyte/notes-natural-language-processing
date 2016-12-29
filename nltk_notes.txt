@@ -1,0 +1,39 @@
+How to determine the GENRE and TOPIC of text?
+
+Could look at the frequency, relative frequency or cumulative frequency of the
+different token types in the text. However, these are often jumbled with
+English "plumbing" words, such as "the", "a", "then". They tell you nothing
+about what the actual text is talking about (e.g. whale is only topic-relate
+word in top 50 words in Jonah and the Whale).
+
+Alternatively, he could ook at all the HAPAXES. Hapaxes are words which
+only occur once in a given text - outliers. However, the problem with
+this is that they don't really tell you anything about the topic as they're
+exceptions. Plus, a lot of them are very rare words whose meaning is difficult
+to derive without the context in which it is used.
+
+NEITHER FREQUENCT OR INFREQUENT WORDS HELP! WHAT DO WE USE???
+
+Try searching for long words (perhaps they contain more content in general?)
+NO. Since long words tend to be hapaxes anyway, so we're back to words
+that are just outliers and only occur once or twice.
+
+INSTEAD we should look for words that are above a certain length that
+have a certain frequency. That way, we get words that aren't just outliers,
+but are more likely to give a better idea on what the overall content
+is about since it's not going to be just be "plumbing" words (typically short).
+
+COLLOCATIONS
+
+These are pairs of words that are paired together, an UNUSUAL amount. This
+also implies if you swapped out one of the words for another, that pair
+would be INFREQUENT (the pair is very specific to both words, one of the
+words isn't just a "plumbing" word like "a").
+
+
+
+DEFINITIONS
+-----------
+antecedent = this precedes a pronoun (e.g. they) to determine the SUBJECT of the verb
+             . The dogs were said. They ran away.
+              the "ran" verb's subject is "dogs" as defined by "they". (OBJECT is away)
