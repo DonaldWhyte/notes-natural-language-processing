@@ -50,7 +50,7 @@ class MostFrequentLabeller:
 				correctPair = compoundToString(bracketings[1])
 			else: # NOTE: We ignore unlabelled compounds
 				continue
-			# Increment or initialise frequency count for 
+			# Increment or initialise frequency count for
 			if correctPair in self.correctBracketingFrequencies:
 				self.correctBracketingFrequencies[correctPair] += 1
 			else:
@@ -85,7 +85,7 @@ class CorpusBigramLabeller:
 		# Retrieve frequency of each bracketing as a bigram in the training corpus
 		leftFreq = self.bigramFreqDist[bracketings[0][0], bracketings[0][1]]
 		rightFreq = self.bigramFreqDist[bracketings[1][0], bracketings[1][1]]
-		# Use most frequency 
+		# Use most frequency
 		if leftFreq > rightFreq:
 			return BRANCH_LABEL_LEFT
 		else: # bias introduced here again
@@ -94,7 +94,7 @@ class CorpusBigramLabeller:
 class CompoundSet:
 
 	def __init__(self, compounds):
-		# Construct nested 2-lists to store label for compounds 
+		# Construct nested 2-lists to store label for compounds
 		self.compounds = [ [compound, BRANCH_LABEL_NONE] for compound in compounds ]
 
 	@classmethod
@@ -108,7 +108,7 @@ class CompoundSet:
 				if len(words) >= compoundSize:
 					# If there's one more token, treat it as the branch label
 					if len(words) >= compoundSize + 1:
-						labels[len(compounds)] = words[compoundSize]			
+						labels[len(compounds)] = words[compoundSize]
 					# Only take the first N tokens
 					compounds.append( words[:compoundSize] )
 		# Construct compound set
@@ -116,7 +116,7 @@ class CompoundSet:
 		# Manually label all compounds with labels found (if any)
 		for index, label in labels.items():
 			compoundSet.setLabel(index, label)
-		return compoundSet 
+		return compoundSet
 
 	def getLabel(self, index):
 		return self.compounds[index][1]
@@ -134,7 +134,7 @@ class CompoundSet:
 		if len(self.compounds) != len(labelledSet.compounds):
 			raise ValueError("Cannot test component set, given labelled set is not the same size")
 		# Count the number of correct labels
-		total = len(self.compounds) 
+		total = len(self.compounds)
 		correct = 0
 		for i in range(total):
 			if self.compounds[i][1] == labelledSet.compounds[i][1]:
@@ -158,7 +158,6 @@ if __name__ == "__main__":
 	compoundSet = CompoundSet.fromFile(unlabelledDatasetFilename, NGRAM_SIZE)
 	labelledSet = CompoundSet.fromFile(labelledDatasetFilename, NGRAM_SIZE)
 	# Label dataset
-	#labeller = CorpusBigramLabeller(brown)
 	labeller = MostFrequentLabeller(labelledSet)
 	compoundSet.labelAll(labeller)
 	# Compare labels with the 'correct' labels in the labelled datasset
