@@ -1,8 +1,22 @@
 ## Natural Language Processing Study Notes
 
-TODO: intro to nlp
+Natural language processing is a field of computer science, artificial
+intelligence, and computational linguistics concerned with the interactions 
+between computers and human (natural) languages.
 
-The notes in this repo explain TODO.
+Many challenges in NLP involve: natural language understanding, enabling
+computers to derive meaning from human or natural language input; and others
+involve natural language generation.
+
+The notes in this repo explain core NLP concepts such as:
+
+* corpora
+* information retrieval
+* text classification
+* semantic similarity
+* information theory
+* part-of-speech (POS) tagging
+* parsing complex non-trivial grammars
 
 ### Get the Source
 
@@ -28,7 +42,7 @@ This will build three PDF documents in the current working directory:
 
 * `natural_language_processing.pdf` -- main document that contains almost all the notes
 * `text-classification/nlp-cw1.pdf` -- document showing performance of different text classifiers and features to detect movie reiew sentiment
-* `n-grams/nlp-cw2.pdf` -- document 
+* `n-grams/nlp-cw2.pdf` -- document showing performance of n-gram trigraph classification using both unsupervised and supervised approaches
 
 ### Executing the Test Programs
 
