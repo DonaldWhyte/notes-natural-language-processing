@@ -52,5 +52,5 @@ generated the data that accompanied the written coursework documents.
 
 ### Acknowledgements
 
-Credit to University of Leeds and Katja Markey for doing a great job
+Credit to University of Leeds and Katja Market for doing a great job
 teaching me the fundamentals of natural language processing.
